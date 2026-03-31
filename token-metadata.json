@@ -1,0 +1,38 @@
+{
+  "name": "TOBESTABLE",
+  "symbol": "TOBE",
+  "description": "Anti-inflationary Solana token with 1024 decreasing mint rounds. 50% to minter, 50% to vault. The vault sells only at $1 — creating permanent upward pressure. No team tokens, no pre-mine, no insiders. Built to be stable.",
+  "image": "https://tobestable.com/logo.png",
+  "external_url": "https://tobestable.com",
+  "attributes": [
+    {
+      "trait_type": "Total Rounds",
+      "value": "1024"
+    },
+    {
+      "trait_type": "Max Supply",
+      "value": "537395200"
+    },
+    {
+      "trait_type": "Mint Cost",
+      "value": "1024 USDC"
+    },
+    {
+      "trait_type": "Vault Mechanism",
+      "value": "50% to vault, sells at $1 ceiling"
+    },
+    {
+      "trait_type": "Network",
+      "value": "Solana"
+    }
+  ],
+  "properties": {
+    "category": "currency",
+    "creators": [
+      {
+        "address": "Eis6SPak12JXqunZqLqgHneomygF1ouuoRk5PFXB5Bvf",
+        "share": 100
+      }
+    ]
+  }
+}

@@ -1688,6 +1688,7 @@
   const [mintAuthorityPda] = solanaWeb3.PublicKey.findProgramAddressSync([new TextEncoder().encode('mint_authority')], programId);
   const [vaultAuthorityPda] = solanaWeb3.PublicKey.findProgramAddressSync([new TextEncoder().encode('vault_authority')], programId);
   const [vaultTokenPda] = solanaWeb3.PublicKey.findProgramAddressSync([new TextEncoder().encode('vault_token')], programId);
+  const [poolSolReservePda] = solanaWeb3.PublicKey.findProgramAddressSync([new TextEncoder().encode('pool_sol_reserve')], programId);
 
   function findATA(owner, mint) {
     return solanaWeb3.PublicKey.findProgramAddressSync(
@@ -1724,6 +1725,7 @@
       { name: 'mintAuthority', isMut: false, isSigner: false },
       { name: 'vaultTokenAccount', isMut: true, isSigner: false },
       { name: 'treasury', isMut: true, isSigner: false },
+      { name: 'poolSolReserve', isMut: true, isSigner: false },
       { name: 'minterTobe', isMut: true, isSigner: false },
       { name: 'tokenProgram', isMut: false, isSigner: false },
       { name: 'systemProgram', isMut: false, isSigner: false },
@@ -1734,7 +1736,7 @@
       { name: 'lpMint', type: 'publicKey' }, { name: 'currentRound', type: 'u64' },
       { name: 'vaultBalance', type: 'u64' }, { name: 'totalVaultReleased', type: 'u64' },
       { name: 'lpLockUntil', type: 'i64' }, { name: 'lpLocked', type: 'bool' },
-      { name: 'paused', type: 'bool' }, { name: 'bump', type: 'u8' },
+      { name: 'paused', type: 'bool' }, { name: 'poolSeeded', type: 'bool' }, { name: 'bump', type: 'u8' },
       { name: 'vaultBump', type: 'u8' }, { name: 'lpLockBump', type: 'u8' },
       { name: 'totalMinted', type: 'u64' },
     ]}}]
@@ -2347,6 +2349,7 @@
           { pubkey: mintAuthorityPda, isSigner: false, isWritable: false },
           { pubkey: vaultTokenPda, isSigner: false, isWritable: true },
           { pubkey: treasuryPk, isSigner: false, isWritable: true },
+          { pubkey: poolSolReservePda, isSigner: false, isWritable: true },
           { pubkey: minterTobeAta, isSigner: false, isWritable: true },
           { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
           { pubkey: solanaWeb3.SystemProgram.programId, isSigner: false, isWritable: false },

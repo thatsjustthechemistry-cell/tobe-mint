@@ -2773,28 +2773,16 @@
     walletAddress = null;
     walletProvider = null;
 
-    // Restore connect button in header
-    const badge = document.querySelector('.header-actions .connected-badge, .header-actions .wallet-badge-wrap');
-    if (badge) {
+    // Restore all connect buttons (desktop + mobile)
+    document.querySelectorAll('.wallet-badge-wrap').forEach((wrap, i) => {
       const btn = document.createElement('button');
       btn.className = 'connect-btn';
-      btn.id = 'connectBtn';
+      btn.id = i === 0 ? 'connectBtn' : 'connectBtnMobile';
       btn.setAttribute('onclick', 'connectWallet()');
       btn.setAttribute('aria-label', 'Connect Solana wallet');
       btn.textContent = 'Connect Wallet';
-      badge.parentNode.replaceChild(btn, badge);
-    }
-
-    // Restore mobile connect button
-    const mobileBadge = document.querySelector('.mobile-nav-overlay .connected-badge, .mobile-nav-overlay .wallet-badge-wrap');
-    if (mobileBadge) {
-      const mBtn = document.createElement('button');
-      mBtn.className = 'connect-btn';
-      mBtn.id = 'connectBtnMobile';
-      mBtn.setAttribute('onclick', 'connectWallet()');
-      mBtn.textContent = 'Connect Wallet';
-      mobileBadge.parentNode.replaceChild(mBtn, mobileBadge);
-    }
+      wrap.parentNode.replaceChild(btn, wrap);
+    });
 
     document.getElementById('mintBtn').disabled = true;
     // Hide referral

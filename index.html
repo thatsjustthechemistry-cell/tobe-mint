@@ -2807,23 +2807,22 @@
 
   function toggleWalletDropdown(e) {
     e.stopPropagation();
-    const dropdown = document.querySelector('.wallet-dropdown');
-    const badge = document.querySelector('.connected-badge');
+    const wrap = e.currentTarget.closest('.wallet-badge-wrap');
+    if (!wrap) return;
+    const dropdown = wrap.querySelector('.wallet-dropdown');
+    const badge = wrap.querySelector('.connected-badge');
     if (!dropdown) return;
     const isOpen = dropdown.classList.contains('open');
-    if (isOpen) {
-      closeWalletDropdown();
-    } else {
+    closeWalletDropdown();
+    if (!isOpen) {
       dropdown.classList.add('open');
       if (badge) badge.classList.add('dropdown-open');
     }
   }
 
   function closeWalletDropdown() {
-    const dropdown = document.querySelector('.wallet-dropdown');
-    const badge = document.querySelector('.connected-badge');
-    if (dropdown) dropdown.classList.remove('open');
-    if (badge) badge.classList.remove('dropdown-open');
+    document.querySelectorAll('.wallet-dropdown').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.connected-badge').forEach(b => b.classList.remove('dropdown-open'));
   }
 
   document.addEventListener('click', (e) => {

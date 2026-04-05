@@ -34,7 +34,7 @@
     "@type": "Offer",
     "price": "1024",
     "priceCurrency": "USD",
-    "description": "Each mint round costs 1,024 USDC"
+    "description": "Each mint round costs 10 SOL"
   }
 }
 </script>
@@ -768,7 +768,20 @@
   /* Fade in on load */
   @keyframes fadeDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
   header { animation: fadeDown 0.5s ease; }
+  /* ═══ LANGUAGE PICKER ═══ */
+  .lang-picker-wrap { position:relative; }
+  .lang-picker-btn { display:flex; align-items:center; gap:6px; background:none; border:1px solid var(--border); border-radius:var(--radius-sm); padding:5px 10px; cursor:pointer; color:var(--text-dim); font-family:var(--mono); font-size:11px; transition:all 0.2s; }
+  .lang-picker-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .lang-code { letter-spacing:0.5px; }
+  .lang-dropdown { position:absolute; top:calc(100% + 8px); right:0; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); min-width:160px; z-index:200; opacity:0; visibility:hidden; transform:translateY(-4px); transition:all 0.2s; box-shadow:0 12px 32px rgba(0,0,0,0.5); max-height:320px; overflow-y:auto; scrollbar-width:none; }
+  .lang-dropdown::-webkit-scrollbar { display:none; }
+  .lang-dropdown.open { opacity:1; visibility:visible; transform:translateY(0); }
+  .lang-option { display:flex; align-items:center; gap:10px; padding:10px 14px; font-size:13px; color:var(--text); cursor:pointer; transition:background 0.15s; border:none; background:none; width:100%; text-align:left; font-family:var(--font); }
+  .lang-option:hover { background:rgba(0,232,198,0.06); }
+  .lang-option.active { color:var(--accent); }
+  .lang-option-flag { font-size:16px; }
 </style>
+<script src="lang.js"></script>
 </head>
 <body>
 <!-- LOADING SCREEN -->
@@ -790,10 +803,10 @@
       TOBE
     </a>
     <nav class="nav-links nav-desktop" id="navLinksDesktop" aria-label="Main navigation">
-      <a href="#how">How It Works</a>
-      <a href="#tokenomics">Tokenomics</a>
-      <a href="#dashboard">Dashboard</a>
-      <a href="#explorer">Explorer</a>
+      <a href="#how" data-i18n="nav_how">How It Works</a>
+      <a href="#tokenomics" data-i18n="nav_tokenomics">Tokenomics</a>
+      <a href="#dashboard" data-i18n="nav_dashboard">Dashboard</a>
+      <a href="#explorer" data-i18n="nav_explorer">Explorer</a>
     </nav>
     <div style="display:flex;align-items:center;gap:12px;">
       <div class="rpc-indicator" id="rpcIndicator" title="Checking Solana RPC..." onclick="toggleRpcPanel()">
@@ -801,11 +814,15 @@
         <span id="rpcSlotLabel" style="font-family:var(--mono);font-size:10px;color:var(--text-muted);display:none;"></span>
       </div>
       <div class="rpc-panel" id="rpcPanel">
-        <div class="rpc-panel-row"><span class="rpc-panel-label">Network</span><span class="rpc-panel-value" id="rpcNetwork">—</span></div>
-        <div class="rpc-panel-row"><span class="rpc-panel-label">Slot</span><span class="rpc-panel-value" id="rpcSlot">—</span></div>
-        <div class="rpc-panel-row"><span class="rpc-panel-label">Latency</span><span class="rpc-panel-value" id="rpcLatency">—</span></div>
-        <div class="rpc-panel-row"><span class="rpc-panel-label">Block Time</span><span class="rpc-panel-value" id="rpcBlockTime">—</span></div>
-        <div class="rpc-panel-row"><span class="rpc-panel-label">Auto Refresh</span><span class="rpc-panel-value" style="color:var(--accent);">15s</span></div>
+        <div class="rpc-panel-row"><span class="rpc-panel-label" data-i18n="rpc_network">Network</span><span class="rpc-panel-value" id="rpcNetwork">—</span></div>
+        <div class="rpc-panel-row"><span class="rpc-panel-label" data-i18n="rpc_slot">Slot</span><span class="rpc-panel-value" id="rpcSlot">—</span></div>
+        <div class="rpc-panel-row"><span class="rpc-panel-label" data-i18n="rpc_latency">Latency</span><span class="rpc-panel-value" id="rpcLatency">—</span></div>
+        <div class="rpc-panel-row"><span class="rpc-panel-label" data-i18n="rpc_block_time">Block Time</span><span class="rpc-panel-value" id="rpcBlockTime">—</span></div>
+        <div class="rpc-panel-row"><span class="rpc-panel-label" data-i18n="rpc_auto_refresh">Auto Refresh</span><span class="rpc-panel-value" style="color:var(--accent);">15s</span></div>
+      </div>
+      <div class="lang-picker-wrap" id="langPickerWrap">
+        <button class="lang-picker-btn" id="langPickerBtn" onclick="toggleLangDropdown()">🇬🇧 <span class="lang-code">EN</span><svg class="badge-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="lang-dropdown" id="langDropdown"></div>
       </div>
       <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
         <svg class="theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -817,7 +834,7 @@
           <div class="theme-preview-label">Light Mode</div>
         </div>
       </button>
-      <button class="connect-btn" id="connectBtn" onclick="connectWallet()" aria-label="Connect Solana wallet">Connect Wallet</button>
+      <button class="connect-btn" id="connectBtn" onclick="connectWallet()" aria-label="Connect Solana wallet" data-i18n="connect_wallet">Connect Wallet</button>
       <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileNav()" aria-label="Toggle mobile menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -826,17 +843,17 @@
 </header>
 
 <div class="rpc-error-banner" id="rpcErrorBanner">
-  <span>⚠ Unable to connect to Solana — data may be outdated</span>
-  <button onclick="retryRpc()">Retry</button>
+  <span data-i18n="rpc_error">⚠ Unable to connect to Solana — data may be outdated</span>
+  <button onclick="retryRpc()" data-i18n="retry">Retry</button>
 </div>
 
 <!-- MOBILE NAV OVERLAY (outside header to avoid stacking context issues) -->
 <nav class="mobile-nav-overlay" id="mobileNav" aria-label="Mobile navigation" role="navigation">
-  <a href="#how">How It Works</a>
-  <a href="#tokenomics">Tokenomics</a>
-  <a href="#dashboard">Dashboard</a>
-  <a href="#explorer">Explorer</a>
-  <button class="connect-btn" id="connectBtnMobile" onclick="connectWallet()">Connect Wallet</button>
+  <a href="#how" data-i18n="nav_how">How It Works</a>
+  <a href="#tokenomics" data-i18n="nav_tokenomics">Tokenomics</a>
+  <a href="#dashboard" data-i18n="nav_dashboard">Dashboard</a>
+  <a href="#explorer" data-i18n="nav_explorer">Explorer</a>
+  <button class="connect-btn" id="connectBtnMobile" onclick="connectWallet()" data-i18n="connect_wallet">Connect Wallet</button>
 </nav>
 
 <div class="container">
@@ -845,34 +862,34 @@
   <section class="hero">
     <canvas id="heroParticles"></canvas>
     <div class="hero-content">
-      <div class="hero-badge"><div class="pulse"></div> Live on Solana</div>
-      <h1>Built To Be<br><span class="gradient">Stable</span></h1>
+      <div class="hero-badge"><div class="pulse"></div> <span data-i18n="hero_badge">Live on Solana</span></div>
+      <h1><span data-i18n="hero_title_1">Built To Be</span><br><span class="gradient" data-i18n="hero_title_2">Stable</span></h1>
       <div class="hero-typed"><span id="typedText"></span><span class="cursor"></span></div>
 
       <div class="hero-stats">
         <div class="hero-stat">
-          <div class="hero-stat-label">Current Round</div>
+          <div class="hero-stat-label" data-i18n="hero_stat_round">Current Round</div>
           <div class="hero-stat-value accent" id="currentRoundDisplay">—</div>
         </div>
         <div class="hero-stat">
-          <div class="hero-stat-label">Price / Token</div>
+          <div class="hero-stat-label" data-i18n="hero_stat_price">Price / Token</div>
           <div class="hero-stat-value" id="priceDisplay">—</div>
         </div>
         <div class="hero-stat">
-          <div class="hero-stat-label">Vault Balance</div>
+          <div class="hero-stat-label" data-i18n="hero_stat_vault">Vault Balance</div>
           <div class="hero-stat-value" id="vaultDisplay" style="color:var(--accent-2);">—</div>
         </div>
       </div>
 
       <div class="hero-ctas">
-        <a href="#how" class="btn-outline" onclick="event.preventDefault();scrollToSection('#how');">Learn How It Works</a>
-        <a href="#mint-section" class="btn-primary" onclick="event.preventDefault();scrollToSection('#mint-section');">Mint Now →</a>
+        <a href="#how" class="btn-outline" onclick="event.preventDefault();scrollToSection('#how');" data-i18n="learn_how">Learn How It Works</a>
+        <a href="#mint-section" class="btn-primary" onclick="event.preventDefault();scrollToSection('#mint-section');" data-i18n="mint_now">Mint Now →</a>
       </div>
 
       <div class="contract-copy" id="contractCopy" onclick="copyContract()">
         <div>
-          <div class="contract-copy-label">Contract Address</div>
-          <div class="contract-copy-addr" id="contractAddr">CWZGdSh1EGsR95CnkK8AkEgtFX63Z9FurafK7rTFWJ4s</div>
+          <div class="contract-copy-label" data-i18n="contract_address">Contract Address</div>
+          <div class="contract-copy-addr" id="contractAddr">DnMvWs2dDim57TLBcJp7FKkDUFw2KnLmJybzpbTZuc65</div>
         </div>
         <svg class="contract-copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
       </div>
@@ -881,70 +898,70 @@
 
   <!-- ═══ HOW IT WORKS ═══ -->
   <section class="section" id="how">
-    <div class="section-label">Mechanism</div>
-    <div class="section-title">How It Works</div>
-    <div class="section-desc">Three steps to anti-inflation. Each round is identical — 1,024 USDC in, tokens out.</div>
+    <div class="section-label" data-i18n="how_label">Mechanism</div>
+    <div class="section-title" data-i18n="how_title">How It Works</div>
+    <div class="section-desc" data-i18n="how_desc">Three steps to anti-inflation. Each round is identical — 10 SOL in, tokens out.</div>
     <div class="steps">
       <div class="step reveal">
         <div class="step-num">01</div>
-        <div class="step-title">Pay 1,024 USDC</div>
-        <div class="step-desc">Every mint round costs exactly $1,024 USDC. Payment goes to the project treasury. Same price, every round, forever.</div>
+        <div class="step-title" data-i18n="step1_title">Pay 10 SOL</div>
+        <div class="step-desc" data-i18n="step1_desc">Every mint round costs exactly 10 SOL. Payment goes to the project treasury. Same price, every round, forever.</div>
       </div>
       <div class="step reveal reveal-delay-1">
         <div class="step-num">02</div>
-        <div class="step-title">50% to You, 50% to Vault</div>
-        <div class="step-desc">Half the tokens go to your wallet. The other half enters the stability vault. Earlier rounds yield exponentially more tokens.</div>
+        <div class="step-title" data-i18n="step2_title">50% to You, 50% to Vault</div>
+        <div class="step-desc" data-i18n="step2_desc">Half the tokens go to your wallet. The other half enters the stability vault. Earlier rounds yield exponentially more tokens.</div>
       </div>
       <div class="step reveal reveal-delay-2">
         <div class="step-num">03</div>
-        <div class="step-title">Vault Sells at $1</div>
-        <div class="step-desc">When market price exceeds $1, the vault sells at exactly $1.00 — a hard price ceiling. The floor rises with each round.</div>
+        <div class="step-title" data-i18n="step3_title">Vault Sells at $1</div>
+        <div class="step-desc" data-i18n="step3_desc">When market price exceeds $1, the vault sells at exactly $1.00 — a hard price ceiling. The floor rises with each round.</div>
       </div>
     </div>
   </section>
 
   <!-- ═══ HOW TO MINT TUTORIAL ═══ -->
   <section class="section reveal" id="tutorial">
-    <div class="section-label">Guide</div>
-    <div class="section-title">How to Mint</div>
-    <div class="section-desc">From zero to $TOBE in under two minutes.</div>
+    <div class="section-label" data-i18n="tut_label">Guide</div>
+    <div class="section-title" data-i18n="tut_title">How to Mint</div>
+    <div class="section-desc" data-i18n="tut_desc">From zero to $TOBE in under two minutes.</div>
     <div class="tutorial-steps">
       <div class="tutorial-step reveal">
-        <div class="tutorial-step-num">STEP 1</div>
+        <div class="tutorial-step-num"><span data-i18n="step_word">STEP</span> 1</div>
         <div class="tutorial-step-icon">👛</div>
-        <div class="tutorial-step-title">Get a Solana Wallet</div>
-        <div class="tutorial-step-desc">Download Phantom, Backpack, or Solflare — available as browser extensions and mobile apps. On mobile, open this site from the wallet's built-in browser.</div>
+        <div class="tutorial-step-title" data-i18n="tut_step1_title">Get a Solana Wallet</div>
+        <div class="tutorial-step-desc" data-i18n="tut_step1_desc">Download Phantom, Backpack, or Solflare — available as browser extensions and mobile apps. On mobile, open this site from the wallet's built-in browser.</div>
         <span class="tutorial-step-arrow">→</span>
       </div>
       <div class="tutorial-step reveal reveal-delay-1">
-        <div class="tutorial-step-num">STEP 2</div>
+        <div class="tutorial-step-num"><span data-i18n="step_word">STEP</span> 2</div>
         <div class="tutorial-step-icon">💵</div>
-        <div class="tutorial-step-title">Fund Your Wallet</div>
-        <div class="tutorial-step-desc">Add 1,024 USDC + a tiny amount of SOL (< 0.01) for transaction fees to your wallet.</div>
+        <div class="tutorial-step-title" data-i18n="tut_step2_title">Fund Your Wallet</div>
+        <div class="tutorial-step-desc" data-i18n="tut_step2_desc">Add 10 SOL + a tiny amount of SOL (&lt; 0.01) for transaction fees to your wallet.</div>
         <span class="tutorial-step-arrow">→</span>
       </div>
       <div class="tutorial-step reveal reveal-delay-2">
-        <div class="tutorial-step-num">STEP 3</div>
+        <div class="tutorial-step-num"><span data-i18n="step_word">STEP</span> 3</div>
         <div class="tutorial-step-icon">🔗</div>
-        <div class="tutorial-step-title">Connect & Mint</div>
-        <div class="tutorial-step-desc">Click "Connect Wallet" above, select your wallet, then hit "Mint" on the dashboard. Approve the transaction.</div>
+        <div class="tutorial-step-title" data-i18n="tut_step3_title">Connect & Mint</div>
+        <div class="tutorial-step-desc" data-i18n="tut_step3_desc">Click "Connect Wallet" above, select your wallet, then hit "Mint" on the dashboard. Approve the transaction.</div>
         <span class="tutorial-step-arrow">→</span>
       </div>
       <div class="tutorial-step reveal reveal-delay-3">
-        <div class="tutorial-step-num">STEP 4</div>
+        <div class="tutorial-step-num"><span data-i18n="step_word">STEP</span> 4</div>
         <div class="tutorial-step-icon">✅</div>
-        <div class="tutorial-step-title">Receive $TOBE</div>
-        <div class="tutorial-step-desc">Your tokens arrive in seconds. 50% to you, 50% to the vault. Check your balance in the dashboard above.</div>
+        <div class="tutorial-step-title" data-i18n="tut_step4_title">Receive $TOBE</div>
+        <div class="tutorial-step-desc" data-i18n="tut_step4_desc">Your tokens arrive in seconds. 50% to you, 50% to the vault. Check your balance in the dashboard above.</div>
       </div>
     </div>
   </section>
 
   <!-- ═══ LIVE DASHBOARD ═══ -->
   <section class="section reveal" id="dashboard" aria-label="Live Dashboard">
-    <div class="section-label">Real-Time</div>
-    <div class="section-title">Live Dashboard</div>
+    <div class="section-label" data-i18n="dash_label">Real-Time</div>
+    <div class="section-title" data-i18n="dash_title">Live Dashboard</div>
     <div class="section-desc" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-      <span>All data pulled directly from on-chain state.</span>
+      <span data-i18n="dash_desc">All data pulled directly from on-chain state.</span>
       <div class="num-format-toggle" id="numFormatToggle" onclick="toggleNumFormat()">
         <div class="num-format-opt active" data-fmt="compact">6.3M</div>
         <div class="num-format-opt" data-fmt="full">6,291,456</div>
@@ -965,62 +982,62 @@
           <text x="110" y="100" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="44" font-weight="700" fill="#00e8c6" id="roundBig">0</text>
           <text x="110" y="125" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#3a4255" letter-spacing="2">of 1,024</text>
         </svg>
-        <div class="round-ring-label">Current Round</div>
+        <div class="round-ring-label" data-i18n="current_round">Current Round</div>
       </div>
       <div class="dashboard-stats">
-        <div class="dash-stat skeleton" data-tooltip="Total TOBE tokens created across all rounds"><div class="stat-label">Total Minted</div><div class="stat-value glow" id="totalMintedDisplay">0</div></div>
-        <div class="dash-stat skeleton" data-tooltip="Tokens held in the protocol vault (50% of each mint)"><div class="stat-label">Vault Balance</div><div class="stat-value" id="dashVault" style="color:var(--accent-2);">0</div></div>
-        <div class="dash-stat skeleton" data-tooltip="Total USDC collected from mint payments"><div class="stat-label">Treasury Revenue</div><div class="stat-value" id="dashTreasury" style="color:var(--success);">$0</div></div>
-        <div class="dash-stat skeleton" data-tooltip="Cost per token at the current mint round"><div class="stat-label">Current Price</div><div class="stat-value" id="dashPrice">—</div></div>
-        <div class="dash-stat skeleton" data-tooltip="USDC earned from vault token sales at $1 ceiling"><div class="stat-label">Vault Revenue</div><div class="stat-value" id="dashVaultRev" style="color:var(--success);">$0</div></div>
-        <div class="dash-stat skeleton" data-tooltip="Effective market price based on supply curve"><div class="stat-label">Market Price</div><div class="stat-value" id="dashMarketPrice">—</div></div>
+        <div class="dash-stat skeleton" data-tooltip="Total TOBE tokens created across all rounds"><div class="stat-label" data-i18n="total_minted">Total Minted</div><div class="stat-value glow" id="totalMintedDisplay">0</div></div>
+        <div class="dash-stat skeleton" data-tooltip="Tokens held in the protocol vault (50% of each mint)"><div class="stat-label" data-i18n="vault_balance">Vault Balance</div><div class="stat-value" id="dashVault" style="color:var(--accent-2);">0</div></div>
+        <div class="dash-stat skeleton" data-tooltip="Total SOL collected from mint payments"><div class="stat-label" data-i18n="treasury_revenue">Treasury Revenue</div><div class="stat-value" id="dashTreasury" style="color:var(--success);">0 SOL</div></div>
+        <div class="dash-stat skeleton" data-tooltip="Cost per token at the current mint round"><div class="stat-label" data-i18n="current_price">Current Price</div><div class="stat-value" id="dashPrice">—</div></div>
+        <div class="dash-stat skeleton" data-tooltip="SOL earned from vault token sales"><div class="stat-label" data-i18n="vault_revenue">Vault Revenue</div><div class="stat-value" id="dashVaultRev" style="color:var(--success);">0 SOL</div></div>
+        <div class="dash-stat skeleton" data-tooltip="Effective market price based on supply curve"><div class="stat-label" data-i18n="market_price">Market Price</div><div class="stat-value" id="dashMarketPrice">—</div></div>
       </div>
     </div>
 
     <div class="rounds-countdown" style="margin-top:24px;padding:20px 24px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <span style="font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);">Rounds Progress</span>
-        <span style="font-family:var(--mono);font-size:13px;color:var(--text);"><span id="roundsDone" style="color:var(--accent);">0</span> / 1,024 rounds</span>
+        <span style="font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);" data-i18n="rounds_progress">Rounds Progress</span>
+        <span style="font-family:var(--mono);font-size:13px;color:var(--text);"><span id="roundsDone" style="color:var(--accent);">0</span> <span data-i18n="of_rounds">/ 1,024 rounds</span></span>
       </div>
       <div style="width:100%;height:8px;background:rgba(255,255,255,0.04);border-radius:4px;overflow:hidden;">
         <div id="roundsProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:4px;transition:width 0.8s cubic-bezier(0.16,1,0.3,1);"></div>
       </div>
       <div style="display:flex;justify-content:space-between;margin-top:8px;">
-        <span style="font-family:var(--mono);font-size:11px;color:var(--text-muted);"><span id="roundsLeft" style="color:var(--accent-2);">1,024</span> rounds remaining</span>
-        <span style="font-family:var(--mono);font-size:11px;color:var(--text-muted);"><span id="roundsPct">0.0</span>% complete</span>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--text-muted);"><span id="roundsLeft" style="color:var(--accent-2);">1,024</span> <span data-i18n="rounds_remaining">rounds remaining</span></span>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--text-muted);"><span id="roundsPct">0.0</span>% <span data-i18n="complete">complete</span></span>
       </div>
     </div>
 
     <div class="admin-detail-grid" style="margin-top:16px;">
       <div class="admin-card">
-        <div class="panel-title">Supply Breakdown <span class="line"></span></div>
-        <div class="admin-bar"><span class="admin-bar-label">Circulating</span><div class="admin-bar-track"><div class="admin-bar-fill" id="barCirc" style="width:0%;background:var(--accent);"></div></div><span class="admin-bar-value" id="barCircVal">0</span></div>
-        <div class="admin-bar"><span class="admin-bar-label">In Vault</span><div class="admin-bar-track"><div class="admin-bar-fill" id="barVault" style="width:0%;background:var(--accent-2);"></div></div><span class="admin-bar-value" id="barVaultVal">0</span></div>
-        <div class="admin-bar"><span class="admin-bar-label">Released</span><div class="admin-bar-track"><div class="admin-bar-fill" id="barReleased" style="width:0%;background:var(--success);"></div></div><span class="admin-bar-value" id="barReleasedVal">0</span></div>
-        <div class="admin-bar"><span class="admin-bar-label">Unminted</span><div class="admin-bar-track"><div class="admin-bar-fill" id="barUnminted" style="width:100%;background:var(--text-muted);"></div></div><span class="admin-bar-value" id="barUnmintedVal">537.4M</span></div>
+        <div class="panel-title"><span data-i18n="supply_breakdown">Supply Breakdown</span> <span class="line"></span></div>
+        <div class="admin-bar"><span class="admin-bar-label" data-i18n="circulating">Circulating</span><div class="admin-bar-track"><div class="admin-bar-fill" id="barCirc" style="width:0%;background:var(--accent);"></div></div><span class="admin-bar-value" id="barCircVal">0</span></div>
+        <div class="admin-bar"><span class="admin-bar-label" data-i18n="in_vault">In Vault</span><div class="admin-bar-track"><div class="admin-bar-fill" id="barVault" style="width:0%;background:var(--accent-2);"></div></div><span class="admin-bar-value" id="barVaultVal">0</span></div>
+        <div class="admin-bar"><span class="admin-bar-label" data-i18n="released">Released</span><div class="admin-bar-track"><div class="admin-bar-fill" id="barReleased" style="width:0%;background:var(--success);"></div></div><span class="admin-bar-value" id="barReleasedVal">0</span></div>
+        <div class="admin-bar"><span class="admin-bar-label" data-i18n="unminted">Unminted</span><div class="admin-bar-track"><div class="admin-bar-fill" id="barUnminted" style="width:100%;background:var(--text-muted);"></div></div><span class="admin-bar-value" id="barUnmintedVal">537.4M</span></div>
       </div>
       <div class="admin-card">
-        <div class="panel-title">Vault Activity <span class="line"></span></div>
-        <ul class="vault-activity" id="vaultActivity"><li><div class="vault-dot hold"></div><span style="color:var(--text-dim);">No activity yet</span></li></ul>
+        <div class="panel-title"><span data-i18n="vault_activity">Vault Activity</span> <span class="line"></span></div>
+        <ul class="vault-activity" id="vaultActivity"><li><div class="vault-dot hold"></div><span style="color:var(--text-dim);" data-i18n="no_activity">No activity yet</span></li></ul>
       </div>
     </div>
 
     <div class="tx-feed">
       <div class="tx-feed-header">
-        <div class="tx-feed-live"><div class="live-dot"></div> Live Transaction Feed</div>
+        <div class="tx-feed-live"><div class="live-dot"></div> <span data-i18n="live_tx_feed">Live Transaction Feed</span></div>
         <span style="font-family:var(--mono);font-size:11px;color:var(--text-muted);" id="txFeedCount">0 mints</span>
       </div>
       <ul class="tx-feed-list" id="txFeedList">
-        <li class="tx-feed-item"><span style="color:var(--text-dim);">Waiting for mint activity...</span></li>
+        <li class="tx-feed-item"><span style="color:var(--text-dim);" data-i18n="waiting_for_mint">Waiting for mint activity...</span></li>
       </ul>
     </div>
   </section>
 
   <!-- ═══ TOKENOMICS ═══ -->
   <section class="section reveal" id="tokenomics">
-    <div class="section-label">Economy</div>
-    <div class="section-title">Tokenomics</div>
-    <div class="section-desc">Explore the decreasing supply curve and simulate any round.</div>
+    <div class="section-label" data-i18n="tok_label">Economy</div>
+    <div class="section-title" data-i18n="tok_title">Tokenomics</div>
+    <div class="section-desc" data-i18n="tok_desc">Explore the decreasing supply curve and simulate any round.</div>
 
     <div class="curve-card">
       <div class="curve-canvas" id="curveCanvasWrap">
@@ -1029,7 +1046,7 @@
           <div class="curve-tooltip-round" id="ctRound">Round 1</div>
           <div class="curve-tooltip-tokens">Tokens: <strong id="ctTokens">1,048,576</strong></div>
           <div class="curve-tooltip-tokens">You get: <strong id="ctYou">524,288</strong></div>
-          <div class="curve-tooltip-price" id="ctPrice">Cost: $0.0020</div>
+          <div class="curve-tooltip-price" id="ctPrice">Cost: $0.0023</div>
         </div>
       </div>
       <div class="curve-labels"><span>Round 1 — 524,288 to you + 524,288 to vault</span><span>Round 1024 — 512 to you + 512 to vault</span></div>
@@ -1037,54 +1054,54 @@
 
     <div class="sim-grid" style="margin-top:32px;">
       <div class="sim-card">
-        <div class="panel-title">Configure Scenario <span class="line"></span></div>
+        <div class="panel-title"><span data-i18n="configure_scenario">Configure Scenario</span> <span class="line"></span></div>
         <div class="sim-slider-group">
-          <div class="sim-slider-label"><span>Mint Round</span><span class="sim-slider-value" id="simRoundVal">1</span></div>
+          <div class="sim-slider-label"><span data-i18n="mint_round">Mint Round</span><span class="sim-slider-value" id="simRoundVal">1</span></div>
           <input type="range" id="simRound" min="1" max="1024" value="1" oninput="updateSim()">
         </div>
         <div class="sim-slider-group">
-          <div class="sim-slider-label"><span>Market Price ($TOBE)</span><span class="sim-slider-value" id="simPriceVal">$0.50</span></div>
+          <div class="sim-slider-label"><span data-i18n="market_price_tobe">Market Price ($TOBE)</span><span class="sim-slider-value" id="simPriceVal">$0.50</span></div>
           <input type="range" id="simPrice" min="1" max="200" value="50" oninput="updateSim()">
         </div>
         <div class="sim-slider-group">
-          <div class="sim-slider-label"><span>Vault Release %</span><span class="sim-slider-value" id="simVaultVal">0%</span></div>
+          <div class="sim-slider-label"><span data-i18n="vault_release_pct">Vault Release %</span><span class="sim-slider-value" id="simVaultVal">0%</span></div>
           <input type="range" id="simVault" min="0" max="100" value="0" oninput="updateSim()">
         </div>
         <div class="sim-result">
-          <div class="sim-result-row"><span class="sim-result-label">Tokens minted</span><span class="sim-result-value accent" id="simTokens">1,048,576</span></div>
-          <div class="sim-result-row"><span class="sim-result-label">You receive (50%)</span><span class="sim-result-value" id="simYou">524,288</span></div>
-          <div class="sim-result-row"><span class="sim-result-label">Vault receives (50%)</span><span class="sim-result-value purple" id="simVaultGet">524,288</span></div>
-          <div class="sim-result-row"><span class="sim-result-label">Cost per token</span><span class="sim-result-value" id="simCost">$0.0020</span></div>
-          <div class="sim-result-row"><span class="sim-result-label">Vault sells at</span><span class="sim-result-value accent" id="simVaultSell">$1.00 (ceiling)</span></div>
-          <div class="sim-result-row"><span class="sim-result-label">Your ROI</span><span class="sim-result-value pink" id="simROI">+24,900%</span></div>
-          <div class="sim-result-row"><span class="sim-result-label">Total supply so far</span><span class="sim-result-value" id="simSupply">1,048,576</span></div>
-          <div class="sim-result-row"><span class="sim-result-label">Vault releasing?</span><span class="sim-result-value" id="simRelease" style="color:var(--danger);">No (price &lt; $1)</span></div>
+          <div class="sim-result-row"><span class="sim-result-label" data-i18n="tokens_minted">Tokens minted</span><span class="sim-result-value accent" id="simTokens">1,048,576</span></div>
+          <div class="sim-result-row"><span class="sim-result-label" data-i18n="you_receive">You receive (50%)</span><span class="sim-result-value" id="simYou">524,288</span></div>
+          <div class="sim-result-row"><span class="sim-result-label" data-i18n="vault_receives">Vault receives (50%)</span><span class="sim-result-value purple" id="simVaultGet">524,288</span></div>
+          <div class="sim-result-row"><span class="sim-result-label" data-i18n="cost_per_token">Cost per token</span><span class="sim-result-value" id="simCost">$0.0023</span></div>
+          <div class="sim-result-row"><span class="sim-result-label" data-i18n="vault_sells_at">Vault sells at</span><span class="sim-result-value accent" id="simVaultSell">$1.00 (ceiling)</span></div>
+          <div class="sim-result-row"><span class="sim-result-label" data-i18n="your_roi">Your ROI</span><span class="sim-result-value pink" id="simROI">+24,900%</span></div>
+          <div class="sim-result-row"><span class="sim-result-label" data-i18n="total_supply_so_far">Total supply so far</span><span class="sim-result-value" id="simSupply">1,048,576</span></div>
+          <div class="sim-result-row"><span class="sim-result-label" data-i18n="vault_releasing">Vault releasing?</span><span class="sim-result-value" id="simRelease" style="color:var(--danger);">No (price &lt; $1)</span></div>
         </div>
       </div>
       <div class="sim-card">
-        <div class="panel-title">Supply Visualization <span class="line"></span></div>
+        <div class="panel-title"><span data-i18n="supply_visualization">Supply Visualization</span> <span class="line"></span></div>
         <div class="sim-chart"><canvas id="simChart"></canvas></div>
         <div style="display:flex;justify-content:space-between;margin-top:12px;">
-          <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">Cumulative supply + vault</span>
-          <span style="font-family:var(--mono);font-size:10px;color:var(--accent);">$1.00 ceiling</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);" data-i18n="chart_supply_vault">Cumulative supply + vault</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--accent);" data-i18n="chart_ceiling">$1.00 ceiling</span>
         </div>
       </div>
     </div>
 
     <div class="scenario-preset-grid reveal">
       <div class="sim-card scenario-card" onclick="setSimScenario(1,50,this)">
-        <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Early Bird</div>
-        <div style="font-size:13px;color:var(--text-dim);line-height:1.5;">First minter gets maximum tokens at the lowest price.</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px;" data-i18n="early_bird">Early Bird</div>
+        <div style="font-size:13px;color:var(--text-dim);line-height:1.5;" data-i18n="early_bird_desc">First minter gets maximum tokens at the lowest price.</div>
         <div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:8px;">Round 1 · $0.50 market</div>
       </div>
       <div class="sim-card scenario-card" onclick="setSimScenario(500,80,this)">
-        <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Mid Game</div>
-        <div style="font-size:13px;color:var(--text-dim);line-height:1.5;">Halfway through. Tokens scarcer, price approaching $1.</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px;" data-i18n="mid_game">Mid Game</div>
+        <div style="font-size:13px;color:var(--text-dim);line-height:1.5;" data-i18n="mid_game_desc">Halfway through. Tokens scarcer, price approaching $1.</div>
         <div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:8px;">Round 500 · $0.80 market</div>
       </div>
       <div class="sim-card scenario-card" onclick="setSimScenario(1000,110,this)">
-        <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Late Entry</div>
-        <div style="font-size:13px;color:var(--text-dim);line-height:1.5;">Almost done. Very few tokens, vault actively selling.</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px;" data-i18n="late_entry">Late Entry</div>
+        <div style="font-size:13px;color:var(--text-dim);line-height:1.5;" data-i18n="late_entry_desc">Almost done. Very few tokens, vault actively selling.</div>
         <div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:8px;">Round 1000 · $1.10 market</div>
       </div>
     </div>
@@ -1096,34 +1113,34 @@
       <div class="mint-card-border">
         <div class="mint-card" data-tilt>
           <div class="card-glow"></div>
-          <div class="mint-card-title">Mint $TOBE</div>
+          <div class="mint-card-title" data-i18n="mint_tobe">Mint $TOBE</div>
           <div class="mint-info">
-            <div class="mint-row"><span class="mint-row-label">You Pay</span><span class="mint-row-value highlight">1,024 USDC</span></div>
-            <div class="mint-row"><span class="mint-row-label">You Receive (50%)</span><span class="mint-row-value" id="receiveAmount">— TOBE</span></div>
-            <div class="mint-row"><span class="mint-row-label">Vault Receives (50%)</span><span class="mint-row-value" id="vaultReceive" style="color:var(--accent-2);">— TOBE</span></div>
-            <div class="mint-row"><span class="mint-row-label">Effective Price</span><span class="mint-row-value" id="effectivePrice">—</span></div>
-            <div class="mint-row"><span class="mint-row-label">Rounds Remaining</span><span class="mint-row-value" id="roundsRemaining">—</span></div>
+            <div class="mint-row"><span class="mint-row-label" data-i18n="you_pay">You Pay</span><span class="mint-row-value highlight">10 SOL</span></div>
+            <div class="mint-row"><span class="mint-row-label" data-i18n="you_receive_50">You Receive (50%)</span><span class="mint-row-value" id="receiveAmount">— TOBE</span></div>
+            <div class="mint-row"><span class="mint-row-label" data-i18n="vault_receives_50">Vault Receives (50%)</span><span class="mint-row-value" id="vaultReceive" style="color:var(--accent-2);">— TOBE</span></div>
+            <div class="mint-row"><span class="mint-row-label" data-i18n="effective_price">Effective Price</span><span class="mint-row-value" id="effectivePrice">—</span></div>
+            <div class="mint-row"><span class="mint-row-label" data-i18n="rounds_remaining_label">Rounds Remaining</span><span class="mint-row-value" id="roundsRemaining">—</span></div>
           </div>
           <div class="roi-calc" style="margin:16px 0;padding:14px;background:rgba(0,232,198,0.04);border:1px solid rgba(0,232,198,0.1);border-radius:var(--radius-sm);">
-            <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:8px;">If $TOBE hits $1.00</div>
+            <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:8px;" data-i18n="if_tobe_hits">If $TOBE hits $1.00</div>
             <div style="display:flex;justify-content:space-between;align-items:baseline;">
-              <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);">Your tokens worth</span>
+              <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);" data-i18n="your_tokens_worth">Your tokens worth</span>
               <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--accent);" id="roiValue">—</span>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:4px;">
-              <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);">Your ROI</span>
+              <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);" data-i18n="your_roi">Your ROI</span>
               <span style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--accent-3);" id="roiPct">—</span>
             </div>
           </div>
           <button class="mint-btn" id="mintBtn" onclick="mintTobe()" disabled>
-            <span>Mint Now</span>
+            <span data-i18n="mint_now_btn">Mint Now</span>
             <div class="spinner"></div>
             <div class="shimmer"></div>
           </button>
-          <div class="mint-connect-hint" id="mintHint">Connect a wallet to get started</div>
+          <div class="mint-connect-hint" id="mintHint" data-i18n="connect_hint">Connect a wallet to get started</div>
           <div style="margin-top:20px;">
             <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-            <div class="progress-meta"><span>ROUND 1</span><span id="progressPct">0%</span><span>ROUND 1024</span></div>
+            <div class="progress-meta"><span><span data-i18n="round_word">ROUND</span> 1</span><span id="progressPct">0%</span><span><span data-i18n="round_word">ROUND</span> 1024</span></div>
           </div>
         </div>
       </div>
@@ -1132,24 +1149,24 @@
 
   <!-- ═══ TRANSPARENCY ═══ -->
   <section class="transparency-section reveal">
-    <div class="section-label" style="justify-content:center;">Verifiable</div>
-    <div class="section-title" style="text-align:center;">Fully Transparent</div>
-    <div class="section-desc" style="text-align:center;margin:0 auto 40px;max-width:480px;">Every mint, every vault action, every dollar — track it all live from this page.</div>
+    <div class="section-label" style="justify-content:center;" data-i18n="verifiable">Verifiable</div>
+    <div class="section-title" style="text-align:center;" data-i18n="fully_transparent">Fully Transparent</div>
+    <div class="section-desc" style="text-align:center;margin:0 auto 40px;max-width:480px;" data-i18n="transparency_desc">Every mint, every vault action, every SOL — track it all live from this page.</div>
     <div class="contract-cards">
-      <div class="contract-card" onclick="navigator.clipboard.writeText('CWZGdSh1EGsR95CnkK8AkEgtFX63Z9FurafK7rTFWJ4s').then(()=>showToast('Copied','success'))">
-        <div class="cc-label">Program ID</div>
-        <div class="cc-value">CWZGdS...WJ4s</div>
+      <div class="contract-card" onclick="navigator.clipboard.writeText('DnMvWs2dDim57TLBcJp7FKkDUFw2KnLmJybzpbTZuc65').then(()=>showToast('Copied','success'))">
+        <div class="cc-label" data-i18n="program_id">Program ID</div>
+        <div class="cc-value">DnMvWs...uc65</div>
       </div>
       <div class="contract-card" onclick="navigator.clipboard.writeText('Eis6SPak12JXqunZqLqgHneomygF1ouuoRk5PFXB5Bvf').then(()=>showToast('Copied','success'))">
-        <div class="cc-label">Authority</div>
+        <div class="cc-label" data-i18n="authority">Authority</div>
         <div class="cc-value">Eis6SP...5Bvf</div>
       </div>
       <div class="contract-card" onclick="navigator.clipboard.writeText('Eis6SPak12JXqunZqLqgHneomygF1ouuoRk5PFXB5Bvf').then(()=>showToast('Copied','success'))">
-        <div class="cc-label">Treasury</div>
+        <div class="cc-label" data-i18n="treasury">Treasury</div>
         <div class="cc-value">Eis6SP...5Bvf</div>
       </div>
       <div class="contract-card">
-        <div class="cc-label">Network</div>
+        <div class="cc-label" data-i18n="network">Network</div>
         <div class="cc-value" style="color:var(--success);">Devnet</div>
       </div>
     </div>
@@ -1157,60 +1174,60 @@
 
   <!-- ═══ EXPLORER ═══ -->
   <section class="section reveal" id="explorer">
-    <div class="section-label">On-Chain</div>
-    <div class="section-title">Explorer</div>
-    <div class="section-desc">Transparent on-chain data. Mints, holders, supply — all verifiable.</div>
+    <div class="section-label" data-i18n="exp_label">On-Chain</div>
+    <div class="section-title" data-i18n="exp_title">Explorer</div>
+    <div class="section-desc" data-i18n="exp_desc">Transparent on-chain data. Mints, holders, supply — all verifiable.</div>
     <div class="tools-bar">
-      <button class="tool-btn" onclick="exportMintCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
-      <button class="tool-btn" id="priceAlertBtn" onclick="togglePriceAlert()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span id="priceAlertLabel">Price Alert</span></button>
+      <button class="tool-btn" onclick="exportMintCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span data-i18n="export_csv">Export CSV</span></button>
+      <button class="tool-btn" id="priceAlertBtn" onclick="togglePriceAlert()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span id="priceAlertLabel" data-i18n="price_alert">Price Alert</span></button>
     </div>
     <div class="price-alert-wrap" id="priceAlertWrap" style="display:none;">
-      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);">Alert when price hits $</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);" data-i18n="alert_price_hits">Alert when price hits $</span>
       <input type="number" class="price-alert-input" id="priceAlertInput" placeholder="0.50" step="0.01" min="0.001" max="2.00">
-      <button class="price-alert-set" onclick="setPriceAlert()">Set Alert</button>
+      <button class="price-alert-set" onclick="setPriceAlert()" data-i18n="set_alert">Set Alert</button>
       <div class="price-alert-active" id="priceAlertStatus" style="display:none;"></div>
     </div>
     <div class="explorer-stats">
-      <div class="explorer-stat"><div class="stat-label">Total Minted</div><div class="stat-value glow" id="expSupply">0</div></div>
-      <div class="explorer-stat"><div class="stat-label">Circulating</div><div class="stat-value" id="expCirculating">0</div></div>
-      <div class="explorer-stat"><div class="stat-label">In Vault</div><div class="stat-value" id="expVaultBalance" style="color:var(--accent-2);">0</div></div>
-      <div class="explorer-stat"><div class="stat-label">Holders</div><div class="stat-value" id="expHolders">0</div></div>
-      <div class="explorer-stat"><div class="stat-label">USDC Raised</div><div class="stat-value" id="expRaised" style="color:var(--success);">$0</div></div>
+      <div class="explorer-stat"><div class="stat-label" data-i18n="total_minted">Total Minted</div><div class="stat-value glow" id="expSupply">0</div></div>
+      <div class="explorer-stat"><div class="stat-label" data-i18n="circulating">Circulating</div><div class="stat-value" id="expCirculating">0</div></div>
+      <div class="explorer-stat"><div class="stat-label" data-i18n="in_vault">In Vault</div><div class="stat-value" id="expVaultBalance" style="color:var(--accent-2);">0</div></div>
+      <div class="explorer-stat"><div class="stat-label" data-i18n="holders">Holders</div><div class="stat-value" id="expHolders">0</div></div>
+      <div class="explorer-stat"><div class="stat-label" data-i18n="usdc_raised">SOL Raised</div><div class="stat-value" id="expRaised" style="color:var(--success);">0 SOL</div></div>
     </div>
     <div class="explorer-grid">
       <div class="explorer-card">
-        <div class="panel-title">Token Info <span class="line"></span></div>
-        <div class="token-info-row"><span class="token-info-label">Name</span><span class="token-info-value">TOBESTABLE</span></div>
-        <div class="token-info-row"><span class="token-info-label">Ticker</span><span class="token-info-value accent">$TOBE</span></div>
-        <div class="token-info-row"><span class="token-info-label">Decimals</span><span class="token-info-value">9</span></div>
-        <div class="token-info-row"><span class="token-info-label">Network</span><span class="token-info-value">Solana (Devnet)</span></div>
-        <div class="token-info-row"><span class="token-info-label">Program</span><span class="token-info-value"><a href="https://explorer.solana.com/address/CWZGdSh1EGsR95CnkK8AkEgtFX63Z9FurafK7rTFWJ4s?cluster=devnet" target="_blank" style="color:var(--accent);text-decoration:none;">CWZGdS...WJ4s</a><button class="copy-btn" onclick="copyProgramId()">Copy</button></span></div>
-        <div class="token-info-row"><span class="token-info-label">Max Supply</span><span class="token-info-value">537,395,200</span></div>
-        <div class="token-info-row"><span class="token-info-label">Mint Cost</span><span class="token-info-value accent">1,024 USDC</span></div>
-        <div class="token-info-row"><span class="token-info-label">Rounds</span><span class="token-info-value">1,024</span></div>
-        <div class="token-info-row"><span class="token-info-label">Oracle Price</span><span class="token-info-value" id="expOraclePrice" style="color:var(--accent);">—</span></div>
-        <div class="token-info-row"><span class="token-info-label">Total Minted (chain)</span><span class="token-info-value" id="expChainMinted">—</span></div>
+        <div class="panel-title"><span data-i18n="token_info">Token Info</span> <span class="line"></span></div>
+        <div class="token-info-row"><span class="token-info-label" data-i18n="name_label">Name</span><span class="token-info-value">TOBESTABLE</span></div>
+        <div class="token-info-row"><span class="token-info-label" data-i18n="ticker">Ticker</span><span class="token-info-value accent">$TOBE</span></div>
+        <div class="token-info-row"><span class="token-info-label" data-i18n="decimals">Decimals</span><span class="token-info-value">9</span></div>
+        <div class="token-info-row"><span class="token-info-label" data-i18n="network">Network</span><span class="token-info-value">Solana (Devnet)</span></div>
+        <div class="token-info-row"><span class="token-info-label" data-i18n="program">Program</span><span class="token-info-value"><a href="https://explorer.solana.com/address/DnMvWs2dDim57TLBcJp7FKkDUFw2KnLmJybzpbTZuc65?cluster=devnet" target="_blank" style="color:var(--accent);text-decoration:none;">DnMvWs...uc65</a><button class="copy-btn" onclick="copyProgramId()">Copy</button></span></div>
+        <div class="token-info-row"><span class="token-info-label" data-i18n="max_supply">Max Supply</span><span class="token-info-value">537,395,200</span></div>
+        <div class="token-info-row"><span class="token-info-label" data-i18n="mint_cost">Mint Cost</span><span class="token-info-value accent">10 SOL</span></div>
+        <div class="token-info-row"><span class="token-info-label" data-i18n="rounds">Rounds</span><span class="token-info-value">1,024</span></div>
+        <div class="token-info-row"><span class="token-info-label" data-i18n="oracle_price">Oracle Price</span><span class="token-info-value" id="expOraclePrice" style="color:var(--accent);">—</span></div>
+        <div class="token-info-row"><span class="token-info-label" data-i18n="total_minted_chain">Total Minted (chain)</span><span class="token-info-value" id="expChainMinted">—</span></div>
         <div class="token-links" style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
-          <a href="https://solscan.io/token/CWZGdSh1EGsR95CnkK8AkEgtFX63Z9FurafK7rTFWJ4s" target="_blank" class="token-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Solscan</a>
-          <a href="https://solana.fm/address/CWZGdSh1EGsR95CnkK8AkEgtFX63Z9FurafK7rTFWJ4s" target="_blank" class="token-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>SolanaFM</a>
-          <a href="https://explorer.solana.com/address/CWZGdSh1EGsR95CnkK8AkEgtFX63Z9FurafK7rTFWJ4s" target="_blank" class="token-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Solana Explorer</a>
-          <a href="https://birdeye.so/token/CWZGdSh1EGsR95CnkK8AkEgtFX63Z9FurafK7rTFWJ4s?chain=solana" target="_blank" class="token-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Birdeye</a>
+          <a href="https://solscan.io/token/DnMvWs2dDim57TLBcJp7FKkDUFw2KnLmJybzpbTZuc65?cluster=devnet" target="_blank" class="token-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Solscan</a>
+          <a href="https://solana.fm/address/DnMvWs2dDim57TLBcJp7FKkDUFw2KnLmJybzpbTZuc65?cluster=devnet-solana" target="_blank" class="token-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>SolanaFM</a>
+          <a href="https://explorer.solana.com/address/DnMvWs2dDim57TLBcJp7FKkDUFw2KnLmJybzpbTZuc65?cluster=devnet" target="_blank" class="token-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Solana Explorer</a>
+          <a href="https://birdeye.so/token/DnMvWs2dDim57TLBcJp7FKkDUFw2KnLmJybzpbTZuc65?chain=solana&cluster=devnet" target="_blank" class="token-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Birdeye</a>
         </div>
       </div>
       <div class="explorer-card">
-        <div class="panel-title">Recent Mints <span class="line"></span></div>
-        <table class="mint-table"><thead><tr><th>Round</th><th>Minter</th><th style="text-align:right">Tokens</th></tr></thead><tbody id="mintTableBody"></tbody></table>
-        <div class="no-data" id="noMints">No mints yet — be the first!</div>
+        <div class="panel-title"><span data-i18n="recent_mints">Recent Mints</span> <span class="line"></span></div>
+        <table class="mint-table"><thead><tr><th data-i18n="round">Round</th><th data-i18n="minter">Minter</th><th style="text-align:right" data-i18n="tokens">Tokens</th></tr></thead><tbody id="mintTableBody"></tbody></table>
+        <div class="no-data" id="noMints" data-i18n="no_mints_yet">No mints yet — be the first!</div>
       </div>
     </div>
     <div class="explorer-grid" style="margin-top:16px;">
       <div class="explorer-card">
-        <div class="panel-title">Top Holders <span class="line"></span></div>
+        <div class="panel-title"><span data-i18n="top_holders">Top Holders</span> <span class="line"></span></div>
         <ul class="holder-list" id="holderList"></ul>
-        <div class="no-data" id="noHolders">No holders yet</div>
+        <div class="no-data" id="noHolders" data-i18n="no_holders_yet">No holders yet</div>
       </div>
       <div class="explorer-card">
-        <div class="panel-title">Price History <span class="line"></span></div>
+        <div class="panel-title"><span data-i18n="price_history">Price History</span> <span class="line"></span></div>
         <div style="width:100%;height:180px;"><canvas id="roundHistoryChart"></canvas></div>
         <div style="display:flex;justify-content:space-between;margin-top:12px;">
           <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">Price per token over rounds</span>
@@ -1222,22 +1239,22 @@
 
   <!-- ═══ LEADERBOARD ═══ -->
   <section class="section reveal" id="leaderboard">
-    <div class="section-label">Community</div>
-    <div class="section-title">Leaderboard</div>
-    <div class="section-desc">Top minters by total tokens received. Data read directly from on-chain history.</div>
+    <div class="section-label" data-i18n="lb_label">Community</div>
+    <div class="section-title" data-i18n="lb_title">Leaderboard</div>
+    <div class="section-desc" data-i18n="lb_desc">Top minters by total tokens received. Data read directly from on-chain history.</div>
     <table class="leaderboard-table" id="leaderboardTable">
-      <thead><tr><th>Rank</th><th>Address</th><th>Rounds</th><th style="text-align:right">Tokens</th></tr></thead>
+      <thead><tr><th data-i18n="rank">Rank</th><th data-i18n="address">Address</th><th data-i18n="rounds">Rounds</th><th style="text-align:right" data-i18n="tokens">Tokens</th></tr></thead>
       <tbody id="leaderboardBody">
-        <tr><td colspan="4" class="lb-empty">Loading on-chain data...</td></tr>
+        <tr><td colspan="4" class="lb-empty" data-i18n="loading_onchain">Loading on-chain data...</td></tr>
       </tbody>
     </table>
 
     <div id="referralSection" style="margin-top:40px;display:none;">
-      <h4 style="font-family:var(--heading);font-size:16px;color:var(--text);margin-bottom:8px;">Your Referral Link</h4>
-      <p class="referral-note" style="margin-bottom:12px;">Share this link. When someone mints through it, your address is recorded as the referrer on-chain via the URL.</p>
+      <h4 style="font-family:var(--heading);font-size:16px;color:var(--text);margin-bottom:8px;" data-i18n="your_referral">Your Referral Link</h4>
+      <p class="referral-note" style="margin-bottom:12px;" data-i18n="referral_desc">Share this link. When someone mints through it, your address is recorded as the referrer on-chain via the URL.</p>
       <div class="referral-box">
-        <input type="text" id="referralLink" readonly value="Connect wallet to generate link">
-        <button class="referral-copy-btn" onclick="copyReferral()">Copy</button>
+        <input type="text" id="referralLink" readonly value="Connect wallet to generate link" data-i18n="connect_wallet_to_generate">
+        <button class="referral-copy-btn" onclick="copyReferral()" data-i18n="copy">Copy</button>
       </div>
       <p class="referral-note" id="referralNote"></p>
     </div>
@@ -1245,247 +1262,247 @@
 
   <!-- ═══ FAQ ═══ -->
   <section class="section reveal" id="faq">
-    <div class="section-label">Answers</div>
-    <div class="section-title">FAQ</div>
-    <div class="section-desc">Common questions about TOBE, answered directly.</div>
+    <div class="section-label" data-i18n="faq_label">Answers</div>
+    <div class="section-title" data-i18n="faq_title">FAQ</div>
+    <div class="section-desc" data-i18n="faq_desc">Common questions about TOBE, answered directly.</div>
     <div class="faq-grid">
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Is $TOBE a stablecoin?</span>
+          <span data-i18n="faq_q1">Is $TOBE a stablecoin?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">No. $TOBE is an anti-inflationary token designed to <em>approach</em> $1 — not peg to it. The vault mechanism creates upward pressure toward $1, but the market determines the actual price. Think of $1 as a ceiling the protocol builds toward, not a guarantee. The name "Built To Be Stable" reflects the design philosophy — not a peg.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a1">No. $TOBE is an anti-inflationary token designed to approach $1 — not peg to it. The vault mechanism creates upward pressure toward $1, but the market determines the actual price. Think of $1 as a ceiling the protocol builds toward, not a guarantee.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>What happens after all 1,024 rounds are minted?</span>
+          <span data-i18n="faq_q2">What happens after all 1,024 rounds are minted?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">Minting stops permanently. No more tokens can ever be created. The vault continues to hold 50% of all tokens ever minted, selling only at the $1 ceiling. The token becomes fully deflationary — fixed supply, growing demand floor.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a2">Minting stops permanently. No more tokens can ever be created. The vault continues to hold 50% of all tokens ever minted, selling only at the SOL ceiling. The token becomes fully deflationary — fixed supply, growing demand floor.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Can the team rug or change the rules?</span>
+          <span data-i18n="faq_q3">Can the team rug or change the rules?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">No. The smart contract controls all minting and vault operations through PDAs (Program Derived Addresses). The authority can pause/unpause for emergencies and update the treasury address, but cannot mint extra tokens, drain the vault, or change the supply curve. All actions are verifiable on-chain.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a3">No. The smart contract controls all minting and vault operations through PDAs (Program Derived Addresses). The authority can pause/unpause for emergencies and update the treasury address, but cannot mint extra tokens, drain the vault, or change the supply curve. All actions are verifiable on-chain.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Why does each round cost exactly 1,024 USDC?</span>
+          <span data-i18n="faq_q4">Why does each round cost exactly 10 SOL?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">Every round costs the same — 1,024 USDC. What changes is how many tokens you receive. Round 1 gives you 524,288 tokens. Round 1024 gives you 512. Same price, fewer tokens. This is what makes early participation more rewarding and creates the anti-inflationary curve.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a4">Every round costs the same — 10 SOL. What changes is how many tokens you receive. Round 1 gives you 524,288 tokens. Round 1024 gives you 512. Same price, fewer tokens. This is what makes early participation more rewarding and creates the anti-inflationary curve.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Where does the USDC go when I mint?</span>
+          <span data-i18n="faq_q5">Where does the SOL go when I mint?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">50% ($512) goes to the protocol treasury to fund development, liquidity, and operations. The other 50% ($512) funds the vault token allocation that creates the price floor mechanism. Every dollar is trackable on-chain.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a5">50% (5 SOL) goes to the protocol treasury to fund development, liquidity, and operations. The other 50% (5 SOL) funds the vault token allocation that creates the price floor mechanism. Every transaction is trackable on-chain.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Can I sell my $TOBE tokens?</span>
+          <span data-i18n="faq_q6">Can I sell my $TOBE tokens?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">Yes. $TOBE is a standard SPL token — you can transfer, trade, or sell it freely on any Solana DEX once liquidity is established. There are no transfer restrictions or sell taxes.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a6">Yes. $TOBE is a standard SPL token — you can transfer, trade, or sell it freely on any Solana DEX once liquidity is established. There are no transfer restrictions or sell taxes.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Is there a team allocation or pre-mine?</span>
+          <span data-i18n="faq_q7">Is there a team allocation or pre-mine?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">Zero. There are no team tokens, no advisor tokens, no VC rounds, no pre-mine. Every single $TOBE token enters circulation through the same 1,024 public mint rounds. The founder mints under the same rules as everyone else.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a7">Zero. There are no team tokens, no advisor tokens, no VC rounds, no pre-mine. Every single $TOBE token enters circulation through the same 1,024 public mint rounds. The founder mints under the same rules as everyone else.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>What is the vault and how does it work?</span>
+          <span data-i18n="faq_q8">What is the vault and how does it work?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">Every time someone mints, 50% of the tokens go to the minter and 50% go to a PDA-controlled vault. The vault only releases tokens when the market price hits the $1 ceiling. This creates permanent buy pressure beneath the price — the vault grows with every mint and acts as a floor mechanism for the token.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a8">Every time someone mints, 50% of the tokens go to the minter and 50% go to a PDA-controlled vault. The vault only releases tokens when the market price hits the SOL ceiling — creating permanent buy pressure. The vault grows with every mint and acts as a floor mechanism for the token.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>How is the token price determined?</span>
+          <span data-i18n="faq_q9">How is the token price determined?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">The market determines the price — $TOBE trades freely on DEXs like any other token. What the protocol controls is the <em>cost per token at mint</em>, which increases every round as fewer tokens are issued. The vault creates upward pressure toward $1, but the actual trading price is set by supply and demand.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a9">The market determines the price — $TOBE trades freely on DEXs like any other token. What the protocol controls is the cost per token at mint, which increases every round as fewer tokens are issued. The vault creates upward pressure toward $1, but the actual trading price is set by supply and demand.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>What network is TOBE on?</span>
+          <span data-i18n="faq_q10">What network is TOBE on?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">Solana. We chose Solana for sub-second finality, near-zero transaction fees, and a mature SPL token ecosystem. Minting costs a fraction of a cent in gas — compared to $10-$50+ on Ethereum.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a10">Solana. We chose Solana for sub-second finality, near-zero transaction fees, and a mature SPL token ecosystem. Minting costs a fraction of a cent in gas — compared to $10-$50+ on Ethereum.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Do I need anything besides 1,024 USDC to mint?</span>
+          <span data-i18n="faq_q11">Do I need anything besides 10 SOL to mint?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">Yes — you'll need a small amount of SOL (less than 0.01 SOL) to cover Solana transaction fees, plus a Solana wallet like Phantom, Backpack, or Solflare. That's it. No KYC, no sign-up, no approval process.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a11">Yes — you'll need a small amount of SOL (less than 0.01 SOL) to cover Solana transaction fees, plus a Solana wallet like Phantom, Backpack, or Solflare. That's it. No KYC, no sign-up, no approval process.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Why should I trust this over other tokens?</span>
+          <span data-i18n="faq_q12">Why should I trust this over other tokens?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">Don't trust — verify. The smart contract is open source. Every mint, vault deposit, and token transfer is on-chain and displayed on this page in real time. There's no team allocation, no backdoor, no admin mint function. The rules are set by code, not by people. Math, not marketing.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a12">Don't trust — verify. The smart contract is open source. Every mint, vault deposit, and token transfer is on-chain and displayed on this page in real time. There's no team allocation, no backdoor, no admin mint function. The rules are set by code, not by people. Math, not marketing.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>What's stopping the price from going below my cost?</span>
+          <span data-i18n="faq_q13">What's stopping the price from going below my cost?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">Nothing is guaranteed — this is crypto, not a bank account. What the protocol <em>does</em> do is create structural upward pressure: each round mints fewer tokens, the vault accumulates supply that only sells at $1, and no new tokens can be created outside the 1,024 rounds. These mechanics push toward stability, but the market has the final say.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a13">Nothing is guaranteed — this is crypto, not a bank account. What the protocol does is create structural upward pressure: each round mints fewer tokens, the vault accumulates supply that only sells at $1, and no new tokens can be created outside the 1,024 rounds. These mechanics push toward stability, but the market has the final say.</div></div>
       </div>
     </div>
   </section>
 
   <!-- ═══ ROADMAP ═══ -->
   <section class="section reveal" id="roadmap">
-    <div class="section-label">Timeline</div>
-    <div class="section-title">Roadmap</div>
-    <div class="section-desc">Where we are and where we're headed.</div>
+    <div class="section-label" data-i18n="roadmap_label">Timeline</div>
+    <div class="section-title" data-i18n="roadmap_title">Roadmap</div>
+    <div class="section-desc" data-i18n="roadmap_desc">Where we are and where we're headed.</div>
     <div class="roadmap-track">
       <div class="roadmap-phase done">
         <div class="roadmap-dot"></div>
-        <div class="roadmap-phase-label">Phase 1</div>
-        <div class="roadmap-phase-title">Protocol Development</div>
-        <div class="roadmap-phase-desc">Smart contract built with Anchor framework. 27/27 tests passing. Mint mechanics, vault system, LP lock, pause/unpause, 2-step authority transfer, on-chain price oracle, and metadata updates — all implemented and verified.</div>
-        <span class="roadmap-tag done">Complete</span>
+        <div class="roadmap-phase-label" data-i18n="phase1">Phase 1</div>
+        <div class="roadmap-phase-title" data-i18n="phase1_title">Protocol Development</div>
+        <div class="roadmap-phase-desc" data-i18n="phase1_desc">Smart contract built with Anchor framework. 27/27 tests passing. Mint mechanics, vault system, LP lock, pause/unpause, 2-step authority transfer, on-chain price oracle, and metadata updates — all implemented and verified.</div>
+        <span class="roadmap-tag done" data-i18n="tag_complete">Complete</span>
       </div>
       <div class="roadmap-phase active">
         <div class="roadmap-dot"></div>
-        <div class="roadmap-phase-label">Phase 2</div>
-        <div class="roadmap-phase-title">Devnet Launch</div>
-        <div class="roadmap-phase-desc">Live on Solana devnet. Real wallet integration (Phantom, Backpack, Solflare). Public testing of mint rounds, on-chain data verification, and frontend polish.</div>
-        <span class="roadmap-tag live">Live Now</span>
+        <div class="roadmap-phase-label" data-i18n="phase2">Phase 2</div>
+        <div class="roadmap-phase-title" data-i18n="phase2_title">Devnet Launch</div>
+        <div class="roadmap-phase-desc" data-i18n="phase2_desc">Live on Solana devnet. Real wallet integration (Phantom, Backpack, Solflare). Public testing of mint rounds, on-chain data verification, and frontend polish.</div>
+        <span class="roadmap-tag live" data-i18n="tag_live">Live Now</span>
       </div>
       <div class="roadmap-phase">
         <div class="roadmap-dot"></div>
-        <div class="roadmap-phase-label">Phase 3</div>
-        <div class="roadmap-phase-title">Mainnet Deployment</div>
-        <div class="roadmap-phase-desc">Deploy to Solana mainnet-beta. Real USDC integration. Round 1 opens to the public. Full on-chain transparency from block one.</div>
-        <span class="roadmap-tag upcoming">Upcoming</span>
+        <div class="roadmap-phase-label" data-i18n="phase3">Phase 3</div>
+        <div class="roadmap-phase-title" data-i18n="phase3_title">Mainnet Deployment</div>
+        <div class="roadmap-phase-desc" data-i18n="phase3_desc">Deploy to Solana mainnet-beta. 10 SOL per mint, no stablecoins needed. Round 1 opens to the public. Full on-chain transparency from block one.</div>
+        <span class="roadmap-tag upcoming" data-i18n="tag_upcoming">Upcoming</span>
       </div>
       <div class="roadmap-phase">
         <div class="roadmap-dot"></div>
-        <div class="roadmap-phase-label">Phase 4</div>
-        <div class="roadmap-phase-title">DEX Liquidity</div>
-        <div class="roadmap-phase-desc">Establish $TOBE/USDC trading pairs on Raydium and Orca. LP tokens locked for 2 years. Price discovery begins with vault-backed floor.</div>
-        <span class="roadmap-tag upcoming">Upcoming</span>
+        <div class="roadmap-phase-label" data-i18n="phase4">Phase 4</div>
+        <div class="roadmap-phase-title" data-i18n="phase4_title">DEX Liquidity</div>
+        <div class="roadmap-phase-desc" data-i18n="phase4_desc">Establish $TOBE/SOL trading pairs on Raydium and Orca. LP tokens locked for 2 years. Price discovery begins with vault-backed floor.</div>
+        <span class="roadmap-tag upcoming" data-i18n="tag_upcoming">Upcoming</span>
       </div>
       <div class="roadmap-phase">
         <div class="roadmap-dot"></div>
-        <div class="roadmap-phase-label">Phase 5</div>
-        <div class="roadmap-phase-title">Ecosystem Growth</div>
-        <div class="roadmap-phase-desc">CoinGecko and CoinMarketCap listings. Community tools, analytics dashboard improvements, and partnership exploration. The protocol runs itself — growth is organic.</div>
-        <span class="roadmap-tag upcoming">Upcoming</span>
+        <div class="roadmap-phase-label" data-i18n="phase5">Phase 5</div>
+        <div class="roadmap-phase-title" data-i18n="phase5_title">Ecosystem Growth</div>
+        <div class="roadmap-phase-desc" data-i18n="phase5_desc">CoinGecko and CoinMarketCap listings. Community tools, analytics dashboard improvements, and partnership exploration. The protocol runs itself — growth is organic.</div>
+        <span class="roadmap-tag upcoming" data-i18n="tag_upcoming">Upcoming</span>
       </div>
     </div>
   </section>
 
   <!-- ═══ RAYDIUM INTEGRATION ═══ -->
   <section class="section reveal" id="raydium">
-    <div class="section-label">Liquidity</div>
-    <div class="section-title">Raydium Integration</div>
-    <div class="section-desc">How $TOBE goes from minting to a live trading pair — trustlessly, with locked liquidity.</div>
+    <div class="section-label" data-i18n="ray_label">Liquidity</div>
+    <div class="section-title" data-i18n="ray_title">Raydium Integration</div>
+    <div class="section-desc" data-i18n="ray_desc">How $TOBE goes from minting to a live trading pair — trustlessly, with locked liquidity.</div>
     <div class="raydium-flow">
       <div class="raydium-step">
         <div class="raydium-icon">1</div>
         <div class="raydium-body">
-          <h4>Minting Fills the Pool Reserve</h4>
-          <p>Every mint splits <span class="raydium-highlight mint">1,024 USDC</span> — half goes to the minter as tokens, half enters the protocol. Of that protocol half, <span class="raydium-highlight vault">512 USDC</span> is held in the pool reserve, earmarked exclusively for Raydium liquidity.</p>
+          <h4 data-i18n="ray_step1_title">Minting Fills the Pool Reserve</h4>
+          <p data-i18n-html="ray_step1_desc">Every mint costs <span class="raydium-highlight mint">10 SOL</span> — half the tokens go to the minter, half go to the vault. The accumulated <span class="raydium-highlight vault">SOL treasury</span> seeds the Raydium liquidity pool.</p>
         </div>
       </div>
       <div class="raydium-step">
         <div class="raydium-icon">2</div>
         <div class="raydium-body">
-          <h4>Vault Tokens Pair with USDC</h4>
-          <p>The vault holds 50% of all minted $TOBE. When pool seeding triggers, these vault tokens are paired with the accumulated USDC reserve to create the <span class="raydium-highlight mint">$TOBE / USDC</span> liquidity pool on Raydium.</p>
+          <h4 data-i18n="ray_step2_title">Vault Tokens Pair with SOL</h4>
+          <p data-i18n-html="ray_step2_desc">The vault holds 50% of all minted $TOBE. When pool seeding triggers, these vault tokens are paired with SOL from the treasury to create the <span class="raydium-highlight mint">$TOBE / SOL</span> liquidity pool on Raydium.</p>
         </div>
       </div>
       <div class="raydium-step">
         <div class="raydium-icon">3</div>
         <div class="raydium-body">
-          <h4>Pool Seeded On-Chain</h4>
-          <p>The <code style="color:var(--accent);font-size:12px;">seed_pool</code> instruction is called once by the authority. It transfers vault tokens + USDC reserve into a Raydium concentrated liquidity pool. This is a one-time, irreversible action — verified on-chain.</p>
+          <h4 data-i18n="ray_step3_title">Pool Seeded On-Chain</h4>
+          <p data-i18n-html="ray_step3_desc">The <code style="color:var(--accent);font-size:12px;">seed_pool</code> instruction is called once by the authority. It transfers vault tokens + SOL from treasury into a Raydium concentrated liquidity pool. This is a one-time, irreversible action — verified on-chain.</p>
         </div>
       </div>
       <div class="raydium-step">
         <div class="raydium-icon">4</div>
         <div class="raydium-body">
-          <h4>LP Tokens Locked for 2 Years</h4>
-          <p>The LP tokens received from Raydium are immediately locked via the <code style="color:var(--accent);font-size:12px;">lock_lp</code> instruction. <span class="raydium-highlight lock">No rug pulls</span> — liquidity cannot be removed until the lock expires. The unlock timestamp is stored on-chain and publicly verifiable.</p>
+          <h4 data-i18n="ray_step4_title">LP Tokens Locked for 2 Years</h4>
+          <p data-i18n-html="ray_step4_desc">The LP tokens received from Raydium are immediately locked via the <code style="color:var(--accent);font-size:12px;">lock_lp</code> instruction. <span class="raydium-highlight lock">No rug pulls</span> — liquidity cannot be removed until the lock expires. The unlock timestamp is stored on-chain and publicly verifiable.</p>
         </div>
       </div>
       <div class="raydium-step">
         <div class="raydium-icon">5</div>
         <div class="raydium-body">
-          <h4>Live Trading Begins</h4>
-          <p>Once the pool is live, anyone can trade $TOBE on Raydium. The vault's remaining tokens create a price floor — they only release at $1.00, providing structural buy pressure and stability.</p>
+          <h4 data-i18n="ray_step5_title">Live Trading Begins</h4>
+          <p data-i18n="ray_step5_desc">Once the pool is live, anyone can trade $TOBE on Raydium. The vault's remaining tokens create a price floor — they only release at $1.00, providing structural buy pressure and stability.</p>
         </div>
       </div>
     </div>
     <div class="raydium-summary">
       <div class="raydium-stat">
         <div class="raydium-stat-value">50%</div>
-        <div class="raydium-stat-label">USDC to Pool</div>
+        <div class="raydium-stat-label" data-i18n="usdc_to_pool">SOL to Pool</div>
       </div>
       <div class="raydium-stat">
         <div class="raydium-stat-value">2 yr</div>
-        <div class="raydium-stat-label">LP Lock Period</div>
+        <div class="raydium-stat-label" data-i18n="lp_lock_period">LP Lock Period</div>
       </div>
       <div class="raydium-stat">
         <div class="raydium-stat-value">$1.00</div>
-        <div class="raydium-stat-label">Vault Floor Price</div>
+        <div class="raydium-stat-label" data-i18n="vault_floor">Vault Floor Price</div>
       </div>
     </div>
   </section>
 
   <!-- ═══ SECURITY ═══ -->
   <section class="section reveal" id="security">
-    <div class="section-label">Trust</div>
-    <div class="section-title">Security</div>
-    <div class="section-desc">How TOBE earns your trust — through code, not promises.</div>
+    <div class="section-label" data-i18n="sec_label">Trust</div>
+    <div class="section-title" data-i18n="sec_title">Security</div>
+    <div class="section-desc" data-i18n="sec_desc">How TOBE earns your trust — through code, not promises.</div>
     <div class="security-grid">
       <div class="security-card">
         <div class="security-icon">🔐</div>
-        <h4>PDA-Controlled Vault</h4>
-        <p>The vault is controlled by a Program Derived Address — no human holds the keys. Only the smart contract can move vault tokens, and only at the $1 ceiling price.</p>
+        <h4 data-i18n="sec_pda">PDA-Controlled Vault</h4>
+        <p data-i18n="sec_pda_desc">The vault is controlled by a Program Derived Address — no human holds the keys. Only the smart contract can move vault tokens, and only at the SOL ceiling price.</p>
       </div>
       <div class="security-card">
         <div class="security-icon">📜</div>
-        <h4>Open Source</h4>
-        <p>Every line of the smart contract is publicly verifiable. Full source code, tests, and project config available on GitHub.</p>
+        <h4 data-i18n="sec_open">Open Source</h4>
+        <p data-i18n="sec_open_desc">Every line of the smart contract is publicly verifiable. Full source code, tests, and project config available on GitHub.</p>
         <a class="security-link" href="https://github.com/thatsjustthechemistry-cell/tobestable-protocol" target="_blank">View on GitHub →</a>
-        <a class="security-link" href="https://explorer.solana.com/address/CWZGdSh1EGsR95CnkK8AkEgtFX63Z9FurafK7rTFWJ4s?cluster=devnet" target="_blank">View on Solana Explorer →</a>
+        <a class="security-link" href="https://explorer.solana.com/address/DnMvWs2dDim57TLBcJp7FKkDUFw2KnLmJybzpbTZuc65?cluster=devnet" target="_blank">View on Solana Explorer →</a>
       </div>
       <div class="security-card">
         <div class="security-icon">🧪</div>
-        <h4>27/27 Tests Passing</h4>
-        <p>Full test suite covering mint mechanics, vault operations, LP lock/unlock, pause/unpause, authority transfer, and edge cases. Every function tested before deployment.</p>
+        <h4 data-i18n="sec_tests">27/27 Tests Passing</h4>
+        <p data-i18n="sec_tests_desc">Full test suite covering mint mechanics, vault operations, LP lock/unlock, pause/unpause, authority transfer, and edge cases. Every function tested before deployment.</p>
       </div>
       <div class="security-card">
         <div class="security-icon">⏸️</div>
-        <h4>Emergency Pause</h4>
-        <p>The authority can pause minting in case of a discovered vulnerability — but cannot drain funds, change supply, or alter the curve. A safety net, not a backdoor.</p>
+        <h4 data-i18n="sec_pause">Emergency Pause</h4>
+        <p data-i18n="sec_pause_desc">The authority can pause minting in case of a discovered vulnerability — but cannot drain funds, change supply, or alter the curve. A safety net, not a backdoor.</p>
       </div>
       <div class="security-card">
         <div class="security-icon">🔄</div>
-        <h4>2-Step Authority Transfer</h4>
-        <p>Authority changes require proposal + acceptance from the new address. No single transaction can hijack control. Prevents accidental or malicious transfers.</p>
+        <h4 data-i18n="sec_auth">2-Step Authority Transfer</h4>
+        <p data-i18n="sec_auth_desc">Authority changes require proposal + acceptance from the new address. No single transaction can hijack control. Prevents accidental or malicious transfers.</p>
       </div>
       <div class="security-card">
         <div class="security-icon">🔒</div>
-        <h4>LP Lock (2 Years)</h4>
-        <p>Liquidity provider tokens are locked on-chain for 2 years after DEX listing. No rug pulls — the liquidity stays where it belongs.</p>
+        <h4 data-i18n="sec_lp">LP Lock (2 Years)</h4>
+        <p data-i18n="sec_lp_desc">Liquidity provider tokens are locked on-chain for 2 years after DEX listing. No rug pulls — the liquidity stays where it belongs.</p>
       </div>
     </div>
     <div style="margin-top:32px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
-      <a href="https://explorer.solana.com/address/CWZGdSh1EGsR95CnkK8AkEgtFX63Z9FurafK7rTFWJ4s?cluster=devnet" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(0,232,198,0.06);border:1px solid rgba(0,232,198,0.15);border-radius:var(--radius-sm);text-decoration:none;font-family:var(--mono);font-size:12px;color:var(--accent);transition:all 0.2s;">
+      <a href="https://explorer.solana.com/address/DnMvWs2dDim57TLBcJp7FKkDUFw2KnLmJybzpbTZuc65?cluster=devnet" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(0,232,198,0.06);border:1px solid rgba(0,232,198,0.15);border-radius:var(--radius-sm);text-decoration:none;font-family:var(--mono);font-size:12px;color:var(--accent);transition:all 0.2s;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
         Verified on Solana Explorer
       </a>
@@ -1500,15 +1517,15 @@
 
 <!-- ═══ FOUNDER ═══ -->
 <section class="section reveal" id="founder" style="padding-bottom:32px;">
-  <div class="section-label">Team</div>
-  <div class="section-title">Built By</div>
-  <div class="section-desc">One team, one vision, zero hidden allocations.</div>
+  <div class="section-label" data-i18n="team_label">Team</div>
+  <div class="section-title" data-i18n="team_title">Built By</div>
+  <div class="section-desc" data-i18n="team_desc">One team, one vision, zero hidden allocations.</div>
   <div class="founder-card">
     <div class="founder-avatar">N</div>
     <div class="founder-info">
       <h4>Team Necdet</h4>
-      <div class="founder-role">Founder & Developer</div>
-      <p>Designed and built the TOBE protocol from scratch — smart contract, frontend, and economic model. No team tokens, no investors, no shortcuts.</p>
+      <div class="founder-role" data-i18n="founder_role">Founder & Developer</div>
+      <p data-i18n="founder_desc">Designed and built the TOBE protocol from scratch — smart contract, frontend, and economic model. No team tokens, no investors, no shortcuts.</p>
       <div class="founder-links">
         <a href="https://github.com/thatsjustthechemistry-cell/tobestable-protocol" target="_blank">GitHub →</a>
       </div>
@@ -1526,70 +1543,44 @@
   <!-- Manifesto -->
   <div class="footer-manifesto">
     <div class="manifesto-line"></div>
-    <h3 class="manifesto-title">Why TOBE Exists</h3>
+    <h3 class="manifesto-title" data-i18n="manifesto_title">Why TOBE Exists</h3>
 
-    <p class="manifesto-text">
-      Crypto promised to give everyone a fair shot. Instead, it created a new class of insiders —
-      teams that pre-mint millions of tokens, VCs that get discounted allocations, and influencers
-      that pump and dump on their own followers. The average person enters late, buys high,
-      and holds the bag. That's not innovation. That's the same old game with a new coat of paint.
-    </p>
+    <p class="manifesto-text" data-i18n="manifesto_p1">Crypto promised to give everyone a fair shot. Instead, it created a new class of insiders — teams that pre-mint millions of tokens, VCs that get discounted allocations, and influencers that pump and dump on their own followers. The average person enters late, buys high, and holds the bag. That's not innovation. That's the same old game with a new coat of paint.</p>
 
-    <p class="manifesto-text">
-      TOBE was built on a different principle: <em>value should be earned, not extracted.</em>
-      There are no team tokens. No private rounds. No seed investors with 10x advantages.
-      Every single token enters circulation the same way — through 1,024 public mint rounds
-      that anyone can participate in, at a price set by math, not marketing.
-    </p>
+    <p class="manifesto-text" data-i18n="manifesto_p2">TOBE was built on a different principle: value should be earned, not extracted. There are no team tokens. No private rounds. No seed investors with 10x advantages. Every single token enters circulation the same way — through 1,024 public mint rounds that anyone can participate in, at a price set by math, not marketing.</p>
 
-    <p class="manifesto-text">
-      The mechanism is simple. Each round, you pay $1,024 USDC. Half the tokens go to you.
-      The other half goes to a vault that only sells at the $1 ceiling — creating permanent
-      buy pressure beneath the price. Every round mints fewer tokens than the last, so early
-      participants get more, but late participants pay the same. The supply curve is decreasing,
-      not inflating. The vault grows, not shrinks.
-    </p>
+    <p class="manifesto-text" data-i18n="manifesto_p3">The mechanism is simple. Each round, you pay 10 SOL. Half the tokens go to you. The other half goes to a vault that only sells at the SOL ceiling — creating permanent buy pressure beneath the price. Every round mints fewer tokens than the last, so early participants get more, but late participants pay the same. The supply curve is decreasing, not inflating. The vault grows, not shrinks.</p>
 
-    <p class="manifesto-text">
-      There is no admin key that can change the rules. No multisig that can drain the vault.
-      No governance vote that can inflate the supply. The smart contract is the protocol,
-      and the protocol is final. Every mint, every vault deposit, every release — all verifiable
-      on Solana, all displayed on this page in real time.
-    </p>
+    <p class="manifesto-text" data-i18n="manifesto_p4">There is no admin key that can change the rules. No multisig that can drain the vault. No governance vote that can inflate the supply. The smart contract is the protocol, and the protocol is final. Every mint, every vault deposit, every release — all verifiable on Solana, all displayed on this page in real time.</p>
 
-    <p class="manifesto-text">
-      TOBE isn't trying to be the next moonshot. It's trying to be something crypto has
-      very few of: <em>a token that does exactly what it says it will do.</em>
-    </p>
+    <p class="manifesto-text" data-i18n="manifesto_p5">TOBE isn't trying to be the next moonshot. It's trying to be something crypto has very few of: a token that does exactly what it says it will do.</p>
 
-    <p class="manifesto-text manifesto-signature">
-      — Built by Team Necdet, verified on Solana.
-    </p>
+    <p class="manifesto-text manifesto-signature" data-i18n="manifesto_sig">— Built by Team Necdet, verified on Solana.</p>
   </div>
 
   <div class="footer-inner">
     <div class="footer-brand">
       <a class="logo" href="#"><div class="logo-icon"><img src="logo-icon.svg" alt="TOBE"></div> TOBE</a>
-      <p>The anti-inflationary token built to reach and hold $1. Fully transparent — every action on-chain, every stat on this page.</p>
+      <p data-i18n="footer_desc">The anti-inflationary token built to reach and hold $1. Fully transparent — every action on-chain, every stat on this page.</p>
     </div>
     <div class="footer-columns">
       <div class="footer-col">
-        <h4>Product</h4>
+        <h4 data-i18n="product">Product</h4>
         <a href="#how" onclick="smoothNav(event)">How It Works</a>
         <a href="#tokenomics" onclick="smoothNav(event)">Tokenomics</a>
         <a href="#dashboard" onclick="smoothNav(event)">Dashboard</a>
         <a href="#explorer" onclick="smoothNav(event)">Explorer</a>
       </div>
       <div class="footer-col">
-        <h4>More</h4>
+        <h4 data-i18n="more">More</h4>
         <a href="#faq" onclick="smoothNav(event)">FAQ</a>
         <a href="#roadmap" onclick="smoothNav(event)">Roadmap</a>
         <a href="#raydium" onclick="smoothNav(event)">Raydium</a>
         <a href="#security" onclick="smoothNav(event)">Security</a>
       </div>
       <div class="footer-col">
-        <h4>Resources</h4>
-        <a href="#" onclick="event.preventDefault();">Documentation</a>
+        <h4 data-i18n="resources">Resources</h4>
+        <a href="#" onclick="event.preventDefault();" data-i18n="documentation">Documentation</a>
         <a href="https://github.com/thatsjustthechemistry-cell/tobestable-protocol" target="_blank">GitHub</a>
       </div>
     </div>
@@ -1604,8 +1595,8 @@
 <div class="wallet-modal-overlay" id="walletModal">
   <div class="wallet-modal">
     <button class="wallet-modal-close" onclick="closeWalletModal()">&times;</button>
-    <div class="wallet-modal-title">Connect Wallet</div>
-    <div class="wallet-modal-sub">Choose a Solana wallet to continue</div>
+    <div class="wallet-modal-title" data-i18n="wallet_modal_title">Connect Wallet</div>
+    <div class="wallet-modal-sub" data-i18n="wallet_modal_sub">Choose a Solana wallet to continue</div>
     <div class="wallet-list" id="walletList"></div>
   </div>
 </div>
@@ -1615,22 +1606,22 @@
   <canvas id="confettiCanvas"></canvas>
   <div class="success-modal">
     <div class="success-check"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div class="success-title">Mint Successful!</div>
-    <div class="success-sub">Your $TOBE tokens are on the way</div>
+    <div class="success-title" data-i18n="mint_successful">Mint Successful!</div>
+    <div class="success-sub" data-i18n="tokens_on_way">Your $TOBE tokens are on the way</div>
     <div class="success-details">
-      <div class="success-row"><span class="success-row-label">Round</span><span class="success-row-value" id="successRound">—</span></div>
-      <div class="success-row"><span class="success-row-label">You Received</span><span class="success-row-value" id="successTokens" style="color:var(--accent);">—</span></div>
-      <div class="success-row"><span class="success-row-label">Vault Received</span><span class="success-row-value" id="successVault" style="color:var(--accent-2);">—</span></div>
-      <div class="success-row"><span class="success-row-label">Cost</span><span class="success-row-value">1,024 USDC</span></div>
-      <div class="success-row"><span class="success-row-label">Tx Hash</span><span class="success-row-value" id="successTx" style="color:var(--accent);font-size:10px;">—</span></div>
+      <div class="success-row"><span class="success-row-label" data-i18n="round">Round</span><span class="success-row-value" id="successRound">—</span></div>
+      <div class="success-row"><span class="success-row-label" data-i18n="you_received">You Received</span><span class="success-row-value" id="successTokens" style="color:var(--accent);">—</span></div>
+      <div class="success-row"><span class="success-row-label" data-i18n="vault_received">Vault Received</span><span class="success-row-value" id="successVault" style="color:var(--accent-2);">—</span></div>
+      <div class="success-row"><span class="success-row-label" data-i18n="cost">Cost</span><span class="success-row-value">10 SOL</span></div>
+      <div class="success-row"><span class="success-row-label" data-i18n="tx_hash">Tx Hash</span><span class="success-row-value" id="successTx" style="color:var(--accent);font-size:10px;">—</span></div>
     </div>
     <div id="firstMintBanner" style="display:none;text-align:center;margin-bottom:16px;padding:12px;background:linear-gradient(135deg,rgba(0,232,198,0.1),rgba(124,106,239,0.1));border:1px solid var(--border-accent);border-radius:var(--radius-sm);">
       <div style="font-size:18px;margin-bottom:4px;">🎉</div>
-      <div style="font-family:var(--display);font-size:14px;font-weight:700;color:var(--accent);margin-bottom:2px;">First Mint!</div>
-      <div style="font-size:11px;color:var(--text-dim);">Welcome to the TOBE community</div>
+      <div style="font-family:var(--display);font-size:14px;font-weight:700;color:var(--accent);margin-bottom:2px;" data-i18n="first_mint">First Mint!</div>
+      <div style="font-size:11px;color:var(--text-dim);" data-i18n="welcome_tobe">Welcome to the TOBE community</div>
     </div>
-    <a id="shareOnX" href="#" target="_blank" style="display:block;width:100%;padding:12px;background:#000;color:#fff;border:1px solid #333;border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;margin-bottom:8px;transition:background 0.2s;" onmouseover="this.style.background='#1a1a1a'" onmouseout="this.style.background='#000'">Share on 𝕏</a>
-    <button class="success-close-btn" onclick="closeSuccessModal()">Done</button>
+    <a id="shareOnX" href="#" target="_blank" style="display:block;width:100%;padding:12px;background:#000;color:#fff;border:1px solid #333;border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;margin-bottom:8px;transition:background 0.2s;" onmouseover="this.style.background='#1a1a1a'" onmouseout="this.style.background='#000'" data-i18n="share_on_x">Share on 𝕏</a>
+    <button class="success-close-btn" onclick="closeSuccessModal()" data-i18n="done">Done</button>
   </div>
 </div>
 
@@ -1660,7 +1651,11 @@
   let connected = false, walletAddress = null, currentRound = 0, isMinting = false;
   let walletProvider = null;
   const MAX_ROUNDS = 1024, TOKENS_PER_UNIT = 1024, MAX_SUPPLY = 537395200;
-  const PROGRAM_ID = 'CWZGdSh1EGsR95CnkK8AkEgtFX63Z9FurafK7rTFWJ4s';
+  const PROGRAM_ID = 'DnMvWs2dDim57TLBcJp7FKkDUFw2KnLmJybzpbTZuc65';
+  const TOBE_MINT  = 'h611YQ3wKJesFUC6NDmpzXNSAG5jYn7BJS6FrepcqbN';
+  const MINT_COST_LAMPORTS = 10_000_000_000; // 10 SOL
+  const MINT_COST_SOL = 10;
+  const SOL_USD = 120; // approximate SOL price in USD for tokenomics display
 
   const NETWORK = 'devnet';
   const RPC_URL = NETWORK === 'devnet'
@@ -1670,10 +1665,6 @@
     ? 'https://explorer.solana.com/tx/{tx}?cluster=devnet'
     : 'https://explorer.solana.com/tx/{tx}';
 
-  const USDC_MINT = NETWORK === 'devnet'
-    ? '99dUgC6dybRHfXuxCqdtU8Ng5a9LtDAysVhTrzranFJE'
-    : 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-
   const TREASURY_WALLET = 'Eis6SPak12JXqunZqLqgHneomygF1ouuoRk5PFXB5Bvf';
   const AUTHORITY_WALLET = 'Eis6SPak12JXqunZqLqgHneomygF1ouuoRk5PFXB5Bvf';
 
@@ -1681,13 +1672,13 @@
   const TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
   const ASSOCIATED_TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
   const programId = new solanaWeb3.PublicKey(PROGRAM_ID);
-  const usdcMintPk = new solanaWeb3.PublicKey(USDC_MINT);
+  const tobeMintPk = new solanaWeb3.PublicKey(TOBE_MINT);
+  const treasuryPk = new solanaWeb3.PublicKey(TREASURY_WALLET);
 
   const [mintStatePda] = solanaWeb3.PublicKey.findProgramAddressSync([new TextEncoder().encode('mint_state')], programId);
   const [mintAuthorityPda] = solanaWeb3.PublicKey.findProgramAddressSync([new TextEncoder().encode('mint_authority')], programId);
   const [vaultAuthorityPda] = solanaWeb3.PublicKey.findProgramAddressSync([new TextEncoder().encode('vault_authority')], programId);
   const [vaultTokenPda] = solanaWeb3.PublicKey.findProgramAddressSync([new TextEncoder().encode('vault_token')], programId);
-  const [poolUsdcReservePda] = solanaWeb3.PublicKey.findProgramAddressSync([new TextEncoder().encode('pool_usdc_reserve')], programId);
 
   function findATA(owner, mint) {
     return solanaWeb3.PublicKey.findProgramAddressSync(
@@ -1723,20 +1714,20 @@
       { name: 'tobeMint', isMut: true, isSigner: false },
       { name: 'mintAuthority', isMut: false, isSigner: false },
       { name: 'vaultTokenAccount', isMut: true, isSigner: false },
-      { name: 'poolUsdcReserve', isMut: true, isSigner: false },
-      { name: 'minterUsdc', isMut: true, isSigner: false },
-      { name: 'treasuryUsdc', isMut: true, isSigner: false },
+      { name: 'treasury', isMut: true, isSigner: false },
       { name: 'minterTobe', isMut: true, isSigner: false },
       { name: 'tokenProgram', isMut: false, isSigner: false },
+      { name: 'systemProgram', isMut: false, isSigner: false },
     ], args: [] }],
     accounts: [{ name: 'MintState', type: { kind: 'struct', fields: [
-      { name: 'authority', type: 'publicKey' }, { name: 'treasury', type: 'publicKey' },
-      { name: 'tobeMint', type: 'publicKey' }, { name: 'usdcMint', type: 'publicKey' },
+      { name: 'authority', type: 'publicKey' }, { name: 'pendingAuthority', type: 'publicKey' },
+      { name: 'treasury', type: 'publicKey' }, { name: 'tobeMint', type: 'publicKey' },
       { name: 'lpMint', type: 'publicKey' }, { name: 'currentRound', type: 'u64' },
       { name: 'vaultBalance', type: 'u64' }, { name: 'totalVaultReleased', type: 'u64' },
-      { name: 'lpLockUntil', type: 'i64' }, { name: 'poolSeeded', type: 'bool' },
-      { name: 'lpLocked', type: 'bool' }, { name: 'bump', type: 'u8' },
+      { name: 'lpLockUntil', type: 'i64' }, { name: 'lpLocked', type: 'bool' },
+      { name: 'paused', type: 'bool' }, { name: 'bump', type: 'u8' },
       { name: 'vaultBump', type: 'u8' }, { name: 'lpLockBump', type: 'u8' },
+      { name: 'totalMinted', type: 'u64' },
     ]}}]
   };
 
@@ -1753,18 +1744,12 @@
       const readU8 = () => { const val = data[offset]; offset += 1; return val; };
       const base = {
         authority: read32(), pendingAuthority: read32(), treasury: read32(),
-        tobeMint: read32(), usdcMint: read32(), lpMint: read32(),
+        tobeMint: read32(), lpMint: read32(),
         currentRound: readU64(), vaultBalance: readU64(), totalVaultReleased: readU64(),
-        lpLockUntil: readI64(), poolSeeded: readBool(), lpLocked: readBool(), paused: readBool(),
+        lpLockUntil: readI64(), lpLocked: readBool(), paused: readBool(),
         bump: readU8(), vaultBump: readU8(), lpLockBump: readU8(),
-        lastPriceNumerator: 0, lastPriceDenominator: 1, totalMinted: 0,
+        totalMinted: readU64(),
       };
-      // Read new oracle fields if data is long enough (new program version)
-      if (offset + 24 <= data.length) {
-        base.lastPriceNumerator = readU64();
-        base.lastPriceDenominator = readU64();
-        base.totalMinted = readU64();
-      }
       return base;
     } catch (err) { console.warn('Failed to fetch mint state:', err); return null; }
   }
@@ -1789,8 +1774,8 @@
   function hideRpcError() { document.getElementById('rpcErrorBanner')?.classList.remove('show'); }
   function retryRpc() {
     hideRpcError(); rpcFailCount = 0;
-    showToast('Retrying connection...', 'success');
-    refreshFromChain().catch(() => showToast('Still unable to connect', 'error'));
+    showToast(t('toast_retrying'), 'success');
+    refreshFromChain().catch(() => showToast(t('toast_still_unable'), 'error'));
   }
   function updateRpcStatus(ok) {
     const dot = document.getElementById('rpcDot');
@@ -1854,16 +1839,11 @@
   function initTypingEffect() {
     const el = document.getElementById('typedText');
     if (!el) return;
-    const phrases = [
-      'Built to reach and hold $1.',
-      'Anti-inflationary by design.',
-      'The earlier you mint, the more you earn.',
-      '100% transparent. 100% on-chain.',
-      '1,024 rounds. 537M tokens. One target.',
-    ];
+    window._typedPhrases = window._typedPhrases || getTypedPhrases();
     let phraseIdx = 0, charIdx = 0, deleting = false;
     function type() {
-      const current = phrases[phraseIdx];
+      const phrases = window._typedPhrases;
+      const current = phrases[phraseIdx % phrases.length];
       if (!deleting) {
         el.textContent = current.slice(0, charIdx + 1); charIdx++;
         if (charIdx === current.length) { setTimeout(() => { deleting = true; type(); }, 2500); return; }
@@ -1903,13 +1883,13 @@
   }
 
   function copyContract() {
-    const addr = 'CWZGdSh1EGsR95CnkK8AkEgtFX63Z9FurafK7rTFWJ4s';
+    const addr = 'DnMvWs2dDim57TLBcJp7FKkDUFw2KnLmJybzpbTZuc65';
     navigator.clipboard.writeText(addr).then(() => {
       const el = document.getElementById('contractCopy');
       const addrEl = document.getElementById('contractAddr');
       el.classList.add('copied');
       addrEl.textContent = 'Copied!';
-      showToast('Contract address copied to clipboard', 'success');
+      showToast(t('toast_contract_copied'), 'success');
       setTimeout(() => { el.classList.remove('copied'); addrEl.textContent = addr; }, 2000);
     });
   }
@@ -1927,7 +1907,7 @@
     if (!p) return;
     const showOpposite = current === 'light' ? 'dark' : 'light';
     p.className = 'theme-preview theme-preview-' + showOpposite;
-    p.querySelector('.theme-preview-label').textContent = showOpposite === 'light' ? 'Light Mode' : 'Dark Mode';
+    p.querySelector('.theme-preview-label').textContent = showOpposite === 'light' ? t('light_mode') : t('dark_mode');
   }
   (function initTheme() {
     const saved = localStorage.getItem('tobe-theme');
@@ -2076,8 +2056,8 @@
           }
         } catch(e) { continue; }
       }
-      if (txItems.length === 0) { countEl.textContent = '0 mints'; return; }
-      countEl.textContent = txItems.length + ' mint' + (txItems.length > 1 ? 's' : '');
+      if (txItems.length === 0) { countEl.textContent = '0 ' + t('mint_plural'); return; }
+      countEl.textContent = txItems.length + ' ' + (txItems.length === 1 ? t('mint_singular') : t('mint_plural'));
       list.innerHTML = '';
       txItems.forEach((item, i) => {
         const short = item.minter.slice(0,4) + '...' + item.minter.slice(-4);
@@ -2085,7 +2065,7 @@
         const li = document.createElement('li');
         li.className = 'tx-feed-item';
         li.style.animationDelay = (i * 0.05) + 's';
-        li.innerHTML = `<span class="tx-round">Mint</span><span class="tx-wallet"><a href="https://explorer.solana.com/address/${item.minter}?cluster=devnet" target="_blank">${short}</a></span><span class="tx-amount">${formatCompact(item.tokens)} TOBE</span><span class="tx-time">${timeStr}</span>`;
+        li.innerHTML = `<span class="tx-round">${t('mint_label_tx')}</span><span class="tx-wallet"><a href="https://explorer.solana.com/address/${item.minter}?cluster=devnet" target="_blank">${short}</a></span><span class="tx-amount">${formatCompact(item.tokens)} TOBE</span><span class="tx-time">${timeStr}</span>`;
         list.appendChild(li);
       });
     } catch(e) { console.log('Tx feed error:', e); }
@@ -2298,7 +2278,7 @@
       refreshFromChain();
       fetchWalletBalance(pubkey);
       updateReferralLink();
-    } catch(err) { showToast('Connection rejected', 'error'); }
+    } catch(err) { showToast(t('toast_rejected'), 'error'); }
   }
 
   async function fetchWalletBalance(pubkey) {
@@ -2332,16 +2312,10 @@
       if (!state) throw new Error('Program not deployed or state not found');
       if (state.currentRound >= MAX_ROUNDS) throw new Error('All 1024 rounds are complete');
       const minterPk = new solanaWeb3.PublicKey(walletAddress);
-      const tobeMintPk = state.tobeMint;
-      const treasuryWallet = state.treasury;
-      const treasuryUsdcPk = findATA(treasuryWallet, usdcMintPk);
-      const minterUsdcAta = findATA(minterPk, usdcMintPk);
       const minterTobeAta = findATA(minterPk, tobeMintPk);
-      showToast('Checking USDC balance...', 'success');
-      try {
-        const usdcAccount = await connection.getTokenAccountBalance(minterUsdcAta);
-        if (parseFloat(usdcAccount.value.uiAmountString) < 1024) throw new Error(`Insufficient USDC: ${parseFloat(usdcAccount.value.uiAmountString).toFixed(2)} (need 1,024)`);
-      } catch (err) { if (err.message.includes('Insufficient')) throw err; throw new Error('No USDC token account found. You need 1,024 USDC to mint.'); }
+      showToast('Checking SOL balance...', 'success');
+      const solBalance = await connection.getBalance(minterPk);
+      if (solBalance < MINT_COST_LAMPORTS + 10_000_000) throw new Error(`Insufficient SOL: ${(solBalance/1e9).toFixed(3)} (need 10 SOL + fees)`);
       showToast('Building transaction...', 'success');
       const tx = new solanaWeb3.Transaction();
       tx.add(createATAInstruction(minterPk, minterPk, tobeMintPk));
@@ -2353,11 +2327,10 @@
           { pubkey: tobeMintPk, isSigner: false, isWritable: true },
           { pubkey: mintAuthorityPda, isSigner: false, isWritable: false },
           { pubkey: vaultTokenPda, isSigner: false, isWritable: true },
-          { pubkey: poolUsdcReservePda, isSigner: false, isWritable: true },
-          { pubkey: minterUsdcAta, isSigner: false, isWritable: true },
-          { pubkey: treasuryUsdcPk, isSigner: false, isWritable: true },
+          { pubkey: treasuryPk, isSigner: false, isWritable: true },
           { pubkey: minterTobeAta, isSigner: false, isWritable: true },
           { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+          { pubkey: solanaWeb3.SystemProgram.programId, isSigner: false, isWritable: false },
         ], data: Buffer.from(discriminator),
       }));
       tx.feePayer = minterPk;
@@ -2471,10 +2444,10 @@
     const tokens = round > 0 ? TOKENS_PER_UNIT * (MAX_ROUNDS + 1 - round) : TOKENS_PER_UNIT * MAX_ROUNDS;
     const minterTokens = Math.floor(tokens / 2);
     const vaultTokens = tokens - minterTokens;
-    const price = round > 0 ? (1024 / minterTokens) : 0;
+    const price = round > 0 ? (MINT_COST_SOL * SOL_USD / minterTokens) : 0;
     const totalMinted = round > 0 ? TOKENS_PER_UNIT * (round * (MAX_ROUNDS + 1) - (round * (round + 1)) / 2) : 0;
     const vaultBalance = onChainState ? Math.floor(onChainState.vaultBalance / 1e9) : Math.floor(totalMinted / 2);
-    const treasuryRev = round > 0 ? 512 + (round - 1) * 1024 : 0;
+    const treasuryRev = round > 0 ? round * MINT_COST_SOL : 0;
 
     document.getElementById('currentRoundDisplay').textContent = round > 0 ? round : '—';
     document.getElementById('priceDisplay').textContent = round > 0 ? '$' + price.toFixed(4) : '—';
@@ -2484,14 +2457,14 @@
     const el = (id) => { const e = document.getElementById(id); return e; };
     el('receiveAmount').textContent = minterTokens.toLocaleString() + ' TOBE';
     el('vaultReceive').textContent = vaultTokens.toLocaleString() + ' TOBE';
-    el('effectivePrice').textContent = round > 0 ? '$' + price.toFixed(4) : '$0.0020';
+    el('effectivePrice').textContent = round > 0 ? '$' + price.toFixed(4) : '$' + (MINT_COST_SOL * SOL_USD / (TOKENS_PER_UNIT * MAX_ROUNDS / 2)).toFixed(4);
     el('roundsRemaining').textContent = (MAX_ROUNDS - round).toLocaleString();
     const roiTokenValue = minterTokens * 1;
     el('roiValue').textContent = round > 0 ? '$' + roiTokenValue.toLocaleString() : '—';
-    el('roiPct').textContent = round > 0 ? '+' + ((roiTokenValue / 1024 - 1) * 100).toFixed(0) + '%' : '—';
+    el('roiPct').textContent = round > 0 ? '+' + ((roiTokenValue / (MINT_COST_SOL * SOL_USD) - 1) * 100).toFixed(0) + '%' : '—';
     animateStat('totalMintedDisplay', totalMinted, v => formatDisplay(Math.round(v)));
     animateStat('dashVault', vaultBalance, v => formatDisplay(Math.round(v)));
-    animateStat('dashTreasury', treasuryRev, v => '$' + Math.round(v).toLocaleString());
+    animateStat('dashTreasury', treasuryRev, v => Math.round(v).toLocaleString() + ' SOL');
     updateHeroTicker(totalMinted);
     // Use on-chain price oracle if available, otherwise compute locally
     let oraclePrice = price;
@@ -2499,12 +2472,12 @@
       oraclePrice = onChainState.lastPriceNumerator / onChainState.lastPriceDenominator;
     }
     el('dashPrice').textContent = round > 0 ? '$' + oraclePrice.toFixed(4) : '—';
-    el('dashPrice').title = round > 0 ? 'On-chain oracle: ' + oraclePrice.toFixed(8) + ' USDC/TOBE' : '';
+    el('dashPrice').title = round > 0 ? 'Price: ' + oraclePrice.toFixed(8) + ' SOL/TOBE' : '';
     // Use on-chain totalMinted if available
     if (onChainState && onChainState.totalMinted > 0) {
-      el('dashMarketPrice').textContent = '$' + (onChainState.totalMinted / 1e9 > 0 ? (1024 * round / (onChainState.totalMinted / 1e9)).toFixed(6) : '—');
+      el('dashMarketPrice').textContent = '$' + (onChainState.totalMinted / 1e9 > 0 ? (MINT_COST_SOL * SOL_USD * round / (onChainState.totalMinted / 1e9)).toFixed(6) : '—');
     } else {
-      el('dashMarketPrice').textContent = round > 0 ? '$' + (1024 * round / totalMinted).toFixed(6) : '—';
+      el('dashMarketPrice').textContent = round > 0 ? '$' + (MINT_COST_SOL * SOL_USD * round / totalMinted).toFixed(6) : '—';
     }
     updateStickyBar(round, tokens, price);
     if (round > 0) checkPriceAlert(oraclePrice);
@@ -2556,13 +2529,13 @@
         const li = document.createElement('li');
         const dot = document.createElement('div'); dot.className = 'vault-dot mint';
         const lbl = document.createElement('span'); lbl.style.color = 'var(--accent-2)'; lbl.textContent = 'Round ' + r;
-        const val = document.createElement('span'); val.style.cssText = 'color:var(--text-dim);flex:1;text-align:right;'; val.textContent = formatCompact(tokens) + ' TOBE deposited';
+        const val = document.createElement('span'); val.style.cssText = 'color:var(--text-dim);flex:1;text-align:right;'; val.textContent = formatCompact(tokens) + ' ' + t('tobe_deposited');
         li.appendChild(dot); li.appendChild(lbl); li.appendChild(val); list.appendChild(li);
       }
     } else {
       const li = document.createElement('li');
       const dot = document.createElement('div'); dot.className = 'vault-dot hold';
-      const txt = document.createElement('span'); txt.style.color = 'var(--text-dim)'; txt.textContent = 'No activity yet';
+      const txt = document.createElement('span'); txt.style.color = 'var(--text-dim)'; txt.textContent = t('no_activity');
       li.appendChild(dot); li.appendChild(txt); list.appendChild(li);
     }
   }
@@ -2576,7 +2549,7 @@
     document.getElementById('simVaultVal').textContent = vaultRelease + '%';
     const tokens = TOKENS_PER_UNIT * (MAX_ROUNDS + 1 - round);
     const you = Math.floor(tokens / 2); const vaultGet = tokens - you;
-    const costPerToken = 1024 / you;
+    const costPerToken = MINT_COST_SOL * SOL_USD / you;
     const roi = ((marketPrice - costPerToken) / costPerToken * 100);
     const totalMinted = TOKENS_PER_UNIT * (round * (MAX_ROUNDS + 1) - (round * (round + 1)) / 2);
     const willRelease = marketPrice > 1.0;
@@ -2584,13 +2557,13 @@
     document.getElementById('simYou').textContent = you.toLocaleString();
     document.getElementById('simVaultGet').textContent = vaultGet.toLocaleString();
     document.getElementById('simCost').textContent = '$' + costPerToken.toFixed(4);
-    document.getElementById('simVaultSell').textContent = '$1.00 (ceiling)';
+    document.getElementById('simVaultSell').textContent = t('sim_vault_ceiling');
     document.getElementById('simROI').textContent = (roi >= 0 ? '+' : '') + roi.toFixed(0) + '%';
     document.getElementById('simROI').style.color = roi >= 0 ? 'var(--success)' : 'var(--danger)';
     document.getElementById('simSupply').textContent = formatCompact(totalMinted);
     const rel = document.getElementById('simRelease');
-    if (willRelease) { rel.textContent = 'Yes — selling at $1.00'; rel.style.color = 'var(--success)'; }
-    else { rel.textContent = 'No (price < $1)'; rel.style.color = 'var(--danger)'; }
+    if (willRelease) { rel.textContent = t('sim_yes_selling'); rel.style.color = 'var(--success)'; }
+    else { rel.textContent = t('sim_no_price'); rel.style.color = 'var(--danger)'; }
     drawSimChart(round, marketPrice, vaultRelease);
   }
 
@@ -2660,9 +2633,9 @@
     ctx.fillStyle='rgba(0,214,143,0.5)';ctx.font='10px "JetBrains Mono"';ctx.fillText('$1.00',w-40,targetY-6);
     const grad=ctx.createLinearGradient(pad.left,0,w,0);grad.addColorStop(0,'#00e8c6');grad.addColorStop(0.5,'#7c6aef');grad.addColorStop(1,'#ff6bb5');
     ctx.strokeStyle=grad;ctx.lineWidth=2.5;ctx.beginPath();
-    for(let r=1;r<=MAX_ROUNDS;r++){const tokens=TOKENS_PER_UNIT*(MAX_ROUNDS+1-r);const price=1024/tokens;const x=pad.left+((r-1)/(MAX_ROUNDS-1))*plotW;const y=pad.top+plotH-(Math.min(price,maxPrice)/maxPrice)*plotH;r===1?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    for(let r=1;r<=MAX_ROUNDS;r++){const tokens=TOKENS_PER_UNIT*(MAX_ROUNDS+1-r);const price=MINT_COST_SOL*SOL_USD/tokens;const x=pad.left+((r-1)/(MAX_ROUNDS-1))*plotW;const y=pad.top+plotH-(Math.min(price,maxPrice)/maxPrice)*plotH;r===1?ctx.moveTo(x,y):ctx.lineTo(x,y);}
     ctx.stroke();
-    if(round>0){const areaGrad=ctx.createLinearGradient(0,pad.top,0,pad.top+plotH);areaGrad.addColorStop(0,'rgba(124,106,239,0.1)');areaGrad.addColorStop(1,'rgba(0,232,198,0.01)');ctx.fillStyle=areaGrad;ctx.beginPath();ctx.moveTo(pad.left,pad.top+plotH);for(let r=1;r<=round;r++){const tokens=TOKENS_PER_UNIT*(MAX_ROUNDS+1-r);const price=1024/tokens;ctx.lineTo(pad.left+((r-1)/(MAX_ROUNDS-1))*plotW,pad.top+plotH-(Math.min(price,maxPrice)/maxPrice)*plotH);}ctx.lineTo(pad.left+((round-1)/(MAX_ROUNDS-1))*plotW,pad.top+plotH);ctx.closePath();ctx.fill();const ct=TOKENS_PER_UNIT*(MAX_ROUNDS+1-round);const cp=1024/ct;const cx=pad.left+((round-1)/(MAX_ROUNDS-1))*plotW;const cy=pad.top+plotH-(Math.min(cp,maxPrice)/maxPrice)*plotH;ctx.fillStyle='#7c6aef';ctx.shadowColor='#7c6aef';ctx.shadowBlur=14;ctx.beginPath();ctx.arc(cx,cy,5,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;}
+    if(round>0){const areaGrad=ctx.createLinearGradient(0,pad.top,0,pad.top+plotH);areaGrad.addColorStop(0,'rgba(124,106,239,0.1)');areaGrad.addColorStop(1,'rgba(0,232,198,0.01)');ctx.fillStyle=areaGrad;ctx.beginPath();ctx.moveTo(pad.left,pad.top+plotH);for(let r=1;r<=round;r++){const tokens=TOKENS_PER_UNIT*(MAX_ROUNDS+1-r);const price=MINT_COST_SOL*SOL_USD/tokens;ctx.lineTo(pad.left+((r-1)/(MAX_ROUNDS-1))*plotW,pad.top+plotH-(Math.min(price,maxPrice)/maxPrice)*plotH);}ctx.lineTo(pad.left+((round-1)/(MAX_ROUNDS-1))*plotW,pad.top+plotH);ctx.closePath();ctx.fill();const ct=TOKENS_PER_UNIT*(MAX_ROUNDS+1-round);const cp=MINT_COST_SOL*SOL_USD/ct;const cx=pad.left+((round-1)/(MAX_ROUNDS-1))*plotW;const cy=pad.top+plotH-(Math.min(cp,maxPrice)/maxPrice)*plotH;ctx.fillStyle='#7c6aef';ctx.shadowColor='#7c6aef';ctx.shadowBlur=14;ctx.beginPath();ctx.arc(cx,cy,5,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;}
   }
 
   function updateExplorer(round) {
@@ -2671,7 +2644,7 @@
     document.getElementById('expSupply').textContent=formatCompact(totalMinted);
     document.getElementById('expCirculating').textContent=formatCompact(circ);
     document.getElementById('expVaultBalance').textContent=formatCompact(vaultBal);
-    document.getElementById('expRaised').textContent='$'+(round*1024).toLocaleString();
+    document.getElementById('expRaised').textContent=(round*10).toLocaleString()+' SOL';
     document.getElementById('expHolders').textContent=round>0?String(round):'0';
     const tbody=document.getElementById('mintTableBody');const noMints=document.getElementById('noMints');
     tbody.textContent='';
@@ -2718,7 +2691,7 @@
       const round = Math.max(1, Math.min(MAX_ROUNDS, Math.round(pct * (MAX_ROUNDS - 1) + 1)));
       const totalTokens = TOKENS_PER_UNIT * (MAX_ROUNDS + 1 - round);
       const youGet = Math.floor(totalTokens / 2);
-      const price = 1024 / youGet;
+      const price = MINT_COST_SOL * SOL_USD / youGet;
       return { round, totalTokens, youGet, price };
     }
 
@@ -3008,11 +2981,35 @@
       if (cur > 40) {
         ptr.classList.add('refreshing');
         refreshFromChain().then(() => loadTxFeed()).finally(() => {
-          setTimeout(() => { ptr.classList.remove('visible', 'refreshing'); ptr.style.transform = 'translateX(-50%) translateY(-50px)'; showToast('Data refreshed', 'success'); }, 600);
+          setTimeout(() => { ptr.classList.remove('visible', 'refreshing'); ptr.style.transform = 'translateX(-50%) translateY(-50px)'; showToast(t('toast_data_refreshed'), 'success'); }, 600);
         });
       } else { ptr.classList.remove('visible'); ptr.style.transform = 'translateX(-50%) translateY(-50px)'; }
     });
   })();
+
+  // ─── i18n: Build language dropdown ───
+  (function buildLangDropdown() {
+    var dd = document.getElementById('langDropdown');
+    if (!dd) return;
+    var currentLang = getCurrentLang();
+    Object.keys(LANG_META).forEach(function(code) {
+      var meta = LANG_META[code];
+      var btn = document.createElement('button');
+      btn.className = 'lang-option' + (code === currentLang ? ' active' : '');
+      btn.onclick = function() { setLang(code); document.getElementById('langDropdown').classList.remove('open'); document.querySelectorAll('.lang-option').forEach(function(b) { b.classList.remove('active'); }); btn.classList.add('active'); };
+      var flag = document.createElement('span');
+      flag.className = 'lang-option-flag';
+      flag.textContent = meta.flag;
+      var label = document.createElement('span');
+      label.textContent = meta.label;
+      btn.appendChild(flag);
+      btn.appendChild(label);
+      dd.appendChild(btn);
+    });
+  })();
+
+  // ─── i18n: Override typed phrases ───
+  window._typedPhrases = getTypedPhrases();
 </script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 {
   "name": "TOBESTABLE",
   "symbol": "TOBE",
-  "description": "Anti-inflationary Solana token with 1024 decreasing mint rounds. 50% to minter, 50% to vault. The vault sells only at $1 — creating permanent upward pressure. No team tokens, no pre-mine, no insiders. Built to be stable.",
+  "description": "Anti-inflationary Solana token with 1024 decreasing mint rounds. 50% to minter, 50% to vault. The vault enforces a two-way $1 peg via on-chain Pyth oracle — selling TOBE above $1, buying TOBE below $1. Permanent locked liquidity on Raydium (LP tokens burned). No team tokens, no pre-mine, no insiders, no SOL to the team from mints. Built to be stable.",
   "image": "https://tobestable.com/logo.png",
   "external_url": "https://tobestable.com",
   "attributes": [
@@ -19,7 +19,11 @@
     },
     {
       "trait_type": "Vault Mechanism",
-      "value": "50% to vault, sells at $1 ceiling"
+      "value": "Two-way Pyth peg at $1 (sells above, buys below)"
+    },
+    {
+      "trait_type": "Liquidity",
+      "value": "Permanent — LP tokens burned"
     },
     {
       "trait_type": "Network",

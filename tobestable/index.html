@@ -905,7 +905,7 @@
       <div class="step reveal">
         <div class="step-num">01</div>
         <div class="step-title" data-i18n="step1_title">Pay 10 SOL</div>
-        <div class="step-desc" data-i18n="step1_desc">Every mint round costs exactly 10 SOL. Payment goes to the project treasury. Same price, every round, forever.</div>
+        <div class="step-desc" data-i18n="step1_desc">Every mint round costs exactly 10 SOL. The protocol splits it 5/5: half accumulates for Raydium liquidity, half backs the vault SOL reserve. Zero goes to the team. Same price, every round, forever.</div>
       </div>
       <div class="step reveal reveal-delay-1">
         <div class="step-num">02</div>
@@ -915,7 +915,7 @@
       <div class="step reveal reveal-delay-2">
         <div class="step-num">03</div>
         <div class="step-title" data-i18n="step3_title">Vault Sells at $1</div>
-        <div class="step-desc" data-i18n="step3_desc">When market price exceeds $1, the vault sells at exactly $1.00 — a hard price ceiling. The floor rises with each round.</div>
+        <div class="step-desc" data-i18n="step3_desc">Two-way $1 peg via on-chain Pyth oracle. Vault sells when price tries to exceed $1. Vault buys when price drops below $1. Both directions are permissionless — anyone can trigger them.</div>
       </div>
     </div>
   </section>
@@ -1278,7 +1278,7 @@
           <span data-i18n="faq_q2">What happens after all 1,024 rounds are minted?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a2">Minting stops permanently. No more tokens can ever be created. The vault continues to hold 50% of all tokens ever minted, selling only at the SOL ceiling. The token becomes fully deflationary — fixed supply, growing demand floor.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a2">Minting stops permanently. No more tokens can ever be created. The vault continues to enforce the $1 peg in both directions — selling TOBE for SOL when price tries to exceed $1, buying TOBE with SOL when price drops below. The token becomes fully deflationary: fixed supply, two-way price defense at $1.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
@@ -1299,7 +1299,7 @@
           <span data-i18n="faq_q5">Where does the SOL go when I mint?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a5">50% (5 SOL) goes to the protocol treasury to fund development, liquidity, and operations. The other 50% (5 SOL) funds the vault token allocation that creates the price floor mechanism. Every transaction is trackable on-chain.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a5">Both halves stay inside the protocol. 5 SOL accumulates in the LP-pending PDA — anyone can trigger a deposit into Raydium when at least 1 SOL has built up. The other 5 SOL backs the vault SOL reserve, used to buy TOBE at $1 when the market dips below the peg. <strong>Zero SOL flows to the authority from mints.</strong> The team only earns from arbitrage proceeds when the price reaches $1 (via buy_from_vault sales). Every transaction is trackable on-chain.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
@@ -1320,7 +1320,7 @@
           <span data-i18n="faq_q8">What is the vault and how does it work?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a8">Every time someone mints, 50% of the tokens go to the minter and 50% go to a PDA-controlled vault. The vault only releases tokens when the market price hits the SOL ceiling — creating permanent buy pressure. The vault grows with every mint and acts as a floor mechanism for the token.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a8">Every time someone mints, 50% of the tokens go to the minter and 50% go to a PDA-controlled vault. The vault enforces a two-way $1 peg via on-chain Pyth oracle: it sells TOBE for SOL when the market price tries to exceed $1, and it buys TOBE with SOL (drawn from the vault SOL reserve) when price drops below $1. Both directions are permissionless. The vault grows with every mint.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
@@ -1355,7 +1355,29 @@
           <span data-i18n="faq_q13">What's stopping the price from going below my cost?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a13">Nothing is guaranteed — this is crypto, not a bank account. What the protocol does is create structural upward pressure: each round mints fewer tokens, the vault accumulates supply that only sells at $1, and no new tokens can be created outside the 1,024 rounds. These mechanics push toward stability, but the market has the final say.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a13">Nothing is guaranteed — this is crypto, not a bank account. What the protocol does is create structural support: each round mints fewer tokens, the vault buys TOBE at $1 from the vault SOL reserve when price dips (sell_to_vault), and no new tokens can be created outside the 1,024 rounds. These mechanics defend the floor, but the market has the final say.</div></div>
+      </div>
+      <!-- TODO i18n: translate q14-q16 / a14-a16 to all 10 languages in lang.js (Phase A added these as English-only) -->
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          <span data-i18n="faq_q14">What is Pyth and how does the $1 peg work?</span>
+          <span class="faq-arrow">+</span>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a14">Pyth Network is an on-chain price oracle. Our program reads the SOL/USD price directly from Pyth on every peg-related instruction (buy_from_vault, sell_to_vault), validates that the price is fresh (under 60 seconds old) and confident (interval under 1% of price), and uses it to price TOBE at exactly $1 USD. No keeper bot. No admin signer. The math runs entirely on-chain.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          <span data-i18n="faq_q15">Who can call flush_lp_to_raydium?</span>
+          <span class="faq-arrow">+</span>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a15">Anyone. It's permissionless. Once at least 1 SOL has accumulated in pool_sol_reserve from minting, any wallet can call the instruction. It wraps SOL to wSOL, deposits with proportional TOBE from the vault into the Raydium pool, and burns the LP tokens — all atomically. Callers pay only the transaction fee. There is no admin gating.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          <span data-i18n="faq_q16">What backs the floor when price drops below $1?</span>
+          <span class="faq-arrow">+</span>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a16">The vault SOL reserve. Every mint sends 5 SOL into this PDA — accumulating up to 5,120 SOL across all 1,024 rounds. When market price drops below $1, anyone can call sell_to_vault: deliver TOBE, receive SOL at $1/TOBE drawn from this reserve. The bought-back TOBE returns to the vault to defend future ceiling breaches. The peg is honest: backed by verifiable on-chain SOL.</div></div>
       </div>
     </div>
   </section>
@@ -1413,36 +1435,36 @@
       <div class="raydium-step">
         <div class="raydium-icon">1</div>
         <div class="raydium-body">
-          <h4 data-i18n="ray_step1_title">Minting Fills the Pool Reserve</h4>
-          <p data-i18n-html="ray_step1_desc">Every mint costs <span class="raydium-highlight mint">10 SOL</span> — half the tokens go to the minter, half go to the vault. The accumulated <span class="raydium-highlight vault">SOL treasury</span> seeds the Raydium liquidity pool.</p>
+          <h4 data-i18n="ray_step1_title">Mints Split SOL Into Protocol PDAs</h4>
+          <p data-i18n-html="ray_step1_desc">Every <span class="raydium-highlight mint">10 SOL</span> mint splits in two: <span class="raydium-highlight mint">5 SOL</span> accumulates in the LP-pending PDA for future Raydium injection; <span class="raydium-highlight vault">5 SOL</span> backs the vault SOL reserve. <strong>None goes to the authority.</strong></p>
         </div>
       </div>
       <div class="raydium-step">
         <div class="raydium-icon">2</div>
         <div class="raydium-body">
-          <h4 data-i18n="ray_step2_title">Vault Tokens Pair with SOL</h4>
-          <p data-i18n-html="ray_step2_desc">The vault holds 50% of all minted $TOBE. When pool seeding triggers, these vault tokens are paired with SOL from the treasury to create the <span class="raydium-highlight mint">$TOBE / SOL</span> liquidity pool on Raydium.</p>
+          <h4 data-i18n="ray_step2_title">Authority Creates the Pool — Once</h4>
+          <p data-i18n-html="ray_step2_desc">As a one-time setup, the authority creates a Raydium CPMM <span class="raydium-highlight mint">$TOBE / wSOL</span> pool with seed liquidity, then calls <code style="color:var(--accent);font-size:12px;">set_pool_config</code> to record the pool addresses on-chain. After this, the program knows where to deposit.</p>
         </div>
       </div>
       <div class="raydium-step">
         <div class="raydium-icon">3</div>
         <div class="raydium-body">
-          <h4 data-i18n="ray_step3_title">Pool Seeded On-Chain</h4>
-          <p data-i18n-html="ray_step3_desc">The <code style="color:var(--accent);font-size:12px;">seed_pool</code> instruction is called once by the authority. It transfers vault tokens + SOL from treasury into a Raydium concentrated liquidity pool. This is a one-time, irreversible action — verified on-chain.</p>
+          <h4 data-i18n="ray_step3_title">Anyone Triggers a Flush</h4>
+          <p data-i18n-html="ray_step3_desc">Once at least 1 SOL has accumulated, <strong>anyone</strong> can call <code style="color:var(--accent);font-size:12px;">flush_lp_to_raydium</code>. The instruction wraps SOL into wSOL, computes proportional $TOBE from the vault using the current pool ratio, and deposits both into the Raydium pool — atomically.</p>
         </div>
       </div>
       <div class="raydium-step">
         <div class="raydium-icon">4</div>
         <div class="raydium-body">
-          <h4 data-i18n="ray_step4_title">LP Tokens Locked for 2 Years</h4>
-          <p data-i18n-html="ray_step4_desc">The LP tokens received from Raydium are immediately locked via the <code style="color:var(--accent);font-size:12px;">lock_lp</code> instruction. <span class="raydium-highlight lock">No rug pulls</span> — liquidity cannot be removed until the lock expires. The unlock timestamp is stored on-chain and publicly verifiable.</p>
+          <h4 data-i18n="ray_step4_title">LP Tokens Burned — Forever</h4>
+          <p data-i18n-html="ray_step4_desc">In the same transaction, the LP tokens received from Raydium are <span class="raydium-highlight lock">burned permanently</span>. Liquidity cannot be removed. Not in 2 years, not in 100. Verifiable on-chain.</p>
         </div>
       </div>
       <div class="raydium-step">
         <div class="raydium-icon">5</div>
         <div class="raydium-body">
-          <h4 data-i18n="ray_step5_title">Live Trading Begins</h4>
-          <p data-i18n="ray_step5_desc">Once the pool is live, anyone can trade $TOBE on Raydium. The vault's remaining tokens create a price floor — they only release at $1.00, providing structural buy pressure and stability.</p>
+          <h4 data-i18n="ray_step5_title">Floor Protection + Pyth Peg</h4>
+          <p data-i18n-html="ray_step5_desc">The vault never drains below 30% of its baseline — even mid-flush. Combined with the on-chain Pyth oracle that powers <code style="color:var(--accent);font-size:12px;">buy_from_vault</code> and <code style="color:var(--accent);font-size:12px;">sell_to_vault</code>, $TOBE has both deep monotonically-growing liquidity AND a defended $1 peg in both directions. No keeper bot needed.</p>
         </div>
       </div>
     </div>
@@ -1452,8 +1474,8 @@
         <div class="raydium-stat-label" data-i18n="usdc_to_pool">SOL to Pool</div>
       </div>
       <div class="raydium-stat">
-        <div class="raydium-stat-value">2 yr</div>
-        <div class="raydium-stat-label" data-i18n="lp_lock_period">LP Lock Period</div>
+        <div class="raydium-stat-value">∞</div>
+        <div class="raydium-stat-label" data-i18n="lp_lock_period">LP Locked (Burned)</div>
       </div>
       <div class="raydium-stat">
         <div class="raydium-stat-value">$1.00</div>

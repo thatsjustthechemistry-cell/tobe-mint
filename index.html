@@ -781,7 +781,7 @@
   .lang-option.active { color:var(--accent); }
   .lang-option-flag { font-size:16px; }
 </style>
-<script src="lang.js"></script>
+<script src="lang.js?v=phase-b"></script>
 </head>
 <body>
 <!-- LOADING SCREEN -->
@@ -991,6 +991,11 @@
         <div class="dash-stat skeleton" data-tooltip="Cost per token at the current mint round"><div class="stat-label" data-i18n="current_price">Current Price</div><div class="stat-value" id="dashPrice">—</div></div>
         <div class="dash-stat skeleton" data-tooltip="SOL earned from vault token sales"><div class="stat-label" data-i18n="vault_revenue">Vault Revenue</div><div class="stat-value" id="dashVaultRev" style="color:var(--success);">0 SOL</div></div>
         <div class="dash-stat skeleton" data-tooltip="Effective market price based on supply curve"><div class="stat-label" data-i18n="market_price">Market Price</div><div class="stat-value" id="dashMarketPrice">—</div></div>
+        <!-- Phase B: vault stats cards -->
+        <div class="dash-stat skeleton" data-tooltip="SOL accumulated in pool_sol_reserve PDA, awaiting flush_lp_to_raydium"><div class="stat-label" data-i18n="vs_lp_pending">LP-Pending SOL</div><div class="stat-value" id="dashLpPending" style="color:var(--accent);">—</div></div>
+        <div class="dash-stat skeleton" data-tooltip="SOL in vault_sol_reserve PDA, used by sell_to_vault floor defense"><div class="stat-label" data-i18n="vs_floor_reserve">Floor Reserve SOL</div><div class="stat-value" id="dashFloorReserve" style="color:var(--accent-2);">—</div></div>
+        <div class="dash-stat skeleton" data-tooltip="Raydium CPMM pool address (set after pool config)"><div class="stat-label" data-i18n="vs_raydium_pool">Raydium Pool</div><div class="stat-value" id="dashRaydiumPool" style="color:var(--text);font-size:13px;">—</div></div>
+        <div class="dash-stat skeleton" data-tooltip="Last on-chain refresh timestamp"><div class="stat-label" data-i18n="vs_last_update">Last Update</div><div class="stat-value" id="dashLastUpdate" style="color:var(--text);font-size:14px;">—</div></div>
       </div>
     </div>
 
@@ -1144,6 +1149,58 @@
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ═══ PROTOCOL ACTIONS (Phase B) ═══ -->
+  <section class="section reveal" id="protocol-actions" aria-label="Protocol Actions">
+    <div class="section-label" data-i18n="pa_section_label">Permissionless</div>
+    <div class="section-title" data-i18n="pa_section_title">Protocol Actions</div>
+    <div class="section-desc" data-i18n="pa_section_desc">These actions are open to anyone — no gatekeeping. Defend the peg, deepen the pool, or just check your stats.</div>
+
+    <div class="pa-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:32px;">
+
+      <!-- BUY FROM VAULT -->
+      <div class="pa-card" id="paBuyCard" style="padding:24px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-card);display:flex;flex-direction:column;">
+        <div style="font-size:18px;font-weight:600;margin-bottom:8px;color:var(--text);" data-i18n="pa_buy_title">Buy from Vault @ $1</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;" data-i18n="pa_buy_desc">Send SOL, receive TOBE at exactly $1/TOBE. Caps the price at $1.</div>
+        <div id="paBuyMainnetNotice" style="display:none;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;margin-bottom:12px;font-size:12px;color:#ffc107;" data-i18n="pa_mainnet_only_notice">🚧 Mainnet only — devnet has no Pyth oracle</div>
+        <label style="font-size:12px;color:var(--text-muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;" data-i18n="pa_buy_input_label">SOL to send</label>
+        <input type="number" id="paBuyInput" min="0.001" step="0.01" placeholder="0.1" style="width:100%;padding:10px;margin-top:6px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);box-sizing:border-box;">
+        <div id="paBuyEstimate" style="font-size:12px;color:var(--text-muted);margin-top:8px;font-family:var(--mono);min-height:16px;">—</div>
+        <button id="paBuyButton" style="width:100%;margin-top:auto;padding:12px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#000;border:none;border-radius:8px;font-weight:600;cursor:pointer;opacity:0.5;" disabled data-i18n="pa_buy_button">Buy from Vault</button>
+      </div>
+
+      <!-- SELL TO VAULT -->
+      <div class="pa-card" id="paSellCard" style="padding:24px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-card);display:flex;flex-direction:column;">
+        <div style="font-size:18px;font-weight:600;margin-bottom:8px;color:var(--text);" data-i18n="pa_sell_title">Sell to Vault @ $1</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;" data-i18n="pa_sell_desc">Send TOBE, receive SOL at exactly $1/TOBE. Defends the floor.</div>
+        <div id="paSellMainnetNotice" style="display:none;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;margin-bottom:12px;font-size:12px;color:#ffc107;" data-i18n="pa_mainnet_only_notice">🚧 Mainnet only — devnet has no Pyth oracle</div>
+        <label style="font-size:12px;color:var(--text-muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;" data-i18n="pa_sell_input_label">TOBE to send</label>
+        <input type="number" id="paSellInput" min="1" step="1" placeholder="100" style="width:100%;padding:10px;margin-top:6px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);box-sizing:border-box;">
+        <div id="paSellEstimate" style="font-size:12px;color:var(--text-muted);margin-top:8px;font-family:var(--mono);min-height:16px;">—</div>
+        <button id="paSellButton" style="width:100%;margin-top:auto;padding:12px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#000;border:none;border-radius:8px;font-weight:600;cursor:pointer;opacity:0.5;" disabled data-i18n="pa_sell_button">Sell to Vault</button>
+      </div>
+
+      <!-- FLUSH LP -->
+      <div class="pa-card" id="paFlushCard" style="padding:24px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-card);display:flex;flex-direction:column;">
+        <div style="font-size:18px;font-weight:600;margin-bottom:8px;color:var(--text);" data-i18n="pa_flush_title">Deepen Raydium Liquidity</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;" data-i18n="pa_flush_desc">Deposit accumulated SOL + matching TOBE into Raydium. LP tokens are burned in the same tx.</div>
+        <div style="font-size:14px;color:var(--text);margin-bottom:8px;font-family:var(--mono);"><span data-i18n="pa_flush_pending_label">Pending</span>: <span id="paFlushPending" style="color:var(--accent);">—</span></div>
+        <div id="paFlushStatus" style="font-size:12px;color:var(--text-muted);margin-bottom:12px;min-height:16px;">—</div>
+        <button id="paFlushButton" style="width:100%;margin-top:auto;padding:12px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#000;border:none;border-radius:8px;font-weight:600;cursor:pointer;opacity:0.5;" disabled data-i18n="pa_flush_button">Flush to Raydium</button>
+      </div>
+
+      <!-- MY WALLET -->
+      <div class="pa-card" id="paMyWalletCard" style="display:none;padding:24px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-card);">
+        <div style="font-size:18px;font-weight:600;margin-bottom:16px;color:var(--text);" data-i18n="pa_my_wallet_title">My Wallet</div>
+        <div style="display:grid;gap:12px;font-family:var(--mono);font-size:13px;">
+          <div><span style="color:var(--text-muted);" data-i18n="pa_my_wallet_balance">TOBE Balance</span>: <span id="paWalletTobe" style="color:var(--accent);">—</span></div>
+          <div><span style="color:var(--text-muted);" data-i18n="pa_my_wallet_value">Value at $1 peg</span>: <span id="paWalletValue" style="color:var(--success);">—</span></div>
+          <div><span style="color:var(--text-muted);" data-i18n="pa_my_wallet_share">Share of total minted</span>: <span id="paWalletShare" style="color:var(--accent-2);">—</span></div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -1667,6 +1724,20 @@
     window.Buffer = pk.toBuffer().constructor;
   })();
 </script>
+<!-- Phase B: Pyth Solana Receiver SDK via esm.sh CDN (peg arbitrage UI) -->
+<script type="module">
+  try {
+    const mod = await import('https://esm.sh/@pythnetwork/pyth-solana-receiver@0.14.0?bundle');
+    window.PythReceiver = mod.PythSolanaReceiver;
+    window.PYTH_READY = true;
+    window.dispatchEvent(new CustomEvent('pyth-receiver-ready'));
+  } catch (e) {
+    console.error('Failed to load Pyth SDK from CDN:', e);
+    window.PYTH_READY = false;
+    window.PYTH_ERROR = e.message;
+    window.dispatchEvent(new CustomEvent('pyth-receiver-failed', { detail: { error: e.message } }));
+  }
+</script>
 <script>
 
   // ── State ──
@@ -1808,6 +1879,49 @@
   }
 
   let rpcFailCount = 0;
+  // ─── Phase B: PDA balance polling + Vault Stats card updates ───
+  async function pollSolPdaBalances() {
+    try {
+      const [poolBal, vaultBal] = await Promise.all([
+        connection.getBalance(poolSolReservePda),
+        connection.getBalance(vaultSolReservePda),
+      ]);
+      return { poolSolLamports: poolBal, vaultSolLamports: vaultBal };
+    } catch (e) {
+      console.warn('PDA balance poll failed:', e.message);
+      return { poolSolLamports: null, vaultSolLamports: null };
+    }
+  }
+  function updateVaultStatsCards(state, pdaBalances) {
+    const fmtSol = lamports => lamports == null ? '—' : (lamports / 1e9).toFixed(4) + ' SOL';
+    const lpEl = document.getElementById('dashLpPending');
+    const floorEl = document.getElementById('dashFloorReserve');
+    const poolEl = document.getElementById('dashRaydiumPool');
+    const updEl = document.getElementById('dashLastUpdate');
+    if (lpEl) lpEl.textContent = fmtSol(pdaBalances.poolSolLamports);
+    if (floorEl) floorEl.textContent = fmtSol(pdaBalances.vaultSolLamports);
+    if (poolEl) {
+      const isConfigured = state && state.raydiumPoolState &&
+        state.raydiumPoolState.toBase58 && state.raydiumPoolState.toBase58() !== '11111111111111111111111111111111';
+      // Clear safely (textContent), then build link via DOM API to avoid XSS via pubkey injection
+      while (poolEl.firstChild) poolEl.removeChild(poolEl.firstChild);
+      if (isConfigured) {
+        const pubkey = state.raydiumPoolState.toBase58();
+        const a = document.createElement('a');
+        a.href = `https://explorer.solana.com/address/${encodeURIComponent(pubkey)}?cluster=${encodeURIComponent(NETWORK)}`;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.style.color = 'var(--accent)';
+        a.style.textDecoration = 'none';
+        a.textContent = pubkey.slice(0, 6) + '…' + pubkey.slice(-4);
+        poolEl.appendChild(a);
+      } else {
+        poolEl.textContent = 'Not configured';
+      }
+    }
+    if (updEl) updEl.textContent = new Date().toLocaleTimeString();
+  }
+
   async function refreshFromChain() {
     try {
       const state = await fetchMintState();
@@ -1815,6 +1929,12 @@
         onChainState = state; updateDisplay(state.currentRound); console.log('On-chain state:', state);
         rpcFailCount = 0; hideRpcError(); updateRpcStatus(true);
       } else { throw new Error('No state'); }
+
+      // Phase B: poll PDA balances + update vault-stats cards + flush button + my wallet
+      const pdaBalances = await pollSolPdaBalances();
+      updateVaultStatsCards(state, pdaBalances);
+      if (typeof updateFlushButtonState === 'function') updateFlushButtonState(state, pdaBalances);
+      if (typeof updateMyWalletCard === 'function') updateMyWalletCard(state);
     } catch(e) {
       rpcFailCount++;
       console.warn('RPC error (attempt ' + rpcFailCount + '):', e.message);
@@ -2436,6 +2556,363 @@
     }
     btn.classList.remove('loading'); btn.disabled = false; isMinting = false;
   }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ─── PHASE B: PROTOCOL ACTIONS — Flush LP / Buy / Sell / My Wallet ───
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // Anchor instruction discriminators (sha256("global:<name>")[..8])
+  const DISC_FLUSH = new Uint8Array([0x13, 0x24, 0xc3, 0xf5, 0x58, 0xc7, 0x8c, 0xd9]);
+  const DISC_BUY   = new Uint8Array([0x58, 0x00, 0x62, 0xbd, 0x14, 0xf6, 0xa4, 0x99]);
+  const DISC_SELL  = new Uint8Array([0xea, 0x00, 0xf7, 0xdd, 0xa1, 0x23, 0x61, 0x6f]);
+
+  const FLUSH_THRESHOLD_LAMPORTS = 1_000_000_000; // 1 SOL
+  const NATIVE_MINT = new solanaWeb3.PublicKey('So11111111111111111111111111111111111111112');
+  const TOKEN_2022_PROGRAM_ID = new solanaWeb3.PublicKey('TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb');
+  const RAYDIUM_CPMM = new solanaWeb3.PublicKey(NETWORK === 'mainnet'
+    ? 'CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C'
+    : 'DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb');
+  const SOL_USD_FEED_ID = '0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d';
+  const HERMES_URL = 'https://hermes.pyth.network';
+
+  // Phase B PDAs (derived once)
+  const [wsolTempPda]  = solanaWeb3.PublicKey.findProgramAddressSync([new TextEncoder().encode('wsol_temp')],  programId);
+  const [lpReceiptPda] = solanaWeb3.PublicKey.findProgramAddressSync([new TextEncoder().encode('lp_receipt')], programId);
+
+  // ─── Flush LP gating + handler ───────────────────────────────────────────
+  function updateFlushButtonState(state, pdaBalances) {
+    const btn = document.getElementById('paFlushButton');
+    const pendingEl = document.getElementById('paFlushPending');
+    const statusEl = document.getElementById('paFlushStatus');
+    if (!btn || !pendingEl || !statusEl) return;
+    const lamports = pdaBalances?.poolSolLamports ?? 0;
+    pendingEl.textContent = (lamports / 1e9).toFixed(4) + ' SOL';
+    const isPoolConfigured = state?.raydiumPoolState && state.raydiumPoolState.toBase58
+      && state.raydiumPoolState.toBase58() !== '11111111111111111111111111111111';
+    const setEnabled = (enabled, statusKey, statusFallback) => {
+      btn.disabled = !enabled;
+      btn.style.opacity = enabled ? '1' : '0.5';
+      btn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+      const txt = (typeof t === 'function' ? t(statusKey) : null) || statusFallback;
+      statusEl.textContent = txt;
+      btn.title = enabled ? '' : txt;
+    };
+    if (!isPoolConfigured) {
+      setEnabled(false, 'pa_flush_no_pool', 'Pool not yet configured by authority');
+    } else if (lamports < FLUSH_THRESHOLD_LAMPORTS) {
+      const need = ((FLUSH_THRESHOLD_LAMPORTS - lamports) / 1e9).toFixed(4);
+      const base = (typeof t === 'function' ? t('pa_flush_below_threshold') : null) || 'Need ≥1 SOL pending';
+      setEnabled(false, null, `${base} (${need} more)`);
+    } else {
+      setEnabled(true, 'pa_flush_ready', 'Ready to flush');
+    }
+  }
+
+  async function callFlushLpToRaydium() {
+    if (!connected) { connectWallet(); return; }
+    const state = onChainState || await fetchMintState();
+    if (!state) { showToast('State not loaded', 'error'); return; }
+    const btn = document.getElementById('paFlushButton');
+    btn.classList.add('loading'); btn.disabled = true;
+    try {
+      const callerPk = new solanaWeb3.PublicKey(walletAddress);
+      const ix = new solanaWeb3.TransactionInstruction({
+        programId,
+        keys: [
+          { pubkey: callerPk,                       isSigner: true,  isWritable: true  },
+          { pubkey: mintStatePda,                   isSigner: false, isWritable: true  },
+          { pubkey: state.tobeMint,                 isSigner: false, isWritable: true  },
+          { pubkey: vaultAuthorityPda,              isSigner: false, isWritable: false },
+          { pubkey: vaultTokenPda,                  isSigner: false, isWritable: true  },
+          { pubkey: poolSolReservePda,              isSigner: false, isWritable: true  },
+          { pubkey: wsolTempPda,                    isSigner: false, isWritable: true  },
+          { pubkey: NATIVE_MINT,                    isSigner: false, isWritable: false },
+          { pubkey: lpReceiptPda,                   isSigner: false, isWritable: true  },
+          { pubkey: state.raydiumPoolState,         isSigner: false, isWritable: true  },
+          { pubkey: state.raydiumLpMint,            isSigner: false, isWritable: true  },
+          { pubkey: state.raydiumPoolAuthority,     isSigner: false, isWritable: false },
+          { pubkey: state.raydiumToken0Vault,       isSigner: false, isWritable: true  },
+          { pubkey: state.raydiumToken1Vault,       isSigner: false, isWritable: true  },
+          { pubkey: state.tobeIsToken0 ? state.tobeMint  : NATIVE_MINT,       isSigner: false, isWritable: false },
+          { pubkey: state.tobeIsToken0 ? NATIVE_MINT     : state.tobeMint,    isSigner: false, isWritable: false },
+          { pubkey: RAYDIUM_CPMM,                   isSigner: false, isWritable: false },
+          { pubkey: TOKEN_PROGRAM_ID,               isSigner: false, isWritable: false },
+          { pubkey: TOKEN_2022_PROGRAM_ID,          isSigner: false, isWritable: false },
+          { pubkey: solanaWeb3.SystemProgram.programId, isSigner: false, isWritable: false },
+          { pubkey: solanaWeb3.SYSVAR_RENT_PUBKEY,  isSigner: false, isWritable: false },
+        ],
+        data: Buffer.from(DISC_FLUSH),
+      });
+      const tx = new solanaWeb3.Transaction().add(ix);
+      tx.feePayer = callerPk;
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
+      tx.recentBlockhash = blockhash;
+      const signed = await walletProvider.signTransaction(tx);
+      const sig = await connection.sendRawTransaction(signed.serialize(), { preflightCommitment: 'confirmed' });
+      await connection.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, 'confirmed');
+      showToast((typeof t === 'function' ? t('pa_flush_success') : '') || 'Flush successful!', 'success');
+      await refreshFromChain();
+    } catch (err) {
+      console.error('Flush error:', err);
+      const msg = (err.message || 'Flush failed');
+      showToast(msg.includes('User rejected') ? 'Transaction cancelled' : msg, 'error');
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  // ─── Pyth peg arbitrage (mainnet only) ───────────────────────────────────
+  const PYTH_OK = (typeof NETWORK === 'string') && NETWORK === 'mainnet';
+
+  function showPegArbDisabledNotice(messageOverride) {
+    for (const id of ['paBuyMainnetNotice', 'paSellMainnetNotice']) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      if (messageOverride) el.textContent = messageOverride;
+      el.style.display = 'block';
+    }
+    for (const id of ['paBuyButton', 'paSellButton', 'paBuyInput', 'paSellInput']) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      if (id.endsWith('Button')) {
+        el.disabled = true;
+        el.style.opacity = '0.5';
+        el.style.cursor = 'not-allowed';
+        el.title = messageOverride || 'Mainnet only';
+      } else {
+        el.disabled = true;
+      }
+    }
+  }
+
+  function enablePegArbButtons() {
+    for (const id of ['paBuyButton', 'paSellButton']) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      el.disabled = false;
+      el.style.opacity = '1';
+      el.style.cursor = 'pointer';
+      el.title = '';
+    }
+    for (const id of ['paBuyInput', 'paSellInput']) {
+      const el = document.getElementById(id);
+      if (el) el.disabled = false;
+    }
+  }
+
+  function setupPegArbitrageUI() {
+    if (!PYTH_OK) {
+      showPegArbDisabledNotice();
+      return;
+    }
+    if (window.PYTH_READY === true) {
+      enablePegArbButtons();
+    } else if (window.PYTH_READY === false) {
+      showPegArbDisabledNotice('Pyth oracle SDK failed to load. Try refreshing.');
+    } else {
+      window.addEventListener('pyth-receiver-ready', enablePegArbButtons, { once: true });
+      window.addEventListener('pyth-receiver-failed', () => showPegArbDisabledNotice('Pyth oracle SDK failed to load. Try refreshing.'), { once: true });
+    }
+  }
+
+  async function fetchSolUsdPriceUpdate() {
+    const url = `${HERMES_URL}/v2/updates/price/latest?ids%5B%5D=${SOL_USD_FEED_ID.replace(/^0x/, '')}&encoding=base64`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('Hermes fetch failed: ' + r.status);
+    const d = await r.json();
+    return {
+      base64: d.binary.data[0],
+      price: Number(d.parsed[0].price.price) * Math.pow(10, Number(d.parsed[0].price.expo)),
+      expo: Number(d.parsed[0].price.expo),
+    };
+  }
+
+  // Live estimates as user types (only when Pyth available)
+  let buyEstTimer, sellEstTimer;
+  document.getElementById('paBuyInput')?.addEventListener('input', e => {
+    clearTimeout(buyEstTimer);
+    const sol = parseFloat(e.target.value);
+    const out = document.getElementById('paBuyEstimate');
+    if (!sol || sol <= 0 || !PYTH_OK) { out.textContent = '—'; return; }
+    out.textContent = '…';
+    buyEstTimer = setTimeout(async () => {
+      try {
+        const { price } = await fetchSolUsdPriceUpdate();
+        out.textContent = `≈ ${(sol * price).toFixed(2)} TOBE @ $${price.toFixed(2)}/SOL`;
+      } catch { out.textContent = 'Pyth fetch failed'; }
+    }, 400);
+  });
+  document.getElementById('paSellInput')?.addEventListener('input', e => {
+    clearTimeout(sellEstTimer);
+    const tobe = parseFloat(e.target.value);
+    const out = document.getElementById('paSellEstimate');
+    if (!tobe || tobe <= 0 || !PYTH_OK) { out.textContent = '—'; return; }
+    out.textContent = '…';
+    sellEstTimer = setTimeout(async () => {
+      try {
+        const { price } = await fetchSolUsdPriceUpdate();
+        out.textContent = `≈ ${(tobe / price).toFixed(4)} SOL @ $${price.toFixed(2)}/SOL`;
+      } catch { out.textContent = 'Pyth fetch failed'; }
+    }, 400);
+  });
+
+  function buildPythConsumerWallet(callerPk) {
+    return {
+      publicKey: callerPk,
+      signTransaction: walletProvider.signTransaction.bind(walletProvider),
+      signAllTransactions: walletProvider.signAllTransactions
+        ? walletProvider.signAllTransactions.bind(walletProvider)
+        : (async (txs) => Promise.all(txs.map(t => walletProvider.signTransaction(t)))),
+    };
+  }
+
+  async function callBuyFromVault() {
+    if (!connected) { connectWallet(); return; }
+    if (!PYTH_OK)        { showToast('Mainnet only', 'error'); return; }
+    if (!window.PYTH_READY) { showToast('Pyth SDK not loaded', 'error'); return; }
+    const sol = parseFloat(document.getElementById('paBuyInput').value);
+    if (!sol || sol <= 0) { showToast('Enter a SOL amount', 'error'); return; }
+    const btn = document.getElementById('paBuyButton');
+    btn.classList.add('loading'); btn.disabled = true;
+    try {
+      const state = onChainState || await fetchMintState();
+      const callerPk = new solanaWeb3.PublicKey(walletAddress);
+      const buyerTobeAta = findATA(callerPk, state.tobeMint);
+      const lamports = Math.floor(sol * 1e9);
+      const { base64 } = await fetchSolUsdPriceUpdate();
+      const receiver = new window.PythReceiver({ connection, wallet: buildPythConsumerWallet(callerPk) });
+      const builder = receiver.newTransactionBuilder({ closeUpdateAccounts: true });
+      await builder.addPostPriceUpdates([base64]);
+      // Ensure buyer ATA exists
+      const ataInfo = await connection.getAccountInfo(buyerTobeAta);
+      const preIxs = ataInfo ? [] : [createATAInstruction(callerPk, callerPk, state.tobeMint)];
+      const dataBuf = Buffer.alloc(16);
+      dataBuf.set(DISC_BUY, 0);
+      dataBuf.writeBigUInt64LE(BigInt(lamports), 8);
+      await builder.addPriceConsumerInstructions(async getPriceUpdateAccount => {
+        const pythAcc = getPriceUpdateAccount(SOL_USD_FEED_ID);
+        return [...preIxs.map(instruction => ({ instruction, signers: [] })), {
+          instruction: new solanaWeb3.TransactionInstruction({
+            programId,
+            keys: [
+              { pubkey: callerPk,                            isSigner: true,  isWritable: true  },
+              { pubkey: mintStatePda,                        isSigner: false, isWritable: true  },
+              { pubkey: vaultAuthorityPda,                   isSigner: false, isWritable: false },
+              { pubkey: vaultTokenPda,                       isSigner: false, isWritable: true  },
+              { pubkey: new solanaWeb3.PublicKey(state.treasury), isSigner: false, isWritable: true  },
+              { pubkey: buyerTobeAta,                        isSigner: false, isWritable: true  },
+              { pubkey: pythAcc,                             isSigner: false, isWritable: false },
+              { pubkey: TOKEN_PROGRAM_ID,                    isSigner: false, isWritable: false },
+              { pubkey: solanaWeb3.SystemProgram.programId,  isSigner: false, isWritable: false },
+            ],
+            data: dataBuf,
+          }),
+          signers: [],
+        }];
+      });
+      const txs = await builder.buildVersionedTransactions({ computeUnitPriceMicroLamports: 50000 });
+      const sigs = await receiver.provider.sendAll(txs, { skipPreflight: false });
+      showToast(`Buy successful: ${sigs[sigs.length - 1].slice(0, 8)}…`, 'success');
+      await refreshFromChain();
+    } catch (err) {
+      console.error('Buy error:', err);
+      const msg = err.message || 'Buy failed';
+      showToast(msg.includes('User rejected') ? 'Transaction cancelled' : msg, 'error');
+    } finally {
+      btn.classList.remove('loading');
+      if (PYTH_OK && window.PYTH_READY) btn.disabled = false;
+    }
+  }
+
+  async function callSellToVault() {
+    if (!connected) { connectWallet(); return; }
+    if (!PYTH_OK)        { showToast('Mainnet only', 'error'); return; }
+    if (!window.PYTH_READY) { showToast('Pyth SDK not loaded', 'error'); return; }
+    const tobe = parseFloat(document.getElementById('paSellInput').value);
+    if (!tobe || tobe <= 0) { showToast('Enter a TOBE amount', 'error'); return; }
+    const btn = document.getElementById('paSellButton');
+    btn.classList.add('loading'); btn.disabled = true;
+    try {
+      const state = onChainState || await fetchMintState();
+      const callerPk = new solanaWeb3.PublicKey(walletAddress);
+      const sellerTobeAta = findATA(callerPk, state.tobeMint);
+      const tobeRaw = BigInt(Math.floor(tobe * 1e9));
+      const { base64 } = await fetchSolUsdPriceUpdate();
+      const receiver = new window.PythReceiver({ connection, wallet: buildPythConsumerWallet(callerPk) });
+      const builder = receiver.newTransactionBuilder({ closeUpdateAccounts: true });
+      await builder.addPostPriceUpdates([base64]);
+      const dataBuf = Buffer.alloc(16);
+      dataBuf.set(DISC_SELL, 0);
+      dataBuf.writeBigUInt64LE(tobeRaw, 8);
+      await builder.addPriceConsumerInstructions(async getPriceUpdateAccount => {
+        const pythAcc = getPriceUpdateAccount(SOL_USD_FEED_ID);
+        return [{
+          instruction: new solanaWeb3.TransactionInstruction({
+            programId,
+            keys: [
+              { pubkey: callerPk,                           isSigner: true,  isWritable: true  },
+              { pubkey: mintStatePda,                       isSigner: false, isWritable: true  },
+              { pubkey: vaultAuthorityPda,                  isSigner: false, isWritable: false },
+              { pubkey: vaultTokenPda,                      isSigner: false, isWritable: true  },
+              { pubkey: vaultSolReservePda,                 isSigner: false, isWritable: true  },
+              { pubkey: sellerTobeAta,                      isSigner: false, isWritable: true  },
+              { pubkey: pythAcc,                            isSigner: false, isWritable: false },
+              { pubkey: TOKEN_PROGRAM_ID,                   isSigner: false, isWritable: false },
+              { pubkey: solanaWeb3.SystemProgram.programId, isSigner: false, isWritable: false },
+            ],
+            data: dataBuf,
+          }),
+          signers: [],
+        }];
+      });
+      const txs = await builder.buildVersionedTransactions({ computeUnitPriceMicroLamports: 50000 });
+      const sigs = await receiver.provider.sendAll(txs, { skipPreflight: false });
+      showToast(`Sell successful: ${sigs[sigs.length - 1].slice(0, 8)}…`, 'success');
+      await refreshFromChain();
+    } catch (err) {
+      console.error('Sell error:', err);
+      const msg = err.message || 'Sell failed';
+      showToast(msg.includes('User rejected') ? 'Transaction cancelled' : msg, 'error');
+    } finally {
+      btn.classList.remove('loading');
+      if (PYTH_OK && window.PYTH_READY) btn.disabled = false;
+    }
+  }
+
+  // ─── My Wallet card ──────────────────────────────────────────────────────
+  async function updateMyWalletCard(state) {
+    const card = document.getElementById('paMyWalletCard');
+    if (!card) return;
+    if (!connected || !walletAddress || !state) { card.style.display = 'none'; return; }
+    try {
+      const callerPk = new solanaWeb3.PublicKey(walletAddress);
+      const ata = findATA(callerPk, state.tobeMint);
+      const acctInfo = await connection.getAccountInfo(ata);
+      let balanceRaw = 0n;
+      if (acctInfo && acctInfo.data && acctInfo.data.length >= 72) {
+        // SPL Token Account: amount is u64 LE at offset 64
+        balanceRaw = acctInfo.data.readBigUInt64LE(64);
+      }
+      const balDecimal = Number(balanceRaw) / 1e9;
+      const totalMintedDecimal = Number(state.totalMinted) / 1e9;
+      const sharePct = totalMintedDecimal > 0 ? (balDecimal / totalMintedDecimal * 100) : 0;
+      document.getElementById('paWalletTobe').textContent =
+        balDecimal.toLocaleString(undefined, { maximumFractionDigits: 4 }) + ' TOBE';
+      document.getElementById('paWalletValue').textContent =
+        '$' + balDecimal.toLocaleString(undefined, { maximumFractionDigits: 2 });
+      document.getElementById('paWalletShare').textContent = sharePct.toFixed(4) + '%';
+      card.style.display = 'block';
+    } catch (e) {
+      console.warn('My Wallet update failed:', e);
+      card.style.display = 'none';
+    }
+  }
+
+  // ─── Wire button events + initial setup ─────────────────────────────────
+  document.getElementById('paFlushButton')?.addEventListener('click', callFlushLpToRaydium);
+  document.getElementById('paBuyButton')?.addEventListener('click',   callBuyFromVault);
+  document.getElementById('paSellButton')?.addEventListener('click',  callSellToVault);
+  setupPegArbitrageUI();
 
   function closeSuccessModal() { document.getElementById('successModal').classList.remove('show'); }
   document.getElementById('successModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeSuccessModal(); });

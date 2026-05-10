@@ -781,7 +781,7 @@
   .lang-option.active { color:var(--accent); }
   .lang-option-flag { font-size:16px; }
 </style>
-<script src="lang.js?v=phase-b"></script>
+<script src="lang.js?v=phase-c"></script>
 </head>
 <body>
 <!-- LOADING SCREEN -->
@@ -1035,6 +1035,43 @@
       <ul class="tx-feed-list" id="txFeedList">
         <li class="tx-feed-item"><span style="color:var(--text-dim);" data-i18n="waiting_for_mint">Waiting for mint activity...</span></li>
       </ul>
+    </div>
+  </section>
+
+  <!-- ═══ LIVE MARKET (Phase C) ═══ -->
+  <section class="section reveal" id="live-market" aria-label="Live Market">
+    <div class="section-label" data-i18n="lm_section_label">Real-time</div>
+    <div class="section-title" data-i18n="lm_section_title">Live Market</div>
+    <div class="section-desc" data-i18n="lm_section_desc">Real-time view of the TOBE/wSOL pool on Raydium. Updates with every state refresh.</div>
+
+    <!-- Empty state shown when raydium_pool_state is unconfigured -->
+    <div id="lmEmptyState" style="display:none;margin-top:24px;padding:32px;text-align:center;background:var(--bg-card);border:1px dashed var(--border);border-radius:var(--radius);color:var(--text-muted);" data-i18n="lm_pool_not_configured">
+      Pool not yet configured by authority. Live market data will appear once the Raydium pool is set.
+    </div>
+
+    <!-- Card grid (hidden until pool configured) -->
+    <div id="lmCardGrid" style="display:none;margin-top:24px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;">
+        <div class="dash-stat" data-tooltip="TOBE in the Raydium pool's vault — direct read of the on-chain token account">
+          <div class="stat-label" data-i18n="lm_pool_tobe">Pool TOBE Depth</div>
+          <div class="stat-value" id="lmPoolTobe" style="color:var(--accent);">—</div>
+        </div>
+        <div class="dash-stat" data-tooltip="wSOL in the Raydium pool's vault">
+          <div class="stat-label" data-i18n="lm_pool_sol">Pool SOL Depth</div>
+          <div class="stat-value" id="lmPoolSol" style="color:var(--accent-2);">—</div>
+        </div>
+        <div class="dash-stat" data-tooltip="Spot price in TOBE per SOL — derived from pool reserves">
+          <div class="stat-label" data-i18n="lm_spot_price">Spot Price (TOBE/SOL)</div>
+          <div class="stat-value" id="lmSpotPrice" style="color:var(--text);">—</div>
+        </div>
+        <div class="dash-stat" data-tooltip="How far the spot USD price is from the $1 peg — uses Pyth Hermes for SOL/USD">
+          <div class="stat-label" data-i18n="lm_peg_deviation">Peg Deviation</div>
+          <div class="stat-value" id="lmPegDeviation" style="color:var(--text);">—</div>
+        </div>
+      </div>
+      <div style="margin-top:20px;text-align:center;font-size:12px;color:var(--text-muted);">
+        <span id="lmPoolLink"></span>
+      </div>
     </div>
   </section>
 
@@ -1922,6 +1959,122 @@
     if (updEl) updEl.textContent = new Date().toLocaleTimeString();
   }
 
+  // ─── Phase C: Live Market — Raydium pool reserves + spot price + peg deviation ───
+  // Reads the two pool vault token accounts (amounts at SPL Token offset 64).
+  // SOL/USD via existing fetchSolUsdPriceUpdate() (Pyth Hermes REST), 30s cached.
+  async function pollRaydiumPoolReserves(state) {
+    const isConfigured = state && state.raydiumPoolState && state.raydiumPoolState.toBase58
+      && state.raydiumPoolState.toBase58() !== '11111111111111111111111111111111';
+    if (!isConfigured) return null;
+    try {
+      const accts = await connection.getMultipleAccountsInfo([
+        state.raydiumToken0Vault,
+        state.raydiumToken1Vault,
+      ]);
+      if (!accts[0] || !accts[1]) return null;
+      // SPL Token Account: amount is u64 LE at offset 64
+      const amt0 = accts[0].data.readBigUInt64LE(64);
+      const amt1 = accts[1].data.readBigUInt64LE(64);
+      // tobeIsToken0 flag tells us which side is which
+      const tobeRaw = state.tobeIsToken0 ? amt0 : amt1;
+      const solRaw  = state.tobeIsToken0 ? amt1 : amt0;
+      return {
+        tobeRaw, solRaw,
+        tobe: Number(tobeRaw) / 1e9,
+        sol:  Number(solRaw)  / 1e9,
+      };
+    } catch (e) {
+      console.warn('Pool reserves poll failed:', e.message);
+      return null;
+    }
+  }
+
+  // Cache SOL/USD reads to avoid hammering Hermes (30s window)
+  let __solUsdCache = { ts: 0, price: null };
+  async function cachedFetchSolUsdPrice() {
+    const now = Date.now();
+    if (__solUsdCache.price != null && (now - __solUsdCache.ts) < 30_000) {
+      return __solUsdCache.price;
+    }
+    try {
+      // Reuse the existing helper added in Phase B (defined later in file).
+      // If it's not yet defined (page still booting), fall back to direct fetch.
+      const fetcher = (typeof fetchSolUsdPriceUpdate === 'function')
+        ? fetchSolUsdPriceUpdate
+        : (async () => {
+            const r = await fetch('https://hermes.pyth.network/v2/updates/price/latest?ids%5B%5D=ef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d&encoding=base64');
+            if (!r.ok) throw new Error('Hermes ' + r.status);
+            const d = await r.json();
+            return { price: Number(d.parsed[0].price.price) * Math.pow(10, Number(d.parsed[0].price.expo)) };
+          });
+      const { price } = await fetcher();
+      __solUsdCache = { ts: now, price };
+      return price;
+    } catch (e) {
+      console.warn('SOL/USD fetch failed:', e.message);
+      return __solUsdCache.price; // last known, may be null
+    }
+  }
+
+  function updateLiveMarketCards(state, reserves, solUsdPrice) {
+    const empty = document.getElementById('lmEmptyState');
+    const grid  = document.getElementById('lmCardGrid');
+    if (!empty || !grid) return;
+    const isConfigured = state && state.raydiumPoolState && state.raydiumPoolState.toBase58
+      && state.raydiumPoolState.toBase58() !== '11111111111111111111111111111111';
+    if (!isConfigured || !reserves) {
+      empty.style.display = 'block';
+      grid.style.display  = 'none';
+      return;
+    }
+    empty.style.display = 'none';
+    grid.style.display  = 'block';
+
+    const tobeEl = document.getElementById('lmPoolTobe');
+    const solEl  = document.getElementById('lmPoolSol');
+    const spotEl = document.getElementById('lmSpotPrice');
+    const pegEl  = document.getElementById('lmPegDeviation');
+    const linkEl = document.getElementById('lmPoolLink');
+
+    if (tobeEl) tobeEl.textContent = reserves.tobe.toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' TOBE';
+    if (solEl)  solEl.textContent  = reserves.sol.toLocaleString(undefined,  { maximumFractionDigits: 4 }) + ' SOL';
+
+    // Spot price = TOBE per SOL (reserve_tobe / reserve_sol).
+    // Peg deviation: each TOBE costs (reserve_sol/reserve_tobe) SOL -> × SOL/USD.
+    if (spotEl) {
+      if (reserves.tobe > 0 && reserves.sol > 0) {
+        const tobePerSol = reserves.tobe / reserves.sol;
+        spotEl.textContent = tobePerSol.toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' TOBE/SOL';
+      } else {
+        spotEl.textContent = '—';
+      }
+    }
+    if (pegEl) {
+      if (reserves.tobe > 0 && reserves.sol > 0 && solUsdPrice && solUsdPrice > 0) {
+        const tobeUsd = (reserves.sol / reserves.tobe) * solUsdPrice;
+        const devPct  = (tobeUsd / 1.0 - 1) * 100;
+        const sign    = devPct >= 0 ? '+' : '';
+        pegEl.textContent = `${sign}${devPct.toFixed(2)}% ($${tobeUsd.toFixed(4)})`;
+        pegEl.style.color = Math.abs(devPct) < 1 ? 'var(--success)' : (devPct > 0 ? 'var(--accent)' : 'var(--danger, #ff6b81)');
+      } else {
+        pegEl.textContent = '—';
+        pegEl.style.color = 'var(--text)';
+      }
+    }
+    if (linkEl) {
+      while (linkEl.firstChild) linkEl.removeChild(linkEl.firstChild);
+      const pubkey = state.raydiumPoolState.toBase58();
+      const a = document.createElement('a');
+      a.href = `https://explorer.solana.com/address/${encodeURIComponent(pubkey)}?cluster=${encodeURIComponent(NETWORK)}`;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.style.color = 'var(--accent)';
+      a.style.textDecoration = 'none';
+      a.textContent = 'View pool on Solana Explorer →';
+      linkEl.appendChild(a);
+    }
+  }
+
   async function refreshFromChain() {
     try {
       const state = await fetchMintState();
@@ -1935,6 +2088,13 @@
       updateVaultStatsCards(state, pdaBalances);
       if (typeof updateFlushButtonState === 'function') updateFlushButtonState(state, pdaBalances);
       if (typeof updateMyWalletCard === 'function') updateMyWalletCard(state);
+
+      // Phase C: live market — pool reserves + SOL/USD (cached) -> spot price + peg deviation
+      const [reserves, solUsd] = await Promise.all([
+        pollRaydiumPoolReserves(state),
+        cachedFetchSolUsdPrice(),
+      ]);
+      updateLiveMarketCards(state, reserves, solUsd);
     } catch(e) {
       rpcFailCount++;
       console.warn('RPC error (attempt ' + rpcFailCount + '):', e.message);

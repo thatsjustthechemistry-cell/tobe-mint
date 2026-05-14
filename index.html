@@ -781,7 +781,7 @@
   .lang-option.active { color:var(--accent); }
   .lang-option-flag { font-size:16px; }
 </style>
-<script src="lang.js?v=phase-c"></script>
+<script src="lang.js?v=mainnet"></script>
 </head>
 <body>
 <!-- LOADING SCREEN -->
@@ -790,6 +790,14 @@
   <div class="loader-bar"><div class="loader-bar-fill"></div></div>
 </div>
 
+<!-- Mainnet launch banner — shown when the on-chain mint_state doesn't yet exist
+     (i.e., between mainnet program deploy and the initialize call). Auto-hides
+     once state appears. Also displayed if TOBE_MINT is still the placeholder. -->
+<div id="mainnetLaunchBanner" role="status" style="display:none;position:sticky;top:0;left:0;right:0;z-index:998;padding:14px 20px;background:linear-gradient(90deg,rgba(0,232,198,0.18),rgba(124,106,239,0.18));border-bottom:1px solid rgba(0,232,198,0.4);backdrop-filter:blur(12px);font-family:var(--mono);font-size:13px;color:var(--text);text-align:center;">
+  <span style="font-size:16px;margin-right:8px;">🚀</span>
+  <strong data-i18n="mainnet_launching_title">Mainnet launching</strong>
+  <span data-i18n="mainnet_launching_body" style="opacity:0.85;margin-left:8px;">— the program is being initialized. Minting will be live shortly. Refresh in a few minutes.</span>
+</div>
 <div class="scroll-progress" id="scrollProgress"></div>
 <div class="grid-bg"></div>
 <div class="orb-wrap" style="top:-200px;left:-100px;"><div class="orb orb-1"></div></div>
@@ -889,7 +897,7 @@
       <div class="contract-copy" id="contractCopy" onclick="copyContract()">
         <div>
           <div class="contract-copy-label" data-i18n="contract_address">Contract Address</div>
-          <div class="contract-copy-addr" id="contractAddr">CfdXZeKuFRGMxiedAHBemm35rANWPvcriwPEyh9KVnBQ</div>
+          <div class="contract-copy-addr" id="contractAddr">Eekx6ftd6WZfSpubr9otS1G6wbKdSCWuXt7n1cbQjmdX</div>
         </div>
         <svg class="contract-copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
       </div>
@@ -1247,9 +1255,9 @@
     <div class="section-title" style="text-align:center;" data-i18n="fully_transparent">Fully Transparent</div>
     <div class="section-desc" style="text-align:center;margin:0 auto 40px;max-width:480px;" data-i18n="transparency_desc">Every mint, every vault action, every SOL — track it all live from this page.</div>
     <div class="contract-cards">
-      <div class="contract-card" onclick="navigator.clipboard.writeText('CfdXZeKuFRGMxiedAHBemm35rANWPvcriwPEyh9KVnBQ').then(()=>showToast('Copied','success'))">
+      <div class="contract-card" onclick="navigator.clipboard.writeText('Eekx6ftd6WZfSpubr9otS1G6wbKdSCWuXt7n1cbQjmdX').then(()=>showToast('Copied','success'))">
         <div class="cc-label" data-i18n="program_id">Program ID</div>
-        <div class="cc-value">CfdXZe...VnBQ</div>
+        <div class="cc-value">Eekx6f...QjmdX</div>
       </div>
       <div class="contract-card" onclick="navigator.clipboard.writeText('Eis6SPak12JXqunZqLqgHneomygF1ouuoRk5PFXB5Bvf').then(()=>showToast('Copied','success'))">
         <div class="cc-label" data-i18n="authority">Authority</div>
@@ -1295,17 +1303,17 @@
         <div class="token-info-row"><span class="token-info-label" data-i18n="ticker">Ticker</span><span class="token-info-value accent">$TOBE</span></div>
         <div class="token-info-row"><span class="token-info-label" data-i18n="decimals">Decimals</span><span class="token-info-value">9</span></div>
         <div class="token-info-row"><span class="token-info-label" data-i18n="network">Network</span><span class="token-info-value">Solana (Devnet)</span></div>
-        <div class="token-info-row"><span class="token-info-label" data-i18n="program">Program</span><span class="token-info-value"><a href="https://explorer.solana.com/address/CfdXZeKuFRGMxiedAHBemm35rANWPvcriwPEyh9KVnBQ" target="_blank" class="explorer-link" style="color:var(--accent);text-decoration:none;">CfdXZe...VnBQ</a><button class="copy-btn" onclick="copyProgramId()">Copy</button></span></div>
+        <div class="token-info-row"><span class="token-info-label" data-i18n="program">Program</span><span class="token-info-value"><a href="https://explorer.solana.com/address/Eekx6ftd6WZfSpubr9otS1G6wbKdSCWuXt7n1cbQjmdX" target="_blank" class="explorer-link" style="color:var(--accent);text-decoration:none;">Eekx6f...QjmdX</a><button class="copy-btn" onclick="copyProgramId()">Copy</button></span></div>
         <div class="token-info-row"><span class="token-info-label" data-i18n="max_supply">Max Supply</span><span class="token-info-value">537,395,200</span></div>
         <div class="token-info-row"><span class="token-info-label" data-i18n="mint_cost">Mint Cost</span><span class="token-info-value accent">10 SOL</span></div>
         <div class="token-info-row"><span class="token-info-label" data-i18n="rounds">Rounds</span><span class="token-info-value">1,024</span></div>
         <div class="token-info-row"><span class="token-info-label" data-i18n="oracle_price">Oracle Price</span><span class="token-info-value" id="expOraclePrice" style="color:var(--accent);">—</span></div>
         <div class="token-info-row"><span class="token-info-label" data-i18n="total_minted_chain">Total Minted (chain)</span><span class="token-info-value" id="expChainMinted">—</span></div>
         <div class="token-links" style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
-          <a href="https://solscan.io/token/CfdXZeKuFRGMxiedAHBemm35rANWPvcriwPEyh9KVnBQ" target="_blank" class="token-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Solscan</a>
-          <a href="https://solana.fm/address/CfdXZeKuFRGMxiedAHBemm35rANWPvcriwPEyh9KVnBQ" target="_blank" class="token-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>SolanaFM</a>
-          <a href="https://explorer.solana.com/address/CfdXZeKuFRGMxiedAHBemm35rANWPvcriwPEyh9KVnBQ" target="_blank" class="token-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Solana Explorer</a>
-          <a href="https://birdeye.so/token/CfdXZeKuFRGMxiedAHBemm35rANWPvcriwPEyh9KVnBQ?chain=solana" target="_blank" class="token-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Birdeye</a>
+          <a href="https://solscan.io/token/Eekx6ftd6WZfSpubr9otS1G6wbKdSCWuXt7n1cbQjmdX" target="_blank" class="token-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Solscan</a>
+          <a href="https://solana.fm/address/Eekx6ftd6WZfSpubr9otS1G6wbKdSCWuXt7n1cbQjmdX" target="_blank" class="token-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>SolanaFM</a>
+          <a href="https://explorer.solana.com/address/Eekx6ftd6WZfSpubr9otS1G6wbKdSCWuXt7n1cbQjmdX" target="_blank" class="token-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Solana Explorer</a>
+          <a href="https://birdeye.so/token/Eekx6ftd6WZfSpubr9otS1G6wbKdSCWuXt7n1cbQjmdX?chain=solana" target="_blank" class="token-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Birdeye</a>
         </div>
       </div>
       <div class="explorer-card">
@@ -1594,7 +1602,7 @@
         <h4 data-i18n="sec_open">Open Source</h4>
         <p data-i18n="sec_open_desc">Every line of the smart contract is publicly verifiable. Full source code, tests, and project config available on GitHub.</p>
         <a class="security-link" href="https://github.com/thatsjustthechemistry-cell/tobestable-protocol" target="_blank">View on GitHub →</a>
-        <a class="security-link" href="https://explorer.solana.com/address/CfdXZeKuFRGMxiedAHBemm35rANWPvcriwPEyh9KVnBQ" target="_blank">View on Solana Explorer →</a>
+        <a class="security-link" href="https://explorer.solana.com/address/Eekx6ftd6WZfSpubr9otS1G6wbKdSCWuXt7n1cbQjmdX" target="_blank">View on Solana Explorer →</a>
       </div>
       <div class="security-card">
         <div class="security-icon">🧪</div>
@@ -1618,7 +1626,7 @@
       </div>
     </div>
     <div style="margin-top:32px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
-      <a href="https://explorer.solana.com/address/CfdXZeKuFRGMxiedAHBemm35rANWPvcriwPEyh9KVnBQ" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(0,232,198,0.06);border:1px solid rgba(0,232,198,0.15);border-radius:var(--radius-sm);text-decoration:none;font-family:var(--mono);font-size:12px;color:var(--accent);transition:all 0.2s;">
+      <a href="https://explorer.solana.com/address/Eekx6ftd6WZfSpubr9otS1G6wbKdSCWuXt7n1cbQjmdX" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(0,232,198,0.06);border:1px solid rgba(0,232,198,0.15);border-radius:var(--radius-sm);text-decoration:none;font-family:var(--mono);font-size:12px;color:var(--accent);transition:all 0.2s;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
         Verified on Solana Explorer
       </a>
@@ -1781,8 +1789,12 @@
   let connected = false, walletAddress = null, currentRound = 0, isMinting = false;
   let walletProvider = null;
   const MAX_ROUNDS = 1024, TOKENS_PER_UNIT = 1024, MAX_SUPPLY = 537395200;
-  const PROGRAM_ID = 'CfdXZeKuFRGMxiedAHBemm35rANWPvcriwPEyh9KVnBQ';
-  const TOBE_MINT  = '4fFD96LWnsgCiWMtLJym12k7xLofH6FdSDtr5MgyYmHV';
+  const PROGRAM_ID = 'Eekx6ftd6WZfSpubr9otS1G6wbKdSCWuXt7n1cbQjmdX';
+  // [FILL_AFTER_INIT] — replace this placeholder with the mainnet TOBE mint
+  // pubkey printed by scripts/mainnet-initialize.js. Until then, MAINNET_PENDING
+  // is true (banner displays, ATA-derivation skipped to avoid runtime errors).
+  const TOBE_MINT  = '11111111111111111111111111111111';
+  const MAINNET_PENDING = TOBE_MINT === '11111111111111111111111111111111';
   const MINT_COST_LAMPORTS = 10_000_000_000; // 10 SOL
   const MINT_COST_SOL = 10;
   let SOL_USD = 120; // fallback SOL price in USD, updated live below
@@ -1797,7 +1809,7 @@
   fetchSolPrice();
   setInterval(fetchSolPrice, 5 * 60 * 1000); // refresh every 5 min
 
-  const NETWORK = 'devnet';
+  const NETWORK = 'mainnet';
   const RPC_URL = NETWORK === 'devnet'
     ? 'https://devnet.helius-rpc.com/?api-key=3ad51e0c-9fa4-4d79-8ba4-9303b1f85897'
     : 'https://api.mainnet-beta.solana.com';
@@ -2075,13 +2087,34 @@
     }
   }
 
+  function setMainnetLaunchBanner(visible) {
+    const el = document.getElementById('mainnetLaunchBanner');
+    if (!el) return;
+    el.style.display = visible ? 'block' : 'none';
+  }
+
   async function refreshFromChain() {
+    // Mainnet-prep: if TOBE_MINT is still the placeholder, the frontend
+    // hasn't been wired to the real on-chain mint yet — show the banner and
+    // skip on-chain reads (they would fail noisily otherwise).
+    if (MAINNET_PENDING) {
+      setMainnetLaunchBanner(true);
+      updateRpcStatus(true); // pretend RPC is fine; we're just pre-init
+      return;
+    }
     try {
       const state = await fetchMintState();
       if (state) {
         onChainState = state; updateDisplay(state.currentRound); console.log('On-chain state:', state);
         rpcFailCount = 0; hideRpcError(); updateRpcStatus(true);
-      } else { throw new Error('No state'); }
+        setMainnetLaunchBanner(false); // state exists → hide banner
+      } else {
+        // Program deployed but not yet initialized — show the launch banner
+        // and don't escalate to the RPC error banner.
+        setMainnetLaunchBanner(true);
+        updateRpcStatus(true);
+        return;
+      }
 
       // Phase B: poll PDA balances + update vault-stats cards + flush button + my wallet
       const pdaBalances = await pollSolPdaBalances();
@@ -2226,7 +2259,7 @@
   }
 
   function copyContract() {
-    const addr = 'CfdXZeKuFRGMxiedAHBemm35rANWPvcriwPEyh9KVnBQ';
+    const addr = 'Eekx6ftd6WZfSpubr9otS1G6wbKdSCWuXt7n1cbQjmdX';
     navigator.clipboard.writeText(addr).then(() => {
       const el = document.getElementById('contractCopy');
       const addrEl = document.getElementById('contractAddr');

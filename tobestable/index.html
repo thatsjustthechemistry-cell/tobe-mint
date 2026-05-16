@@ -781,7 +781,7 @@
   .lang-option.active { color:var(--accent); }
   .lang-option-flag { font-size:16px; }
 </style>
-<script src="lang.js?v=phase-c"></script>
+<script src="lang.js?v=phase-d"></script>
 </head>
 <body>
 <!-- LOADING SCREEN -->
@@ -1365,7 +1365,7 @@
           <span data-i18n="faq_q1">Is $TOBE a stablecoin?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a1">No. $TOBE is an anti-inflationary token designed to approach $1 — not peg to it. The vault mechanism creates upward pressure toward $1, but the market determines the actual price. Think of $1 as a ceiling the protocol builds toward, not a guarantee.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a1">Yes — TOBESTABLE is an algorithmic stablecoin pegged at $1 USD via on-chain two-way arbitrage. The vault sells TOBE for SOL when price tries to exceed $1, and buys TOBE with SOL when price drops below. Both directions are permissionless and use the Pyth SOL/USD oracle. Unlike fiat-backed stablecoins (USDC, USDT) there is no issuer or off-chain reserve audit — the peg is enforced by on-chain code. Unlike failed algorithmic stablecoins (UST/Terra), the floor is bounded by an honest on-chain SOL reserve, not infinite minting.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">

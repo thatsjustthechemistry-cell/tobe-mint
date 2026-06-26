@@ -781,7 +781,7 @@
   .lang-option.active { color:var(--accent); }
   .lang-option-flag { font-size:16px; }
 </style>
-<script src="lang.js?v=phase-d"></script>
+<script src="lang.js?v=phase-e"></script>
 </head>
 <body>
 <!-- LOADING SCREEN -->
@@ -914,8 +914,8 @@
       </div>
       <div class="step reveal reveal-delay-2">
         <div class="step-num">03</div>
-        <div class="step-title" data-i18n="step3_title">Vault Sells at $1</div>
-        <div class="step-desc" data-i18n="step3_desc">Two-way $1 peg via on-chain Pyth oracle. Vault sells when price tries to exceed $1. Vault buys when price drops below $1. Both directions are permissionless — anyone can trigger them.</div>
+        <div class="step-title" data-i18n="step3_title">The Two-Way Vault</div>
+        <div class="step-desc" data-i18n="step3_desc">Above $1 the vault sells TOBE for SOL — an unlimited, hard ceiling. Below $1 it buys TOBE from a finite SOL reserve — a floor that holds only as far as the reserve reaches. Both directions are permissionless via Pyth oracle. Early on the reserve backs just a small fraction of supply at $1 (~0.2%), so the ceiling is strong and the floor is partial — plan accordingly.</div>
       </div>
     </div>
   </section>
@@ -1365,7 +1365,7 @@
           <span data-i18n="faq_q1">Is $TOBE a stablecoin?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a1">Yes — TOBESTABLE is an algorithmic stablecoin pegged at $1 USD via on-chain two-way arbitrage. The vault sells TOBE for SOL when price tries to exceed $1, and buys TOBE with SOL when price drops below. Both directions are permissionless and use the Pyth SOL/USD oracle. Unlike fiat-backed stablecoins (USDC, USDT) there is no issuer or off-chain reserve audit — the peg is enforced by on-chain code. Unlike failed algorithmic stablecoins (UST/Terra), the floor is bounded by an honest on-chain SOL reserve, not infinite minting.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a1">It uses an on-chain two-way arbitrage system around $1, but the two sides aren't equally strong — so it is a soft, asymmetric peg, not a guaranteed $1. Above $1 the vault sells TOBE for SOL: an unlimited, hard ceiling, so TOBE rarely trades above $1. Below $1 the vault buys TOBE with SOL from a finite reserve (~5 SOL per mint round). That floor is real but partial: early on it backs only a small fraction (~0.2%) of circulating tokens at $1, and if the reserve empties the floor can break and price can fall below $1. Unlike fiat-backed coins (USDC/USDT) there is no issuer or off-chain reserve — it is all enforced on-chain. Unlike UST/Terra, the floor is bounded by an honest SOL reserve, never infinite minting — so a failure is capped, not catastrophic.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
@@ -1414,7 +1414,7 @@
           <span data-i18n="faq_q8">What is the vault and how does it work?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a8">Every time someone mints, 50% of the tokens go to the minter and 50% go to a PDA-controlled vault. The vault enforces a two-way $1 peg via on-chain Pyth oracle: it sells TOBE for SOL when the market price tries to exceed $1, and it buys TOBE with SOL (drawn from the vault SOL reserve) when price drops below $1. Both directions are permissionless. The vault grows with every mint.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a8">Every time someone mints, 50% of the tokens go to the minter and 50% go to a PDA-controlled vault. The vault works in two directions via Pyth oracle, but not symmetrically: it sells TOBE for SOL when price tries to exceed $1 — an unlimited, hard ceiling — and it buys TOBE with SOL from a finite SOL reserve when price drops below $1 — a partial floor that holds only as far as the reserve reaches. Both directions are permissionless. The reserve grows ~5 SOL per mint, but early on backs only a small fraction of supply at $1, so the ceiling is strong while the floor is bounded.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">

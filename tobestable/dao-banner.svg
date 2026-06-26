@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 200" width="1200" height="200">
+  <defs>
+    <linearGradient id="neon" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00ffdd"/>
+      <stop offset="40%" stop-color="#00e8c6"/>
+      <stop offset="70%" stop-color="#7c6aef"/>
+      <stop offset="100%" stop-color="#ff6bb5"/>
+    </linearGradient>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#060810"/>
+      <stop offset="100%" stop-color="#0a0e1a"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00ffdd" stop-opacity="0"/>
+      <stop offset="20%" stop-color="#00ffdd" stop-opacity="0.3"/>
+      <stop offset="80%" stop-color="#7c6aef" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ff6bb5" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="200" rx="16" fill="url(#bgGrad)"/>
+
+  <!-- Decorative bottom line -->
+  <rect x="0" y="194" width="1200" height="3" fill="url(#line)"/>
+
+  <!-- TOBESTABLE text -->
+  <text x="600" y="105" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="56" font-weight="800" letter-spacing="6" fill="url(#neon)">TOBESTABLE</text>
+
+  <!-- Tagline -->
+  <text x="600" y="145" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="400" letter-spacing="3" fill="#6b7a99">ANTI-INFLATIONARY SOLANA TOKEN</text>
+
+  <!-- Decorative dots on right -->
+  <circle cx="1020" cy="80" r="3" fill="#00e8c6" opacity="0.4"/>
+  <circle cx="1050" cy="100" r="2" fill="#7c6aef" opacity="0.3"/>
+  <circle cx="1080" cy="70" r="4" fill="#ff6bb5" opacity="0.2"/>
+  <circle cx="1100" cy="110" r="2.5" fill="#00ffdd" opacity="0.35"/>
+  <circle cx="1040" cy="130" r="3" fill="#7c6aef" opacity="0.25"/>
+</svg>

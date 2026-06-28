@@ -781,7 +781,7 @@
   .lang-option.active { color:var(--accent); }
   .lang-option-flag { font-size:16px; }
 </style>
-<script src="lang.js?v=phase-e"></script>
+<script src="lang.js?v=phase-f"></script>
 </head>
 <body>
 <!-- LOADING SCREEN -->
@@ -1211,7 +1211,7 @@
       <!-- SELL TO VAULT -->
       <div class="pa-card" id="paSellCard" style="padding:24px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-card);display:flex;flex-direction:column;">
         <div style="font-size:18px;font-weight:600;margin-bottom:8px;color:var(--text);" data-i18n="pa_sell_title">Sell to Vault @ $1</div>
-        <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;" data-i18n="pa_sell_desc">Send TOBE, receive SOL at exactly $1/TOBE. Defends the floor.</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;" data-i18n="pa_sell_desc">Send TOBE, receive SOL at exactly $1/TOBE. Defends the floor — active only once TOBE first reaches $1.</div>
         <div id="paSellMainnetNotice" style="display:none;padding:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:8px;margin-bottom:12px;font-size:12px;color:#ffc107;" data-i18n="pa_mainnet_only_notice">🚧 Mainnet only — devnet has no Pyth oracle</div>
         <label style="font-size:12px;color:var(--text-muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;" data-i18n="pa_sell_input_label">TOBE to send</label>
         <input type="number" id="paSellInput" min="1" step="1" placeholder="100" style="width:100%;padding:10px;margin-top:6px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);box-sizing:border-box;">
@@ -1471,7 +1471,7 @@
           <span data-i18n="faq_q16">What backs the floor when price drops below $1?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a16">The vault SOL reserve. Every mint sends 5 SOL into this PDA — accumulating up to 5,120 SOL across all 1,024 rounds. When market price drops below $1, anyone can call sell_to_vault: deliver TOBE, receive SOL at $1/TOBE drawn from this reserve. The bought-back TOBE returns to the vault to defend future ceiling breaches. The peg is honest: backed by verifiable on-chain SOL.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a16">The vault SOL reserve. Every mint sends 5 SOL into this PDA — up to 5,120 SOL across all 1,024 rounds. The floor stays OFF until TOBE first reaches $1 (a one-way on-chain latch via arm_floor), which blocks the early below-$1 drain. Once armed, anyone can call sell_to_vault when price is under $1: deliver TOBE, receive SOL at $1/TOBE from this reserve. The reserve is finite, so the floor is bounded — it holds only as far as the reserve reaches, not infinitely — but every lamport backing it is verifiable on-chain.</div></div>
       </div>
     </div>
   </section>

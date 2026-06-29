@@ -345,6 +345,32 @@ const TRANSLATIONS = {
   vs_raydium_pool:  { en: 'Raydium Pool',      tr: 'Raydium Havuzu',      es: 'Pool de Raydium',       pt: 'Pool da Raydium',      fr: 'Pool Raydium',          de: 'Raydium-Pool',          ru: 'Пул Raydium',              zh: 'Raydium 流动池', ja: 'Raydiumプール',      ko: 'Raydium 풀'      },
   vs_last_update:   { en: 'Last Update',       tr: 'Son Güncelleme',      es: 'Última Actualización',  pt: 'Última Atualização',   fr: 'Dernière mise à jour',  de: 'Letztes Update',        ru: 'Последнее обновление',     zh: '上次更新',        ja: '最終更新',           ko: '마지막 업데이트'  },
 
+  // ─── MAINNET PREP: launch banner (shown pre-init) ───
+  mainnet_launching_title: {
+    en: 'Mainnet launching',
+    tr: 'Mainnet başlıyor',
+    es: 'Lanzamiento de Mainnet',
+    pt: 'Lançamento da Mainnet',
+    fr: 'Lancement Mainnet',
+    de: 'Mainnet-Launch',
+    ru: 'Запуск Mainnet',
+    zh: '主网启动中',
+    ja: 'メインネット起動中',
+    ko: '메인넷 출시 중',
+  },
+  mainnet_launching_body: {
+    en: '— the program is being initialized. Minting will be live shortly. Refresh in a few minutes.',
+    tr: '— program başlatılıyor. Mint kısa sürede aktif olacak. Birkaç dakika sonra yenileyin.',
+    es: '— el programa se está inicializando. El minteo estará activo en breve. Actualice en unos minutos.',
+    pt: '— o programa está sendo inicializado. Cunhagem estará ativa em breve. Atualize em alguns minutos.',
+    fr: '— le programme est en cours d\'initialisation. Le mint sera bientôt actif. Actualisez dans quelques minutes.',
+    de: '— Programm wird initialisiert. Minting wird in Kürze live sein. In ein paar Minuten aktualisieren.',
+    ru: '— программа инициализируется. Минт скоро будет активен. Обновите через несколько минут.',
+    zh: '— 程序正在初始化。铸造很快就会上线。请几分钟后刷新。',
+    ja: '— プログラムを初期化中です。間もなくミントが開始されます。数分後に更新してください。',
+    ko: '— 프로그램이 초기화 중입니다. 곧 민팅이 활성화됩니다. 몇 분 후 새로고침하세요.',
+  },
+
   // ─── PHASE C: Live Market section (Raydium pool reads) ───
   lm_section_label:    { en: 'Real-time',           tr: 'Gerçek Zamanlı',         es: 'Tiempo Real',           pt: 'Tempo Real',             fr: 'Temps Réel',                de: 'Echtzeit',                ru: 'В реальном времени',           zh: '实时',           ja: 'リアルタイム',          ko: '실시간'                },
   lm_section_title:    { en: 'Live Market',         tr: 'Canlı Piyasa',           es: 'Mercado en Vivo',       pt: 'Mercado ao Vivo',        fr: 'Marché en Direct',          de: 'Live-Markt',              ru: 'Живой рынок',                  zh: '实时市场',       ja: 'ライブマーケット',      ko: '실시간 마켓'           },

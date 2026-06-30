@@ -441,6 +441,7 @@ const TRANSLATIONS = {
   product: { en: 'Product', tr: 'Ürün', es: 'Producto', pt: 'Produto', fr: 'Produit', de: 'Produkt', ru: 'Продукт', zh: '产品', ja: '製品', ko: '제품' },
   more: { en: 'More', tr: 'Daha Fazla', es: 'Más', pt: 'Mais', fr: 'Plus', de: 'Mehr', ru: 'Ещё', zh: '更多', ja: 'もっと', ko: '더 보기' },
   resources: { en: 'Resources', tr: 'Kaynaklar', es: 'Recursos', pt: 'Recursos', fr: 'Ressources', de: 'Ressourcen', ru: 'Ресурсы', zh: '资源', ja: 'リソース', ko: '리소스' },
+  community: { en: 'Community', tr: 'Topluluk', es: 'Comunidad', pt: 'Comunidade', fr: 'Communauté', de: 'Community', ru: 'Сообщество', zh: '社区', ja: 'コミュニティ', ko: '커뮤니티' },
   documentation: { en: 'Documentation', tr: 'Belgeler', es: 'Documentación', pt: 'Documentação', fr: 'Documentation', de: 'Dokumentation', ru: 'Документация', zh: '文档', ja: 'ドキュメント', ko: '문서' },
   manifesto_title: { en: 'Why TOBE Exists', tr: 'TOBE Neden Var', es: 'Por Qué Existe TOBE', pt: 'Por Que TOBE Existe', fr: 'Pourquoi TOBE Existe', de: 'Warum TOBE existiert', ru: 'Почему TOBE существует', zh: '为什么 TOBE 存在', ja: 'TOBE が存在する理由', ko: 'TOBE가 존재하는 이유' },
   manifesto_p1: {

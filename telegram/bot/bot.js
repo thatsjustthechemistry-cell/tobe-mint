@@ -10,6 +10,16 @@
 const TelegramBot = require('node-telegram-bot-api');
 const { Connection, PublicKey } = require('@solana/web3.js');
 
+// Load a local .env (KEY=VALUE per line) if present, so you can run with just
+// `node bot.js` — no need to set env vars on the command line. .env is gitignored.
+try {
+  const fs = require('fs'), path = require('path');
+  for (const line of fs.readFileSync(path.join(__dirname, '.env'), 'utf8').split('\n')) {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/);
+    if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
+  }
+} catch { /* no .env — rely on real env vars */ }
+
 // ── Config ────────────────────────────────────────────────────────────────
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 if (!TOKEN) { console.error('Set TELEGRAM_BOT_TOKEN'); process.exit(1); }

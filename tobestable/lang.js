@@ -140,7 +140,7 @@ const TRANSLATIONS = {
   current_round: { en: 'Current Round', tr: 'Mevcut Tur', es: 'Ronda Actual', pt: 'Rodada Atual', fr: 'Tour Actuel', de: 'Aktuelle Runde', ru: 'Текущий раунд', zh: '当前轮次', ja: '現在のラウンド', ko: '현재 라운드' },
   total_minted: { en: 'Total Minted', tr: 'Toplam Basılan', es: 'Total Acuñado', pt: 'Total Criado', fr: 'Total Frappé', de: 'Gesamt Gemintet', ru: 'Всего отчеканено', zh: '总铸造量', ja: '合計ミント', ko: '총 민트' },
   vault_balance: { en: 'Vault Balance', tr: 'Kasa Bakiyesi', es: 'Saldo de Bóveda', pt: 'Saldo do Cofre', fr: 'Solde du Coffre', de: 'Tresor-Guthaben', ru: 'Баланс хранилища', zh: '金库余额', ja: 'ボールト残高', ko: '볼트 잔액' },
-  treasury_revenue: { en: 'Treasury Revenue', tr: 'Hazine Geliri', es: 'Ingresos del Tesoro', pt: 'Receita do Tesouro', fr: 'Revenu du Trésor', de: 'Schatzeinnahmen', ru: 'Доход казны', zh: '国库收入', ja: '財務収入', ko: '재무 수입' },
+  treasury_revenue: { en: 'Total Mint Volume', tr: 'Toplam Basım Hacmi', es: 'Volumen Total de Acuñación', pt: 'Volume Total de Cunhagem', fr: 'Volume Total de Frappe', de: 'Gesamtes Mint-Volumen', ru: 'Общий объём минта', zh: '总铸造量', ja: '総ミント量', ko: '총 민팅 볼륨' },
   current_price: { en: 'Current Price', tr: 'Mevcut Fiyat', es: 'Precio Actual', pt: 'Preço Atual', fr: 'Prix Actuel', de: 'Aktueller Preis', ru: 'Текущая цена', zh: '当前价格', ja: '現在の価格', ko: '현재 가격' },
   vault_revenue: { en: 'Vault Revenue', tr: 'Kasa Geliri', es: 'Ingresos de Bóveda', pt: 'Receita do Cofre', fr: 'Revenu du Coffre', de: 'Tresor-Einnahmen', ru: 'Доход хранилища', zh: '金库收入', ja: 'ボールト収入', ko: '볼트 수입' },
   market_price: { en: 'Market Price', tr: 'Piyasa Fiyatı', es: 'Precio de Mercado', pt: 'Preço de Mercado', fr: 'Prix du Marché', de: 'Marktpreis', ru: 'Рыночная цена', zh: '市场价格', ja: '市場価格', ko: '시장 가격' },

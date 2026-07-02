@@ -1379,7 +1379,7 @@
           <span data-i18n="faq_q3">Can the team rug or change the rules?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a3">No. The smart contract controls all minting and vault operations through PDAs (Program Derived Addresses). The authority can pause/unpause for emergencies and update the treasury address, but cannot mint extra tokens, drain the vault, or change the supply curve. All actions are verifiable on-chain.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a3">No rug is possible. The authority cannot mint extra tokens and cannot change the 1,024-round supply curve — everything runs through PDAs and is verifiable on-chain. It can only pause/unpause for emergencies and update the treasury address. The one legacy instruction that could move vault funds to a chosen destination (seed_pool) was removed in a security audit, so that path no longer exists. After the authority migrates to the DAO, remaining admin actions need a 2-of-3 council vote. Control is bounded and collective.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
@@ -1471,7 +1471,7 @@
           <span data-i18n="faq_q16">What backs the floor when price drops below $1?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a16">The vault SOL reserve. Every mint sends 5 SOL into this PDA — up to 5,120 SOL across all 1,024 rounds. The floor stays OFF until TOBE first reaches $1 (a one-way on-chain latch via arm_floor), which blocks the early below-$1 drain. Once armed, anyone can call sell_to_vault when price is under $1: deliver TOBE, receive SOL at $1/TOBE from this reserve. The reserve is finite, so the floor is bounded — it holds only as far as the reserve reaches, not infinitely — but every lamport backing it is verifiable on-chain.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a16">The vault SOL reserve. Every mint sends 5 SOL into this PDA — up to 5,120 SOL across all 1,024 rounds. The floor stays OFF until TOBE genuinely reaches $1, when the 2-of-3 council arms it permanently via a one-way on-chain latch (arm_floor). Arming is council-gated (a security-audit hardening) so the latch cannot be flash-manipulated on early. Once armed, anyone can call sell_to_vault when price is under $1: deliver TOBE, receive SOL at $1/TOBE from this reserve. The reserve is finite, so the floor is bounded — it holds only as far as the reserve reaches, not infinitely — but every lamport backing it is verifiable on-chain.</div></div>
       </div>
     </div>
   </section>

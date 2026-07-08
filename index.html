@@ -2712,6 +2712,23 @@
       const tx = new solanaWeb3.Transaction();
       tx.add(createATAInstruction(minterPk, minterPk, tobeMintPk));
       const discriminator = new Uint8Array([0x42, 0x97, 0xfd, 0xe0, 0x60, 0x93, 0x1e, 0xab]);
+      // Optional referrer (from ?ref=<pubkey>, stored in localStorage): logged
+      // on-chain via msg! in mint_tobe. No reward/fee — purely a recorded credit.
+      // Borsh Option<Pubkey>: 1 byte tag (0=None, 1=Some) + 32 bytes if Some.
+      let referrerPk = null;
+      const storedRef = localStorage.getItem('tobe-referrer');
+      if (storedRef) {
+        try {
+          const candidate = new solanaWeb3.PublicKey(storedRef);
+          if (!candidate.equals(minterPk)) referrerPk = candidate;
+        } catch (e) { /* invalid stored ref, ignore */ }
+      }
+      const referrerArg = referrerPk
+        ? Uint8Array.from([1, ...referrerPk.toBytes()])
+        : Uint8Array.from([0]);
+      const ixData = new Uint8Array(discriminator.length + referrerArg.length);
+      ixData.set(discriminator, 0);
+      ixData.set(referrerArg, discriminator.length);
       tx.add(new solanaWeb3.TransactionInstruction({
         programId, keys: [
           { pubkey: minterPk, isSigner: true, isWritable: true },
@@ -2724,7 +2741,7 @@
           { pubkey: minterTobeAta, isSigner: false, isWritable: true },
           { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
           { pubkey: solanaWeb3.SystemProgram.programId, isSigner: false, isWritable: false },
-        ], data: Buffer.from(discriminator),
+        ], data: Buffer.from(ixData),
       }));
       tx.feePayer = minterPk;
       const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');

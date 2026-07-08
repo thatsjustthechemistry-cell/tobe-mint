@@ -1280,6 +1280,12 @@
       <div style="text-align:center;font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-top:10px;" data-i18n="fr_bar_caption">Split of buy_from_vault (ceiling-arbitrage) proceeds — only when TOBE ≥ $1</div>
     </div>
 
+    <div style="text-align:center;margin:0 auto 36px;">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);letter-spacing:1.5px;text-transform:uppercase;" data-i18n="fr_live_label">Founder revenue to date</div>
+      <div style="font-family:var(--mono);font-weight:700;font-size:clamp(32px,7vw,44px);color:var(--accent-2);margin-top:6px;" id="frFounderUsd">$0.00</div>
+      <div style="font-size:11px;color:var(--text-dim);margin:6px auto 0;max-width:420px;line-height:1.5;" data-i18n="fr_live_note">Stays at $0 until TOBE first trades at $1 — it only accrues from buy_from_vault (ceiling arbitrage). Live from on-chain state.</div>
+    </div>
+
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;max-width:920px;margin:0 auto;">
       <div class="contract-card" style="cursor:default;text-align:left;">
         <div class="cc-label" data-i18n="fr_c1_label">From minting</div>
@@ -3251,6 +3257,11 @@
     const totalMinted = round > 0 ? TOKENS_PER_UNIT * (round * (MAX_ROUNDS + 1) - (round * (round + 1)) / 2) : 0;
     const vault = onChainState ? Math.floor(onChainState.vaultBalance / 1e9) : Math.floor(totalMinted / 2);
     const released = onChainState ? Math.floor(onChainState.totalVaultReleased / 1e9) : 0;
+    // Founder revenue (live): each released TOBE was sold at $1 via buy_from_vault,
+    // so total $ paid = released; the founder got 50%. Naturally $0 until a
+    // buy_from_vault occurs (only at/above $1).
+    const founderUsd = released * 0.5;
+    try { const _fr = document.getElementById('frFounderUsd'); if (_fr) _fr.textContent = '$' + founderUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } catch (e) {}
     const circ = totalMinted - vault - released;
     const unminted = MAX_SUPPLY - totalMinted;
     const treasuryRevenue = round > 0 ? 512 + (round - 1) * 1024 + released : 0;

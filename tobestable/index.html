@@ -780,8 +780,37 @@
   .lang-option:hover { background:rgba(0,232,198,0.06); }
   .lang-option.active { color:var(--accent); }
   .lang-option-flag { font-size:16px; }
+
+  /* ═══ Phase D — Alive ═══ */
+  .orb-1 { opacity:0.10; } .orb-2 { opacity:0.09; } .orb-3 { opacity:0.07; }
+  [data-theme="light"] .orb-1 { opacity:0.07; } [data-theme="light"] .orb-2 { opacity:0.06; } [data-theme="light"] .orb-3 { opacity:0.05; }
+  @keyframes pdSheen { 0% { background-position:130% 0; } 100% { background-position:-30% 0; } }
+  .pd-sheen { background-image:linear-gradient(100deg, var(--text) 42%, var(--accent) 50%, var(--text) 58%); background-size:250% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:pdSheen 1.1s ease-out 1; }
+  @keyframes pdFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-4px); } }
+  .pd-float { animation:pdFloat 5s ease-in-out infinite; animation-delay:var(--pd-delay, 0s); }
+  @keyframes pdShim { 0% { text-shadow:0 0 0 rgba(0,232,198,0); } 35% { text-shadow:0 0 16px rgba(0,232,198,0.85); } 100% { text-shadow:0 0 0 rgba(0,232,198,0); } }
+  .pd-shimmer { animation:pdShim 0.9s ease-out 1; }
+  .pd-ticker { display:inline-flex; align-items:center; gap:8px; margin:14px 0 2px; padding:7px 14px; border-radius:100px; background:rgba(0,232,198,0.05); border:1px solid rgba(0,232,198,0.18); font-family:var(--mono); font-size:11px; color:var(--text-dim); max-width:100%; overflow:hidden; white-space:nowrap; }
+  .pd-ticker .pd-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 2s infinite; flex-shrink:0; }
+  .pd-ticker.pd-error .pd-dot { background:var(--danger); animation:none; }
+  .pd-badge { font-size:8.5px; letter-spacing:1px; padding:2px 6px; border-radius:4px; background:var(--accent); color:var(--bg); font-weight:700; flex-shrink:0; }
+  .pd-tick-text { overflow:hidden; text-overflow:ellipsis; }
+  .pd-glow { position:fixed; left:-500px; top:-500px; width:260px; height:260px; border-radius:50%; background:radial-gradient(circle, rgba(0,232,198,0.10) 0%, transparent 65%); pointer-events:none; transform:translate(-50%,-50%); z-index:1; opacity:0; transition:opacity 0.4s; }
+  .pd-glow.on { opacity:1; }
+  .pd-curve-dot { position:absolute; width:11px; height:11px; border-radius:50%; background:var(--accent); box-shadow:0 0 14px var(--accent); pointer-events:none; transform:translate(-50%,-50%); opacity:0; transition:opacity 0.15s; z-index:3; }
+  .pd-curve-dot.visible { opacity:1; }
+  .pd-heartbeat { max-width:1100px; margin:28px auto 0; padding:0 24px; display:flex; align-items:center; gap:9px; font-family:var(--mono); font-size:11px; color:var(--text-dim); }
+  @keyframes pdBeat { 0%,100% { transform:scale(1); opacity:1; } 12% { transform:scale(1.45); opacity:0.7; } 24% { transform:scale(1); } }
+  .pd-heart { width:7px; height:7px; border-radius:50%; background:var(--accent); animation:pdBeat 2.4s ease-in-out infinite; flex-shrink:0; }
+  .faq-item { transition:background 0.25s, box-shadow 0.25s; }
+  .faq-item:hover { background:rgba(0,232,198,0.03); box-shadow:inset 3px 0 0 rgba(0,232,198,0.4); }
+  .roadmap-phase.active .roadmap-dot { animation:pulse 2s infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .pd-sheen, .pd-float, .pd-shimmer, .pd-heart, .pd-ticker .pd-dot, .roadmap-phase.active .roadmap-dot { animation:none !important; }
+    .pd-glow { display:none !important; }
+  }
 </style>
-<script src="lang.js?v=phase-i"></script>
+<script src="lang.js?v=phase-d"></script>
 </head>
 <body>
 <!-- LOADING SCREEN -->
@@ -865,6 +894,12 @@
       <div class="hero-badge"><div class="pulse"></div> <span data-i18n="hero_badge">Live on Solana</span></div>
       <h1><span data-i18n="hero_title_1">Built To Be</span><br><span class="gradient" data-i18n="hero_title_2">Stable</span></h1>
       <div class="hero-typed"><span id="typedText"></span><span class="cursor"></span></div>
+
+      <div class="pd-ticker" id="pdTicker" style="display:none;">
+        <span class="pd-dot"></span>
+        <span class="pd-tick-text" id="pdTickerText"></span>
+        <span class="pd-badge" id="pdBadge" style="display:none;">DEVNET</span>
+      </div>
 
       <div class="hero-stats">
         <div class="hero-stat">
@@ -1084,6 +1119,7 @@
     <div class="curve-card">
       <div class="curve-canvas" id="curveCanvasWrap">
         <canvas id="curveChart"></canvas>
+        <div class="pd-curve-dot" id="pdCurveDot"></div>
         <div class="curve-tooltip" id="curveTooltip">
           <div class="curve-tooltip-round" id="ctRound">Round 1</div>
           <div class="curve-tooltip-tokens">Tokens: <strong id="ctTokens">1,048,576</strong></div>
@@ -1360,7 +1396,7 @@
     </div>
     <div class="explorer-grid" style="margin-top:16px;">
       <div class="explorer-card">
-        <div class="panel-title"><span data-i18n="top_holders">Top Holders</span> <span class="line"></span></div>
+        <div class="panel-title"><span data-i18n="alive_recent_minters">Recent Minters</span> <span class="line"></span></div>
         <ul class="holder-list" id="holderList"></ul>
         <div class="no-data" id="noHolders" data-i18n="no_holders_yet">No holders yet</div>
       </div>
@@ -1750,6 +1786,7 @@
       </div>
     </div>
   </div>
+  <div class="pd-heartbeat"><span class="pd-heart"></span><span id="pdHeartText"></span></div>
   <div class="footer-bottom">
     <span>TOBE &copy; 2026 — Built on Solana</span>
     <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">v3.0.0</span>
@@ -1840,7 +1877,7 @@
     try {
       const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
       const data = await res.json();
-      if (data?.solana?.usd) { SOL_USD = data.solana.usd; updateDisplay(currentRound); updateSim(); }
+      if (data?.solana?.usd) { SOL_USD = data.solana.usd; updateDisplay(currentRound); updateSim(); PD.emit('sol', SOL_USD); }
     } catch (e) { console.log('SOL price fetch failed, using fallback:', SOL_USD); }
   }
   fetchSolPrice();
@@ -1875,6 +1912,122 @@
       [owner.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mint.toBuffer()],
       ASSOCIATED_TOKEN_PROGRAM_ID
     )[0];
+  }
+
+  // ═══ Phase D — LifeEngine ═══
+  // One ticker (single persistent rAF), one section observer (wake/sleep), one data bus.
+  const PD = (() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const touch = window.matchMedia('(pointer: coarse)').matches;
+    const lite = touch || window.innerWidth < 768;
+    const noFx = reduced || lite; // cursor-driven effects off
+    const listeners = {};
+    const on = (ev, fn) => { (listeners[ev] = listeners[ev] || []).push(fn); };
+    const emit = (ev, data) => { (listeners[ev] || []).forEach(fn => { try { fn(data); } catch (e) {} }); };
+    const frameCbs = new Map();
+    const awake = new Set(['global']);
+    let rafId = null;
+    function loop() {
+      rafId = null;
+      if (document.hidden) return; // fully paused; resumed on visibilitychange
+      frameCbs.forEach(cb => { if (awake.has(cb.section)) { try { cb.fn(); } catch (e) {} } });
+      rafId = requestAnimationFrame(loop);
+    }
+    function ensureLoop() { if (!rafId && !document.hidden && frameCbs.size) rafId = requestAnimationFrame(loop); }
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) ensureLoop(); });
+    const ticker = (key, fn, section) => { if (reduced) return; frameCbs.set(key, { fn, section: section || 'global' }); ensureLoop(); };
+    let feed = [], feedState = 'loading'; // loading | ok | empty | error
+    const setFeed = items => { feed = items.slice(0, 50); feedState = feed.length ? 'ok' : 'empty'; emit('feed', feed); };
+    const feedError = () => { feedState = 'error'; emit('feed', feed); };
+    return { reduced, touch, lite, noFx, on, emit, ticker, awake,
+             get feed() { return feed; }, get feedState() { return feedState; }, setFeed, feedError };
+  })();
+
+  function formatAgo(ts) {
+    const s = Math.floor((Date.now() - ts) / 1000);
+    if (s < 60) return t('alive_just_now');
+    if (s < 3600) return Math.floor(s / 60) + t('alive_ago_m');
+    if (s < 86400) return Math.floor(s / 3600) + t('alive_ago_h');
+    return Math.floor(s / 86400) + t('alive_ago_d');
+  }
+  function pdShort(a) { return a.slice(0, 4) + '…' + a.slice(-4); }
+  function pdShimmer(el) {
+    if (!el || PD.reduced) return;
+    el.classList.remove('pd-shimmer'); void el.offsetWidth; el.classList.add('pd-shimmer');
+    el.addEventListener('animationend', () => el.classList.remove('pd-shimmer'), { once: true });
+  }
+
+  function pdInit() {
+    // section wake/sleep
+    const secs = document.querySelectorAll('section, footer');
+    secs.forEach((el, i) => { el.dataset.pdKey = el.classList.contains('hero') ? 'hero' : (el.id || (el.tagName === 'FOOTER' ? 'footer' : 'sec' + i)); });
+    const secObs = new IntersectionObserver(entries => entries.forEach(en => {
+      const key = en.target.dataset.pdKey;
+      if (en.isIntersecting) {
+        PD.awake.add(key);
+        if (!en.target.dataset.pdWoke) { // one-shot title sheen per page load
+          en.target.dataset.pdWoke = '1';
+          if (!PD.reduced) {
+            const title = en.target.querySelector('.section-title');
+            if (title) { title.classList.add('pd-sheen'); title.addEventListener('animationend', () => title.classList.remove('pd-sheen'), { once: true }); }
+          }
+        }
+      } else PD.awake.delete(key);
+    }), { threshold: 0.05 });
+    secs.forEach(el => secObs.observe(el));
+
+    // idle micro-float on non-tilt tiles — armed only after the reveal entrance finishes
+    if (!PD.reduced) {
+      document.querySelectorAll('.step, .admin-card').forEach((el, i) => {
+        if (el.hasAttribute('data-tilt')) return;
+        const arm = () => { el.style.setProperty('--pd-delay', ((i % 6) * 0.8) + 's'); el.classList.add('pd-float'); };
+        const host = el.classList.contains('reveal') ? el : el.closest('.reveal');
+        if (host && !host.classList.contains('visible')) host.addEventListener('transitionend', arm, { once: true });
+        else arm();
+      });
+    }
+
+    // page-wide cursor glow (lerped inside the ticker, 'global' key)
+    if (!PD.noFx) {
+      const glow = document.createElement('div'); glow.className = 'pd-glow'; document.body.appendChild(glow);
+      let tx = -500, ty = -500, gx = -500, gy = -500, seen = false;
+      document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; if (!seen) { seen = true; glow.classList.add('on'); } }, { passive: true });
+      PD.ticker('pd-glow', () => { gx += (tx - gx) * 0.12; gy += (ty - gy) * 0.12; glow.style.left = gx + 'px'; glow.style.top = gy + 'px'; });
+    }
+
+    // hero activity ticker (real feed events only)
+    const tick = document.getElementById('pdTicker'), tickText = document.getElementById('pdTickerText'), badge = document.getElementById('pdBadge');
+    if (badge && NETWORK === 'devnet') badge.style.display = '';
+    let tickIdx = 0;
+    function renderTick() {
+      if (!tick) return;
+      tick.classList.remove('pd-error');
+      if (PD.feedState === 'error') { tick.style.display = ''; tick.classList.add('pd-error'); tickText.textContent = t('alive_feed_error'); return; }
+      if (PD.feedState === 'empty') { tick.style.display = ''; tickText.textContent = t('alive_awaiting_mint'); return; }
+      if (!PD.feed.length) { tick.style.display = 'none'; return; }
+      tick.style.display = '';
+      const it = PD.feed[tickIdx % PD.feed.length];
+      const ago = it.time ? ' · ' + formatAgo(it.time.getTime()) : '';
+      tickText.textContent = it.referrer
+        ? pdShort(it.referrer) + ' ' + t('alive_referral_event') + ago
+        : pdShort(it.minter) + ' ' + t('alive_minted') + (it.round ? ' — ' + t('alive_round') + ' ' + it.round : '') + ago;
+    }
+    PD.on('feed', () => { tickIdx = 0; renderTick(); });
+    setInterval(() => { if (PD.reduced || !PD.awake.has('hero') || PD.feed.length < 2) return; tickIdx++; renderTick(); }, 4000);
+
+    // footer chain heartbeat
+    const heart = document.getElementById('pdHeartText');
+    function renderHeart() {
+      if (!heart) return;
+      const latest = PD.feed.length ? PD.feed[0] : null;
+      const left = latest && latest.time ? t('alive_last_event') + ' ' + formatAgo(latest.time.getTime()) : t('alive_awaiting_mint');
+      heart.textContent = left + '  ·  SOL $' + SOL_USD.toFixed(2);
+    }
+    PD.on('feed', renderHeart); PD.on('sol', renderHeart);
+    setInterval(renderHeart, 30000); renderHeart();
+
+    // explorer re-render when real events arrive
+    PD.on('feed', () => { try { updateExplorer(currentRound); } catch (e) {} });
   }
 
   function createATAInstruction(payer, owner, mint) {
@@ -2215,8 +2368,12 @@
     }
     drawCurve(); updateDisplay(0); updateSim();
     refreshFromChain().catch(() => console.log('Program not yet deployed'));
+    document.querySelectorAll('.dash-stat, .sim-card, .explorer-card').forEach(el => el.setAttribute('data-tilt', ''));
+    pdInit();
     initHeroParticles(); initTypingEffect(); initScrollProgress();
-    initTiltCards(); initActiveNav(); initParallaxOrbs(); initMagneticButton();
+    initActiveNav();
+    if (!PD.noFx) { initTiltCards(); initMagneticButton(); }
+    if (!PD.reduced) initParallaxOrbs();
     initBackToTop(); initPageLoader(); initCounters(); loadLeaderboard(); loadTxFeed(); initChainListener(); fetchRpcHealth();
     document.querySelectorAll('.step, .dash-stat, .sim-card, .admin-card, .explorer-card').forEach(el => {
       el.style.position = 'relative'; el.addEventListener('click', createRipple);
@@ -2313,6 +2470,7 @@
     const startVal = parseFloat(el.dataset.lastVal || '0');
     if (startVal === endVal) return;
     el.dataset.lastVal = endVal;
+    if (startVal > 0) pdShimmer(el); // live update (not initial paint) — one-shot digit shimmer
     const startTime = performance.now();
     function tick(now) {
       const progress = Math.min((now - startTime) / duration, 1);
@@ -2444,10 +2602,20 @@
           }
           if (tokensReceived > 0) {
             const time = tx.blockTime ? new Date(tx.blockTime * 1000) : null;
-            txItems.push({ minter, tokens: Math.round(tokensReceived), time, sig: sig.signature });
+            // referrer, when present, is real instruction data echoed in the program's msg! log
+            const logStr = (tx.meta.logMessages || []).join('\n');
+            const rm = logStr.match(/referr\w*[:=\s]+([1-9A-HJ-NP-Za-km-z]{32,44})/i);
+            // round is derivable: minter got half of 1024×(1025−N)
+            const total = Math.round(tokensReceived) * 2;
+            const rr = MAX_ROUNDS + 1 - total / TOKENS_PER_UNIT;
+            txItems.push({ minter, tokens: Math.round(tokensReceived), time, sig: sig.signature,
+                           referrer: rm ? rm[1] : null,
+                           round: Number.isInteger(rr) && rr >= 1 && rr <= MAX_ROUNDS ? rr : null });
           }
         } catch(e) { continue; }
       }
+      window._pdRetryMs = 0; // feed fetch succeeded — reset backoff
+      PD.setFeed(txItems);
       if (txItems.length === 0) { countEl.textContent = '0 ' + t('mint_plural'); return; }
       countEl.textContent = txItems.length + ' ' + (txItems.length === 1 ? t('mint_singular') : t('mint_plural'));
       list.innerHTML = '';
@@ -2460,15 +2628,14 @@
         li.innerHTML = `<span class="tx-round">${t('mint_label_tx')}</span><span class="tx-wallet"><a href="https://explorer.solana.com/address/${item.minter}${CLUSTER_PARAM}" target="_blank">${short}</a></span><span class="tx-amount">${formatCompact(item.tokens)} TOBE</span><span class="tx-time">${timeStr}</span>`;
         list.appendChild(li);
       });
-    } catch(e) { console.log('Tx feed error:', e); }
+    } catch(e) {
+      console.log('Tx feed error:', e);
+      PD.feedError(); // honest error state — never rendered as "awaiting first mint"
+      window._pdRetryMs = window._pdRetryMs ? Math.min(window._pdRetryMs * 6, 60000) : 5000; // 5s → 30s → 60s cap
+      setTimeout(() => loadTxFeed().catch(() => {}), window._pdRetryMs);
+    }
   }
-  function timeSince(date) {
-    const s = Math.floor((Date.now() - date.getTime()) / 1000);
-    if (s < 60) return s + 's ago';
-    if (s < 3600) return Math.floor(s/60) + 'm ago';
-    if (s < 86400) return Math.floor(s/3600) + 'h ago';
-    return Math.floor(s/86400) + 'd ago';
-  }
+  function timeSince(date) { return formatAgo(date.getTime()); }
 
   function initTiltCards() {
     document.querySelectorAll('[data-tilt]').forEach(card => {
@@ -2514,17 +2681,23 @@
   }
 
   function initMagneticButton() {
-    const btn = document.getElementById('mintBtn');
-    if (!btn) return;
-    btn.addEventListener('mousemove', e => {
-      const rect = btn.getBoundingClientRect();
-      btn.style.transform = `translate(${(e.clientX - rect.left - rect.width/2) * 0.15}px, ${(e.clientY - rect.top - rect.height/2) * 0.25}px)`;
-    });
-    btn.addEventListener('mouseleave', () => {
-      btn.style.transform = 'translate(0, 0)';
-      btn.style.transition = 'transform 0.4s cubic-bezier(0.16,1,0.3,1)';
-      setTimeout(() => btn.style.transition = '', 400);
-    });
+    const magnetize = btn => {
+      if (!btn || btn._pdMag) return;
+      btn._pdMag = true;
+      btn.addEventListener('mousemove', e => {
+        const rect = btn.getBoundingClientRect();
+        btn.style.transform = `translate(${(e.clientX - rect.left - rect.width/2) * 0.15}px, ${(e.clientY - rect.top - rect.height/2) * 0.25}px)`;
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.transform = 'translate(0, 0)';
+        btn.style.transition = 'transform 0.4s cubic-bezier(0.16,1,0.3,1)';
+        setTimeout(() => btn.style.transition = '', 400);
+      });
+    };
+    magnetize(document.getElementById('mintBtn'));
+    document.querySelectorAll('.hero-ctas .btn-primary').forEach(magnetize);
+    // connect buttons are recreated on disconnect — bind by delegation so new ones are picked up
+    document.addEventListener('mouseover', e => { const b = e.target.closest && e.target.closest('.connect-btn'); if (b) magnetize(b); }, { passive: true });
   }
 
   function initHeroParticles() {
@@ -2573,18 +2746,20 @@
       ctx.fillStyle = '#00e8c6'; ctx.textAlign = 'left'; ctx.fillText('50% YOU', sx + 20, curveY(sx) - 30);
       ctx.fillStyle = '#7c6aef'; ctx.fillText('50% VAULT', sx + 20, curveY(sx) + 40);
       ctx.globalAlpha = 1;
-      // Floating particles
-      for (let i = 0; i < 12; i++) {
+      // Floating particles (Phase D: 24 desktop / 12 lite)
+      const PN = PD.lite ? 12 : 24;
+      for (let i = 0; i < PN; i++) {
         const px = (Math.sin(t * 0.4 + i * 1.1) * 0.5 + 0.5) * w;
         const py = (Math.cos(t * 0.3 + i * 0.8) * 0.5 + 0.5) * h;
-        const sz = 1 + Math.sin(t + i) * 0.5;
+        const sz = 1.2 + Math.sin(t + i) * 0.6;
         ctx.beginPath(); ctx.arc(px, py, sz, 0, Math.PI * 2);
-        ctx.fillStyle = i % 3 === 0 ? 'rgba(0,232,198,0.15)' : i % 3 === 1 ? 'rgba(124,106,239,0.12)' : 'rgba(255,107,181,0.08)';
+        ctx.fillStyle = i % 3 === 0 ? 'rgba(0,232,198,0.22)' : i % 3 === 1 ? 'rgba(124,106,239,0.18)' : 'rgba(255,107,181,0.12)';
         ctx.fill();
       }
-      requestAnimationFrame(animate);
     }
-    animate();
+    // Phase D: this loop is driven by the LifeEngine ticker (wakes/sleeps with the hero section)
+    PD.ticker('hero-canvas', animate, 'hero');
+    if (PD.reduced) animate(); // reduced motion: paint one static frame
   }
 
   function createRipple(e) {
@@ -3144,7 +3319,6 @@
   document.getElementById('successModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeSuccessModal(); });
 
   function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-  function generateTxHash() { const c='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'; let h=''; for(let i=0;i<8;i++)h+=c[Math.floor(Math.random()*c.length)]; return h+'...'+c[Math.floor(Math.random()*c.length)]+c[Math.floor(Math.random()*c.length)]+c[Math.floor(Math.random()*c.length)]+c[Math.floor(Math.random()*c.length)]; }
 
   function playMintSound() {
     try {
@@ -3417,13 +3591,13 @@
     document.getElementById('expCirculating').textContent=formatCompact(circ);
     document.getElementById('expVaultBalance').textContent=formatCompact(vaultBal);
     document.getElementById('expRaised').textContent=(round*10).toLocaleString()+' SOL';
-    document.getElementById('expHolders').textContent=round>0?String(round):'0';
+    document.getElementById('expHolders').textContent=PD.feed.length?String(new Set(PD.feed.map(i=>i.minter)).size):(round>0?String(round):'0');
     const tbody=document.getElementById('mintTableBody');const noMints=document.getElementById('noMints');
     tbody.textContent='';
-    if(round>0){noMints.style.display='none';for(let r=round;r>Math.max(0,round-6);r--){const tokens=TOKENS_PER_UNIT*(MAX_ROUNDS+1-r);const tr=document.createElement('tr');const td1=document.createElement('td');td1.className='round-cell';td1.textContent='#'+r;const td2=document.createElement('td');td2.className='addr';td2.textContent=generateAddr(r);const td3=document.createElement('td');td3.className='amount';td3.textContent=tokens.toLocaleString();tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td3);tbody.appendChild(tr);}}else{noMints.style.display='block';}
+    if(PD.feed.length){noMints.style.display='none';PD.feed.slice(0,6).forEach(it=>{const tr=document.createElement('tr');const td1=document.createElement('td');td1.className='round-cell';td1.textContent=it.round?('#'+it.round):'—';const td2=document.createElement('td');td2.className='addr';const a=document.createElement('a');a.href='https://explorer.solana.com/address/'+it.minter+CLUSTER_PARAM;a.target='_blank';a.style.color='inherit';a.textContent=pdShort(it.minter);td2.appendChild(a);const td3=document.createElement('td');td3.className='amount';td3.textContent=it.tokens.toLocaleString();tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td3);tbody.appendChild(tr);});}else{noMints.style.display='block';}
     const holderList=document.getElementById('holderList');const noHolders=document.getElementById('noHolders');
     holderList.textContent='';
-    if(round>0){noHolders.style.display='none';let totalAll=0;const data=[];for(let r=1;r<=round;r++){const t=Math.floor((TOKENS_PER_UNIT*(MAX_ROUNDS+1-r))/2);totalAll+=t;data.push({addr:generateAddr(r),tokens:t});}data.sort((a,b)=>b.tokens-a.tokens).slice(0,5).forEach((h,i)=>{const li=document.createElement('li');li.className='holder-item';const rank=document.createElement('span');rank.className='holder-rank';rank.textContent=i+1;const addr=document.createElement('span');addr.className='holder-addr';addr.textContent=h.addr;const amt=document.createElement('span');amt.className='holder-amount';amt.textContent=formatCompact(h.tokens);const pct=document.createElement('span');pct.className='holder-pct';pct.textContent=(h.tokens/totalAll*100).toFixed(1)+'%';li.appendChild(rank);li.appendChild(addr);li.appendChild(amt);li.appendChild(pct);holderList.appendChild(li);});}else{noHolders.style.display='block';}
+    if(PD.feed.length){noHolders.style.display='none';const agg={};let totalAll=0;PD.feed.forEach(it=>{agg[it.minter]=(agg[it.minter]||0)+it.tokens;totalAll+=it.tokens;});Object.entries(agg).map(([addr,tk])=>({addr,tokens:tk})).sort((a,b)=>b.tokens-a.tokens).slice(0,5).forEach((h,i)=>{const li=document.createElement('li');li.className='holder-item';const rank=document.createElement('span');rank.className='holder-rank';rank.textContent=i+1;const addr=document.createElement('span');addr.className='holder-addr';addr.textContent=pdShort(h.addr);const amt=document.createElement('span');amt.className='holder-amount';amt.textContent=formatCompact(h.tokens);const pct=document.createElement('span');pct.className='holder-pct';pct.textContent=totalAll?(h.tokens/totalAll*100).toFixed(1)+'%':'';li.appendChild(rank);li.appendChild(addr);li.appendChild(amt);li.appendChild(pct);holderList.appendChild(li);});}else{noHolders.style.display='block';}
     drawPriceChart(round);
     // Update on-chain oracle fields in explorer
     const oracleEl = document.getElementById('expOraclePrice');
@@ -3436,7 +3610,6 @@
     } else { chainMintedEl.textContent = round > 0 ? formatCompact(totalMinted) : '—'; }
   }
 
-  function generateAddr(seed){const c='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';let a='',s=seed*7919;for(let i=0;i<4;i++){s=(s*31+17)%c.length;a+=c[s];}a+='...';for(let i=0;i<4;i++){s=(s*37+13)%c.length;a+=c[s];}return a;}
   function formatCompact(n){if(n>=1_000_000)return(n/1_000_000).toFixed(1)+'M';if(n>=1_000)return(n/1_000).toFixed(0)+'K';return n.toLocaleString();}
   function showToast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';setTimeout(()=>t.classList.remove('show'),3000);}
   function copyProgramId(){navigator.clipboard.writeText(PROGRAM_ID).then(()=>showToast('Program ID copied','success'));}
@@ -3483,12 +3656,26 @@
       if (ty < 0) ty = clientY - rect.top + 20;
       tooltip.style.left = tx + 'px';
       tooltip.style.top = ty + 'px';
+      // Phase D: glow dot rides the curve at the scrub position (same coordinate math as drawCurve)
+      const dot = document.getElementById('pdCurveDot');
+      if (dot) {
+        const cRect = canvas.getBoundingClientRect();
+        const w = cRect.width, mobile = w < 400;
+        const padTop = mobile ? 24 : 16, padBottom = 28, padLeft = mobile ? 42 : 55, padRight = mobile ? 8 : 16;
+        const plotW = w - padLeft - padRight, plotH = cRect.height - padTop - padBottom;
+        const dx = padLeft + ((data.round - 1) / (MAX_ROUNDS - 1)) * plotW;
+        const dy = padTop + plotH - (data.totalTokens / (TOKENS_PER_UNIT * MAX_ROUNDS)) * plotH;
+        dot.style.left = (cRect.left - rect.left + dx) + 'px';
+        dot.style.top = (cRect.top - rect.top + dy) + 'px';
+        dot.classList.add('visible');
+      }
     }
 
+    const hideCurveFx = () => { tooltip.classList.remove('visible'); const d = document.getElementById('pdCurveDot'); if (d) d.classList.remove('visible'); };
     canvas.addEventListener('mousemove', showCurveTooltip);
     canvas.addEventListener('touchmove', e => { e.preventDefault(); showCurveTooltip(e); }, { passive: false });
-    canvas.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
-    canvas.addEventListener('touchend', () => tooltip.classList.remove('visible'));
+    canvas.addEventListener('mouseleave', hideCurveFx);
+    canvas.addEventListener('touchend', hideCurveFx);
   })();
 
   // ── Hero Supply Ticker ──
@@ -3604,20 +3791,6 @@
     if (currentRound > 0) updateDisplay(currentRound);
   }
 
-  // ── Live Viewer Count ──
-  (function() {
-    const el = document.getElementById('liveViewerCount');
-    if (!el) return;
-    let base = Math.floor(Math.random() * 8) + 12;
-    el.textContent = base;
-    setInterval(() => {
-      base += Math.floor(Math.random() * 5) - 2;
-      if (base < 6) base = 6 + Math.floor(Math.random() * 3);
-      if (base > 40) base = 35 - Math.floor(Math.random() * 5);
-      el.textContent = base;
-    }, 8000 + Math.random() * 4000);
-  })();
-
   // ── Export Mint History CSV ──
   function exportMintCSV() {
     const rows = [['Round', 'Tokens Minted', 'Minter Gets (50%)', 'Vault Gets (50%)', 'Cost Per Token']];
@@ -3687,25 +3860,39 @@
     }
   });
 
-  // ── Real-time Chain Listener ──
+  // ── Real-time Chain Listener (Phase D: absorbed by LifeEngine — single subscription, watchdog reconnect) ──
   function initChainListener() {
-    try {
-      const wsUrl = RPC_URL.replace('https://', 'wss://');
-      connection.onLogs(programId, (logs) => {
-        if (logs.err) return;
-        console.log('New program activity detected');
-        // Debounce: wait a moment for confirmation, then refresh
-        clearTimeout(window._chainRefreshTimer);
-        window._chainRefreshTimer = setTimeout(() => {
-          refreshFromChain().catch(() => {});
-          loadTxFeed().catch(() => {});
-          if (connected && walletAddress) {
-            fetchWalletBalance(new solanaWeb3.PublicKey(walletAddress)).catch(() => {});
-          }
-        }, 2000);
-      }, 'confirmed');
-      console.log('Chain listener active');
-    } catch(e) { console.log('WebSocket listener not available:', e.message); }
+    let subId = null, backoff = 5000;
+    const handle = (logs) => {
+      if (logs.err) return;
+      console.log('New program activity detected');
+      PD.emit('chain-activity', Date.now());
+      // Debounce: wait a moment for confirmation, then refresh (loadTxFeed republshes the feed to the bus)
+      clearTimeout(window._chainRefreshTimer);
+      window._chainRefreshTimer = setTimeout(() => {
+        refreshFromChain().catch(() => {});
+        loadTxFeed().catch(() => {});
+        if (connected && walletAddress) {
+          fetchWalletBalance(new solanaWeb3.PublicKey(walletAddress)).catch(() => {});
+        }
+      }, 2000);
+    };
+    function subscribe() {
+      try {
+        subId = connection.onLogs(programId, handle, 'confirmed');
+        backoff = 5000;
+        console.log('Chain listener active');
+      } catch(e) { console.log('WebSocket listener not available:', e.message); }
+    }
+    subscribe();
+    // web3.js exposes no socket state — probe with getSlot; on failure, resubscribe with backoff
+    setInterval(() => {
+      connection.getSlot().catch(() => {
+        if (subId !== null) { try { connection.removeOnLogsListener(subId).catch(() => {}); } catch(e) {} subId = null; }
+        setTimeout(subscribe, backoff);
+        backoff = Math.min(backoff * 6, 60000);
+      });
+    }, 60000);
   }
 
   const HEADER_OFFSET=80;

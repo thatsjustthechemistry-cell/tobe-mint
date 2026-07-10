@@ -733,6 +733,20 @@ const TRANSLATIONS = {
   sim_vault_ceiling: { en: '$1.00 (ceiling)', tr: '$1,00 (tavan)', es: '$1,00 (techo)', pt: '$1,00 (teto)', fr: '$1,00 (plafond)', de: '$1,00 (Obergrenze)', ru: '$1,00 (потолок)', zh: '$1.00（上限）', ja: '$1.00（上限）', ko: '$1.00 (상한선)' },
   sim_yes_selling:   { en: 'Yes — selling at $1.00', tr: 'Evet — $1,00\'dan satıyor', es: 'Sí — vendiendo a $1,00', pt: 'Sim — vendendo a $1,00', fr: 'Oui — vente à $1,00', de: 'Ja — Verkauf bei $1,00', ru: 'Да — продаёт по $1,00', zh: '是——以 $1.00 出售', ja: 'はい — $1.00 で売却中', ko: '예 — $1.00에 판매 중' },
   sim_no_price:      { en: 'No (price < $1)', tr: 'Hayır (fiyat < $1)', es: 'No (precio < $1)', pt: 'Não (preço < $1)', fr: 'Non (prix < $1)', de: 'Nein (Preis < $1)', ru: 'Нет (цена < $1)', zh: '否（价格 < $1）', ja: 'いいえ（価格 < $1）', ko: '아니요 (가격 < $1)' },
+
+  // ─── PHASE D — ALIVE (activity ticker / heartbeat / feed states) ───
+  alive_just_now:       { en: 'just now', tr: 'az önce', es: 'ahora mismo', pt: 'agora mesmo', fr: 'à l’instant', de: 'gerade eben', ru: 'только что', zh: '刚刚', ja: 'たった今', ko: '방금 전' },
+  alive_ago_m:          { en: 'm ago', tr: ' dk önce', es: ' min', pt: ' min', fr: ' min', de: ' Min.', ru: ' мин назад', zh: ' 分钟前', ja: '分前', ko: '분 전' },
+  alive_ago_h:          { en: 'h ago', tr: ' sa önce', es: ' h', pt: ' h', fr: ' h', de: ' Std.', ru: ' ч назад', zh: ' 小时前', ja: '時間前', ko: '시간 전' },
+  alive_ago_d:          { en: 'd ago', tr: ' gün önce', es: ' d', pt: ' d', fr: ' j', de: ' Tg.', ru: ' дн назад', zh: ' 天前', ja: '日前', ko: '일 전' },
+  alive_minted:         { en: 'minted', tr: 'mint etti', es: 'minteó', pt: 'mintou', fr: 'a minté', de: 'hat gemintet', ru: 'сминтил', zh: '铸造了', ja: 'がミント', ko: '민트함' },
+  alive_round:          { en: 'Round', tr: 'Tur', es: 'Ronda', pt: 'Rodada', fr: 'Tour', de: 'Runde', ru: 'Раунд', zh: '轮', ja: 'ラウンド', ko: '라운드' },
+  alive_awaiting_mint:  { en: 'awaiting first mint', tr: 'ilk mint bekleniyor', es: 'esperando el primer mint', pt: 'aguardando o primeiro mint', fr: 'en attente du premier mint', de: 'warte auf ersten Mint', ru: 'ожидание первого минта', zh: '等待首次铸造', ja: '最初のミント待ち', ko: '첫 민트 대기 중' },
+  alive_feed_error:     { en: 'chain feed unavailable · retrying', tr: 'zincir akışı kullanılamıyor · yeniden deneniyor', es: 'feed de la cadena no disponible · reintentando', pt: 'feed da chain indisponível · tentando novamente', fr: 'flux chaîne indisponible · nouvelle tentative', de: 'Chain-Feed nicht verfügbar · neuer Versuch', ru: 'лента сети недоступна · повтор', zh: '链上数据不可用 · 重试中', ja: 'チェーンフィード利用不可 · 再試行中', ko: '체인 피드 사용 불가 · 재시도 중' },
+  alive_last_event:     { en: 'last on-chain event', tr: 'son zincir üstü işlem', es: 'último evento on-chain', pt: 'último evento on-chain', fr: 'dernier événement on-chain', de: 'letztes On-Chain-Event', ru: 'последнее событие в сети', zh: '最近链上事件', ja: '直近のオンチェーンイベント', ko: '최근 온체인 이벤트' },
+  alive_referral_event: { en: 'referred a minter', tr: 'bir minter yönlendirdi', es: 'refirió a un minter', pt: 'indicou um minter', fr: 'a parrainé un minteur', de: 'hat einen Minter geworben', ru: 'привёл минтера', zh: '推荐了一位铸造者', ja: 'ミンターを紹介', ko: '민터를 추천함' },
+  alive_devnet_badge:   { en: 'DEVNET', tr: 'DEVNET', es: 'DEVNET', pt: 'DEVNET', fr: 'DEVNET', de: 'DEVNET', ru: 'DEVNET', zh: 'DEVNET', ja: 'DEVNET', ko: 'DEVNET' },
+  alive_recent_minters: { en: 'Recent Minters', tr: 'Son Mint Edenler', es: 'Minters Recientes', pt: 'Minters Recentes', fr: 'Minteurs Récents', de: 'Aktuelle Minter', ru: 'Недавние минтеры', zh: '最近铸造者', ja: '最近のミンター', ko: '최근 민터' },
 };
 
 // ─── i18n Engine ───

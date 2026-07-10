@@ -795,8 +795,6 @@
   .pd-ticker.pd-error .pd-dot { background:var(--danger); animation:none; }
   .pd-badge { font-size:8.5px; letter-spacing:1px; padding:2px 6px; border-radius:4px; background:var(--accent); color:var(--bg); font-weight:700; flex-shrink:0; }
   .pd-tick-text { overflow:hidden; text-overflow:ellipsis; }
-  .pd-glow { position:fixed; left:-500px; top:-500px; width:260px; height:260px; border-radius:50%; background:radial-gradient(circle, rgba(0,232,198,0.10) 0%, transparent 65%); pointer-events:none; transform:translate(-50%,-50%); z-index:1; opacity:0; transition:opacity 0.4s; }
-  .pd-glow.on { opacity:1; }
   .pd-curve-dot { position:absolute; width:11px; height:11px; border-radius:50%; background:var(--accent); box-shadow:0 0 14px var(--accent); pointer-events:none; transform:translate(-50%,-50%); opacity:0; transition:opacity 0.15s; z-index:3; }
   .pd-curve-dot.visible { opacity:1; }
   .pd-heartbeat { max-width:1100px; margin:28px auto 0; padding:0 24px; display:flex; align-items:center; gap:9px; font-family:var(--mono); font-size:11px; color:var(--text-dim); }
@@ -807,7 +805,6 @@
   .roadmap-phase.active .roadmap-dot { animation:pulse 2s infinite; }
   @media (prefers-reduced-motion: reduce) {
     .pd-sheen, .pd-float, .pd-shimmer, .pd-heart, .pd-ticker .pd-dot, .roadmap-phase.active .roadmap-dot { animation:none !important; }
-    .pd-glow { display:none !important; }
   }
 </style>
 <script src="lang.js?v=phase-d"></script>
@@ -1985,14 +1982,6 @@
         if (host && !host.classList.contains('visible')) host.addEventListener('transitionend', arm, { once: true });
         else arm();
       });
-    }
-
-    // page-wide cursor glow (lerped inside the ticker, 'global' key)
-    if (!PD.noFx) {
-      const glow = document.createElement('div'); glow.className = 'pd-glow'; document.body.appendChild(glow);
-      let tx = -500, ty = -500, gx = -500, gy = -500, seen = false;
-      document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; if (!seen) { seen = true; glow.classList.add('on'); } }, { passive: true });
-      PD.ticker('pd-glow', () => { gx += (tx - gx) * 0.12; gy += (ty - gy) * 0.12; glow.style.left = gx + 'px'; glow.style.top = gy + 'px'; });
     }
 
     // hero activity ticker (real feed events only)

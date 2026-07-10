@@ -3,11 +3,11 @@
 **Status:** Approved
 **Date:** 2026-07-10
 **Repo:** tobe-mint
-**Scope:** Make the whole site feel alive: ambient motion + live on-chain pulse + cursor reactivity on every section, coordinated by one small "LifeEngine". No new libraries, no build step, no fabricated data.
+**Scope:** Make the whole site feel alive: ambient motion + live on-chain pulse + cursor reactivity on every section, coordinated by one small "LifeEngine" that absorbs the page's existing life systems instead of duplicating them. No new libraries, no build step, no fabricated data.
 
 ## Goal
 
-The site is technically animated (orbs, reveals, counters) but reads as static — motion is too subtle and nothing on the page visibly *happens*. Phase D makes the protocol's liveness visible: the page breathes on its own (motion), shows real chain activity (pulse), and responds to the visitor (reactivity) — everywhere, not just the hero.
+The site already has the *mechanics* of life (particles, tilt cards, a tx feed, an onLogs listener, animated counters) but still reads as static: effects are too subtle, scattered across independent init functions, and chain activity is buried in one dashboard widget instead of pulsing through the page. Phase D turns the existing systems up and wires them together: the page breathes on its own (motion), shows real chain activity everywhere (pulse), and responds to the visitor (reactivity).
 
 User-approved direction (2026-07-10, visual companion session):
 1. All three flavors: **A** cinematic motion, **B** live pulse, **C** reactive.
@@ -19,82 +19,105 @@ User-approved direction (2026-07-10, visual companion session):
 
 - WebGL / three.js / shader backgrounds (rejected for weight + mobile risk)
 - The mainnet flip itself (stays in held PR #13; Phase D must be compatible with it)
-- Refactoring the four existing IntersectionObservers or existing animations — the engine runs alongside them
 - Simulated/demo activity feeds of any kind
 - Restructuring lang.js (only additive keys)
+- New network calls beyond what exists (feed + websocket are absorbed, not duplicated)
+
+## Existing systems absorbed or extended (the inventory)
+
+All line refs are to root `index.html` (mirror gets identical changes).
+
+| Existing system | Phase D decision |
+|---|---|
+| `initChainListener()` — `onLogs(programId)` websocket (~3691) | **Absorbed.** Its callback now publishes to `dataBus` (`bus.emit('mint', …)`); stays the page's ONLY subscription. Gains reconnect-with-backoff. |
+| `loadTxFeed()` — `getSignaturesForAddress(20)` + per-tx parse (~2421) | **Absorbed.** Becomes the bus's history source on load; existing dashboard feed UI re-renders from bus data; hero ticker + footer heartbeat subscribe to the same events. One fetch pipeline, N consumers. |
+| `initHeroParticles()` — infinite rAF, 12 particles on hero canvas (~2530) | **Folded into the engine ticker.** Its `animate()` body becomes a ticker callback (same canvas, one draw path). Particle count raised to ≤24 desktop / 12 mobile. This is the one existing animation refactored — everything else is untouched. |
+| `initTiltCards()` — ±4° tilt + glow on `[data-tilt]` (~2473) | **Extended, not re-implemented.** It stays the only tilt code; Phase D adds `data-tilt` to more cards (tokenomics tiles, FAQ container cards) and gates the handler through engine wake/sleep + kill-switches. Existing ±4° kept. |
+| `initMagneticButton()` — magnetic pull on mint button (~2516) | **Extended.** Same function applied to the other primary CTAs (connect wallet, nav CTA). Existing pull parameters kept. |
+| Curve canvas tooltip — already scrubbable with Round/Tokens/You-get/Cost tooltip (~3447, HTML ~1086) | **Extended.** Existing tooltip content kept verbatim; Phase D adds only a glowing dot that rides the curve at the scrub position. |
+| `initCounters()` + `counterObserver` — count-up on scroll (~2329) | **Coexists untouched.** Already observer-gated. Phase D only adds a one-shot digit shimmer when a *live* value changes post-count-up (bus-driven). |
+| `revealObserver`, scroll-progress bar, orbs, confetti, `fetchSolPrice()` 5-min loop (~1839) | **Coexist untouched.** `fetchSolPrice` result is re-broadcast on the bus (`bus.emit('sol-price', v)`); the bus's SOL/USD source is THIS fetch, not the Pyth/Hermes one (~2043), which stays mint-flow-only. |
+| `timeSince()` — English-hardcoded relative time (~2465) | **Replaced by one i18n formatter** `formatAgo(ts)` using new lang keys (seconds→"just now", m/h/d). Existing feed UI switches to it; no second formatter. |
 
 ## What changes
 
-### LifeEngine (~300 lines, one `<script>` block in index.html)
+### LifeEngine (~250 lines, one `<script>` block in index.html)
 
 | Part | Responsibility |
 |---|---|
-| `ticker` | Single `requestAnimationFrame` loop; every JS-driven effect registers a callback with a target FPS budget; loop skips callbacks of sleeping sections |
-| `sections` | One `IntersectionObserver` over all `<section>` elements; entering view → `wake(section)` (CSS class + JS effects resume, one-shot effects fire once), leaving → `sleep(section)` |
-| `dataBus` | Tiny pub/sub: `bus.on('mint', fn)`, `bus.emit('sol-price', v)`. Sources publish; UI elements subscribe |
+| `ticker` | THE single persistent `requestAnimationFrame` loop page-wide. Callbacks register with a section key; loop skips callbacks of sleeping sections. `initHeroParticles`' loop folds in here. Existing one-shot animations (count-ups, confetti, curve-draw) keep their own short-lived rAFs. |
+| `sections` | One additional `IntersectionObserver` over all `<section>` elements; entering view → `wake(key)` (ticker callbacks resume; one-shot sheen fires once per page load), leaving → `sleep(key)` |
+| `dataBus` | Tiny pub/sub: `bus.on/emit` for `mint`, `sol-price`, `round-state`. Sources: absorbed `loadTxFeed` (history), absorbed `initChainListener` (live), existing `fetchSolPrice` + `refreshFromChain` (re-broadcast). |
 
-Kill-switches (checked at engine init and on change):
-- `prefers-reduced-motion: reduce` → no motion (particles, orbs-boost, shimmer, float, tilt, glow all off); live numbers still update instantly without count-up animation
-- `document.hidden` → ticker fully paused, websocket kept alive
-- Viewport < 768px → particle count halved, cursor glow + tilt disabled (no cursor on touch), everything else on
+Kill-switches (checked at init and on change):
+- `prefers-reduced-motion: reduce` → no motion (particles, orb-boost, shimmer, float, tilt, magnetic, glow off); live numbers update instantly without animation
+- `document.hidden` → ticker paused; websocket stays alive
+- **Touch device OR viewport < 768px** (one condition, stated once) → cursor glow, tilt, magnetic off; particle count halved; all else on
 
-### Flavor A — ambient motion (per section)
+### Flavor A — ambient motion
 
-- **Hero:** orb opacity raised 0.04/0.035/0.025 → ~0.10/0.09/0.07; particle field (≤24 desktop / 12 mobile, 2–3px, slow rise) drawn on the existing hero canvas; one-time shimmer sweep across the `<h1>` gradient on load and on section wake
-- **All other sections:** section title gets a one-time gradient sheen on first wake; cards (`.card`, tokenomics tiles, FAQ items) get slow idle micro-float (staggered delays, ±4px, 5s); stat digits get a single shimmer when their value changes
+- **Hero:** orb opacity 0.04/0.035/0.025 → ~0.10/0.09/0.07; particle field ≤24 (via absorbed hero-canvas callback); one-time shimmer sweep on the `<h1>` on load
+- **All sections:** title gets a one-time gradient sheen on first wake; **non-interactive** tiles get slow idle micro-float (CSS animation, ±4px, 5s, staggered). Float and tilt are mutually exclusive per element: `[data-tilt]` elements never get the float class (tilt owns their `transform`); float goes only on elements without tilt. Stat digits shimmer once when a live value changes.
 
-### Flavor B — live pulse (per section, all real data)
+### Flavor B — live pulse (all real data, one pipeline)
 
-Data sources (all already-configured constants: `PROGRAM_ID = CfdXZe…`, Helius devnet RPC):
-- **History on load:** `getSignaturesForAddress(PROGRAM_ID, {limit: 25})` → `getParsedTransactions` → extract mint events (minter, round, amount, referral if present in logs) with real block times
-- **Live:** `connection.onLogs(PROGRAM_ID)` → parse and prepend new events
-- **Reused:** existing 5-min SOL price fetch and existing `refreshFromChain()` round/vault state — re-broadcast through `dataBus` instead of duplicated fetches
+UI consumers of the bus:
+- **Hero:** one-line activity ticker cycling recent events: `8aVT…9vwH2 minted Round 2 · 2d ago` + `DEVNET` badge. Badge keyed off existing `NETWORK` constant — PR #13's mainnet flip removes it with zero extra work.
+- **Dashboard:** existing counters + feed UI now fed from the bus; round progress bar fills to real round fraction
+- **Roadmap:** "Devnet Launch" phase gets a pulsing live dot (true statement — it is live)
+- **Footer:** chain heartbeat — pulsing dot + `last on-chain event {formatAgo}` + SOL price (from the 5-min CoinGecko fetch via bus)
 
-UI consumers:
-- **Hero:** one-line activity ticker cycling the most recent events: `8aVT…9vwH2 minted Round 2 · 2d ago` + `DEVNET` badge. Badge text/visibility keyed off the existing `NETWORK` constant, so PR #13's mainnet flip removes it with zero extra work. Empty devnet history → honest fallback: `awaiting first mint · devnet`
-- **Dashboard:** existing stat numbers count up on section wake (once), then live-update via bus; round progress bar fills to real round fraction
-- **Roadmap:** "Devnet Launch" phase gets a pulsing live dot (real — it is live)
-- **Footer:** chain heartbeat — pulsing dot + `last on-chain event N ago` + SOL price, from real feed timestamps
+Feed states (honesty-complete):
+- History confirmed empty → `awaiting first mint · devnet`
+- History fetch FAILED → `chain feed unavailable · retrying` (never "awaiting first mint" on error), retry with backoff (5s → 30s → 60s cap)
+- Websocket drop → auto-resubscribe with same backoff; no UI flash
+- Event list capped at 50 in memory; ticker shows newest 10
 
-### Flavor C — reactive (page-wide)
+### Flavor C — reactive
 
-- **Cursor glow:** one fixed-position radial-gradient element (~240px, accent at ~0.12 alpha) following the pointer across the entire page via the ticker (lerped, cheap); hidden on touch/reduced-motion
-- **Curve section:** existing curve canvas becomes scrubbable — pointermove maps x → round 1..1024, moves a glow dot along the curve, tooltip shows `R{n} → {1024×(1025−n)} TOBE`; touch: tap-drag works the same
-- **Cards:** ≤2° perspective tilt toward cursor on hover (CSS transform, JS-set custom properties), accent border glow on hover
-- **Primary buttons:** magnetic pull ≤3px toward cursor within 40px proximity
-- **FAQ rows:** accent left-glow on hover
+- **Cursor glow:** one fixed-position radial element (~240px, accent ~0.12 alpha), lerped toward pointer inside the ticker; off on touch/<768px/reduced-motion
+- **Curve:** glow dot riding the existing scrub position (existing tooltip untouched)
+- **Cards:** existing tilt extended to more cards via `data-tilt` (see inventory)
+- **Buttons:** existing magnetic behavior applied to remaining primary CTAs
+- **FAQ rows:** accent left-glow on hover (CSS only)
 
-### i18n (additive keys, all 10 languages in lang.js)
+### i18n (additive keys, all 10 languages, both lang.js copies)
 
-`alive_minted` ("minted"), `alive_round` ("Round"), `alive_ago_m/h/d` ("m/h/d ago" forms), `alive_awaiting_mint` ("awaiting first mint"), `alive_last_event` ("last on-chain event"), `alive_devnet_badge` ("DEVNET" — likely untranslated but keyed), `alive_referral_event` ("referred a minter"). Ticker strings are composed from keys, never hardcoded English.
+`alive_just_now`, `alive_ago_m`, `alive_ago_h`, `alive_ago_d`, `alive_minted`, `alive_round`, `alive_awaiting_mint`, `alive_feed_error`, `alive_last_event`, `alive_referral_event`, `alive_devnet_badge`. Ticker/heartbeat strings composed from keys — no hardcoded English. `formatAgo()` consumes the ago-keys.
 
 ## Honesty constraints
 
 - Every displayed number is real chain data or a real protocol constant
-- Devnet events always carry the badge; badge auto-drops only when `NETWORK === 'mainnet'`
-- Real relative timestamps even when unflattering ("14d ago" is fine; sparse honest beats busy fake)
-- No fabricated addresses, counts, or activity of any kind
+- Devnet events always badged; badge auto-drops only when `NETWORK === 'mainnet'`
+- Real relative timestamps even when unflattering ("14d ago" beats fake-busy)
+- Error states never masquerade as empty states (failed fetch ≠ "awaiting first mint")
+- No fabricated addresses, counts, or activity
 
 ## Performance budget
 
-- Exactly one `requestAnimationFrame` loop page-wide (existing one-shot anims may run their own short rAFs as today)
-- Idle CPU with tab hidden: ~0% from Phase D code (ticker paused)
-- Off-screen sections: zero JS work (observer-gated)
-- No new network calls beyond the two feed calls on load + one websocket subscription
-- Added code target: ≤ ~350 lines JS + ~150 lines CSS per file; no external requests, no new deps
+- Exactly ONE persistent rAF loop page-wide (the ticker, absorbing the hero-particle loop). One-shot animations excluded.
+- Tab hidden → ticker paused, ~0% CPU from Phase D code
+- Off-screen sections → zero JS work (observer-gated)
+- Network: unchanged call count (absorbed pipeline; no new endpoints)
+- Added code ≤ ~350 lines JS + ~150 lines CSS per file; no new deps
 
 ## Files touched
 
-- `index.html` (root) — engine, CSS, section hooks
-- `tobestable/index.html` — mirrored copy (existing sync pattern)
-- `lang.js` + `tobestable/lang.js` — additive keys, 10 languages
+- `index.html` (root) + `tobestable/index.html` (mirror, identical)
+- `lang.js` + `tobestable/lang.js` (additive keys, 10 languages)
+
+## Definition of done
+
+- [ ] Hero ticker cycles real devnet history with DEVNET badge (test mints from PR #25/#27 sessions visible)
+- [ ] Feed error state appears when RPC blocked (devtools offline test), recovers on retry
+- [ ] Counters, tilt, magnetic, curve tooltip behave exactly as before where they already existed
+- [ ] New: sheen on section wake, micro-float on non-tilt tiles, cursor glow, curve dot, roadmap pulse, footer heartbeat
+- [ ] `prefers-reduced-motion` → static-but-live; hidden tab 60s → CPU near zero; 375px width clean in both themes
+- [ ] Curve scrub math: R1 → 1,048,576; R1024 → 1,024 (`1024×(1025−N)`)
+- [ ] All 11 new lang keys present in all 10 languages, both copies; no hardcoded English in new UI
+- [ ] Mirrors byte-identical to root files
+- [ ] Wallet connect, mint, language switch, theme toggle regression-checked
 
 ## Verification
 
-1. Local serve (`serve.ps1` / `python -m http.server`), check hero ticker shows the real devnet mint history (test mints from PR #25/#27 sessions exist on devnet)
-2. Both themes (dark/light), desktop + 375px mobile width
-3. `prefers-reduced-motion` emulation → static-but-live behavior
-4. Tab hidden 60s → CPU near zero (Performance monitor)
-5. Curve scrub: R1 → 1,048,576; R1024 → 1,024; matches contract math `1024×(1025−N)`
-6. Mirror copies byte-identical to root versions
-7. Existing flows untouched: wallet connect, mint, language switch, theme toggle
+Local serve via `python -m http.server`; both themes; desktop + 375px; reduced-motion emulation; Performance-panel CPU check with tab hidden; devnet feed live check.

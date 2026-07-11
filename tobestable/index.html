@@ -166,6 +166,15 @@
 
   /* ═══ HEADER ═══ */
   header { position:sticky; top:0; z-index:9995; background:rgba(10,11,15,0.88); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:0 24px; }
+  .pd-stat-ribbon-wrap { margin:0 -24px; border-top:1px solid var(--border); overflow:hidden; white-space:nowrap; background:var(--bg-card); }
+  .pd-stat-ribbon { display:inline-flex; animation:pdStatScroll 34s linear infinite; padding:7px 0; }
+  .pd-stat-ribbon:hover { animation-play-state:paused; }
+  @keyframes pdStatScroll { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+  .pd-stat-item { display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:11px; letter-spacing:0.3px; color:var(--text-dim); padding:0 20px; border-right:1px solid var(--border); white-space:nowrap; flex-shrink:0; }
+  .pd-stat-item b { color:var(--text); font-weight:600; }
+  .pd-stat-item .pd-stat-accent { color:var(--warning); }
+  .pd-stat-item .pd-stat-mint { color:var(--accent); }
+  @media (prefers-reduced-motion: reduce) { .pd-stat-ribbon { animation:none !important; } }
   .header-inner { max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; height:64px; }
   .logo { font-family:var(--display); font-weight:800; font-size:18px; letter-spacing:0.5px; display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); }
   .logo-icon { width:30px; height:30px; border-radius:8px; overflow:hidden; flex-shrink:0; }
@@ -840,7 +849,7 @@
     .pd-odo-strip { transition:none !important; }
   }
 </style>
-<script src="lang.js?v=phase-d2"></script>
+<script src="lang.js?v=phase-d3"></script>
 </head>
 <body>
 <!-- LOADING SCREEN -->
@@ -898,6 +907,9 @@
         <span></span><span></span><span></span>
       </button>
     </div>
+  </div>
+  <div class="pd-stat-ribbon-wrap">
+    <div class="pd-stat-ribbon" id="pdStatRibbon"></div>
   </div>
 </header>
 
@@ -2079,7 +2091,41 @@
     });
   }
 
+  // protocol-facts ribbon under the header — static constants + two live fields (round, price)
+  function pdStatItem(labelKey, valueBuilder) {
+    const item = document.createElement('span'); item.className = 'pd-stat-item';
+    item.appendChild(document.createTextNode(t(labelKey) + ' '));
+    valueBuilder(item);
+    return item;
+  }
+  function pdBuildStatRibbon() {
+    const ribbon = document.getElementById('pdStatRibbon');
+    if (!ribbon) return;
+    ribbon.textContent = '';
+    const build = () => {
+      const frag = document.createDocumentFragment();
+      frag.appendChild(pdStatItem('ribbon_round', el => { const b = document.createElement('b'); b.className = 'pd-ribbon-round'; b.textContent = '—'; el.appendChild(b); }));
+      frag.appendChild(pdStatItem('ribbon_price', el => {
+        const b = document.createElement('b'); b.className = 'pd-ribbon-price'; b.textContent = '—'; el.appendChild(b);
+        const acc = document.createElement('span'); acc.className = 'pd-stat-accent';
+        acc.textContent = ' ◆ ' + t('ribbon_vault_ceiling') + ' $1.00'; el.appendChild(acc);
+      }));
+      frag.appendChild(pdStatItem('ribbon_hard_cap', el => { const b = document.createElement('b'); b.textContent = MAX_SUPPLY.toLocaleString() + ' TOBE'; el.appendChild(b); }));
+      frag.appendChild(pdStatItem('ribbon_governance', el => { const b = document.createElement('b'); b.textContent = t('ribbon_governance_val'); el.appendChild(b); }));
+      frag.appendChild(pdStatItem('ribbon_mint_split', el => { const b = document.createElement('b'); b.textContent = t('ribbon_mint_split_val'); el.appendChild(b); }));
+      frag.appendChild(pdStatItem('ribbon_network', el => { const b = document.createElement('b'); b.className = 'pd-stat-mint'; b.textContent = 'SOLANA ' + NETWORK.toUpperCase(); el.appendChild(b); }));
+      frag.appendChild(pdStatItem('ribbon_admin_key', el => { const b = document.createElement('b'); b.textContent = t('ribbon_admin_key_val'); el.appendChild(b); }));
+      return frag;
+    };
+    ribbon.appendChild(build()); ribbon.appendChild(build()); // duplicate for the seamless scroll loop
+  }
+  function pdUpdateStatRibbon(round, price) {
+    document.querySelectorAll('.pd-ribbon-round').forEach(el => { el.textContent = (round > 0 ? round : '—') + ' / ' + MAX_ROUNDS; });
+    document.querySelectorAll('.pd-ribbon-price').forEach(el => { el.textContent = round > 0 ? '$' + price.toFixed(4) : '—'; });
+  }
+
   function pdInit() {
+    pdBuildStatRibbon();
     // section wake/sleep
     const secs = document.querySelectorAll('section, footer');
     secs.forEach((el, i) => { el.dataset.pdKey = el.classList.contains('hero') ? 'hero' : (el.id || (el.tagName === 'FOOTER' ? 'footer' : 'sec' + i)); });
@@ -3512,6 +3558,7 @@
     document.getElementById('currentRoundDisplay').textContent = round > 0 ? round : '—';
     if (round > 0) pdFlashPrice(document.getElementById('priceDisplay'), price, 4, '$');
     else document.getElementById('priceDisplay').textContent = '—';
+    pdUpdateStatRibbon(round, price);
     document.getElementById('vaultDisplay').textContent = round > 0 ? formatCompact(vaultBalance) : '—';
     document.getElementById('roundBig').textContent = round;
 

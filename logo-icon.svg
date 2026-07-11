@@ -1,16 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <defs>
-    <linearGradient id="neon" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00ffdd"/>
-      <stop offset="40%" stop-color="#00e8c6"/>
-      <stop offset="70%" stop-color="#7c6aef"/>
-      <stop offset="100%" stop-color="#ff6bb5"/>
-    </linearGradient>
-  </defs>
-
-  <!-- No background — transparent -->
-
-  <!-- Crisp neon T -->
-  <rect x="116" y="116" width="280" height="56" rx="4" fill="url(#neon)"/>
-  <rect x="228" y="116" width="56" height="280" rx="4" fill="url(#neon)"/>
+  <!-- Header mark: ticker [T] — matches the stat ribbon's terminal aesthetic -->
+  <path d="M150 96 h-54 v320 h54" fill="none" stroke="#6b7a90" stroke-width="34" stroke-linecap="round"/>
+  <path d="M362 96 h54 v320 h-54" fill="none" stroke="#6b7a90" stroke-width="34" stroke-linecap="round"/>
+  <rect x="146" y="150" width="220" height="44" rx="5" fill="#00e8c6"/>
+  <rect x="234" y="150" width="44" height="212" rx="5" fill="#00e8c6"/>
 </svg>

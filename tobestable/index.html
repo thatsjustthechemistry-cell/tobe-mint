@@ -179,9 +179,12 @@
      is duplicated elsewhere on the page. Reduced-motion still suppresses the
      flashier effects (flash-tick, odometer, confetti, spring, particles). */
   .header-inner { max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; height:64px; }
-  .logo { font-family:var(--display); font-weight:800; font-size:18px; letter-spacing:0.5px; display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); }
-  .logo-icon { width:30px; height:30px; border-radius:8px; overflow:hidden; flex-shrink:0; }
+  .logo { font-family:var(--mono); font-weight:700; font-size:17px; letter-spacing:1px; display:flex; align-items:center; gap:9px; text-decoration:none; color:var(--text); }
+  .logo-icon { width:26px; height:26px; flex-shrink:0; }
   .logo-icon img { width:100%; height:100%; display:block; }
+  @keyframes logoCursorBlink { 0%,49% { opacity:1; } 50%,100% { opacity:0; } }
+  .logo-cursor { display:inline-block; width:8px; height:3px; background:var(--accent); margin-left:1px; animation:logoCursorBlink 1.1s steps(1) infinite; }
+  @media (prefers-reduced-motion: reduce) { .logo-cursor { animation:none; } }
   .nav-links { display:flex; align-items:center; gap:32px; }
   .nav-links .connect-btn, .nav-links .connected-badge { display:none !important; }
   .nav-links a { font-size:13px; color:var(--text-dim); text-decoration:none; font-weight:500; transition:color 0.2s; letter-spacing:0.2px; }
@@ -241,7 +244,7 @@
   .step:hover { border-color:var(--border-accent); }
   .step::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg, var(--accent), var(--accent-2)); opacity:0; transition:opacity 0.3s; }
   .step:hover::before { opacity:1; }
-  .step-num { font-family:var(--mono); font-size:48px; font-weight:700; color:rgba(0,232,198,0.08); position:absolute; top:16px; right:20px; line-height:1; }
+  .step-num { font-family:var(--mono); font-size:12px; font-weight:700; color:var(--bg); background:var(--accent); width:26px; height:26px; border-radius:7px; display:flex; align-items:center; justify-content:center; position:absolute; top:20px; right:20px; line-height:1; }
   .step-title { font-family:var(--display); font-size:18px; font-weight:700; margin-bottom:10px; }
   .step-desc { font-size:14px; color:var(--text-dim); line-height:1.7; }
 
@@ -433,7 +436,7 @@
   /* ═══ SECURITY ═══ */
   .security-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
   .security-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:28px 24px; }
-  .security-icon { font-size:24px; margin-bottom:16px; }
+  .security-icon { width:26px; height:26px; margin-bottom:16px; color:var(--accent); }
   .security-card h4 { font-family:var(--heading); font-size:15px; color:var(--text); margin-bottom:8px; }
   .security-card p { color:var(--text-dim); font-size:13px; line-height:1.7; }
   .security-link { display:inline-flex; align-items:center; gap:6px; color:var(--accent); font-size:13px; font-weight:600; text-decoration:none; margin-top:12px; transition:gap 0.2s; }
@@ -535,7 +538,6 @@
     .contract-copy { width:100%; }
     .steps { grid-template-columns:1fr; gap:16px; }
     .step { padding:28px 24px; }
-    .step-num { font-size:14px; }
     .step-title { font-size:18px; }
     .step-desc { font-size:14px; }
     .section-label { font-size:12px; }
@@ -751,7 +753,7 @@
   .tutorial-steps { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:32px; }
   .tutorial-step { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:24px 20px; text-align:center; position:relative; }
   .tutorial-step-num { font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:1px; margin-bottom:12px; }
-  .tutorial-step-icon { font-size:28px; margin-bottom:12px; }
+  .tutorial-step-icon { width:28px; height:28px; margin-bottom:12px; color:var(--accent); }
   .tutorial-step-title { font-family:var(--heading); font-size:14px; color:var(--text); margin-bottom:8px; font-weight:600; }
   .tutorial-step-desc { font-size:13px; color:var(--text-dim); line-height:1.6; }
   .tutorial-step-arrow { position:absolute; right:-14px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:16px; z-index:1; }
@@ -870,7 +872,7 @@
   <div class="header-inner">
     <a class="logo" href="#">
       <div class="logo-icon"><img src="logo-icon.svg" alt="TOBE"></div>
-      TOBE
+      TOBE<span class="logo-cursor"></span>
     </a>
     <nav class="nav-links nav-desktop" id="navLinksDesktop" aria-label="Main navigation">
       <a href="#how" data-i18n="nav_how">How It Works</a>
@@ -1007,28 +1009,28 @@
     <div class="tutorial-steps">
       <div class="tutorial-step reveal">
         <div class="tutorial-step-num"><span data-i18n="step_word">STEP</span> 1</div>
-        <div class="tutorial-step-icon">👛</div>
+        <svg class="tutorial-step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 000 4h4v-4z"/></svg>
         <div class="tutorial-step-title" data-i18n="tut_step1_title">Get a Solana Wallet</div>
         <div class="tutorial-step-desc" data-i18n="tut_step1_desc">Download Phantom, Backpack, or Solflare — available as browser extensions and mobile apps. On mobile, open this site from the wallet's built-in browser.</div>
         <span class="tutorial-step-arrow">→</span>
       </div>
       <div class="tutorial-step reveal reveal-delay-1">
         <div class="tutorial-step-num"><span data-i18n="step_word">STEP</span> 2</div>
-        <div class="tutorial-step-icon">💵</div>
+        <svg class="tutorial-step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
         <div class="tutorial-step-title" data-i18n="tut_step2_title">Fund Your Wallet</div>
         <div class="tutorial-step-desc" data-i18n="tut_step2_desc">Add 10 SOL + a tiny amount of SOL (&lt; 0.01) for transaction fees to your wallet.</div>
         <span class="tutorial-step-arrow">→</span>
       </div>
       <div class="tutorial-step reveal reveal-delay-2">
         <div class="tutorial-step-num"><span data-i18n="step_word">STEP</span> 3</div>
-        <div class="tutorial-step-icon">🔗</div>
+        <svg class="tutorial-step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7a5 5 0 010-10h2"/><path d="M15 7h2a5 5 0 110 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
         <div class="tutorial-step-title" data-i18n="tut_step3_title">Connect & Mint</div>
         <div class="tutorial-step-desc" data-i18n="tut_step3_desc">Click "Connect Wallet" above, select your wallet, then hit "Mint" on the dashboard. Approve the transaction.</div>
         <span class="tutorial-step-arrow">→</span>
       </div>
       <div class="tutorial-step reveal reveal-delay-3">
         <div class="tutorial-step-num"><span data-i18n="step_word">STEP</span> 4</div>
-        <div class="tutorial-step-icon">✅</div>
+        <svg class="tutorial-step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         <div class="tutorial-step-title" data-i18n="tut_step4_title">Receive $TOBE</div>
         <div class="tutorial-step-desc" data-i18n="tut_step4_desc">Your tokens arrive in seconds. 50% to you, 50% to the vault. Check your balance in the dashboard above.</div>
       </div>
@@ -1709,34 +1711,34 @@
     <div class="section-desc" data-i18n="sec_desc">How TOBE earns your trust — through code, not promises.</div>
     <div class="security-grid">
       <div class="security-card">
-        <div class="security-icon">🔐</div>
+        <svg class="security-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
         <h4 data-i18n="sec_pda">PDA-Controlled Vault</h4>
         <p data-i18n="sec_pda_desc">The vault is controlled by a Program Derived Address — no human holds the keys. Only the smart contract can move vault tokens, and only at the SOL ceiling price.</p>
       </div>
       <div class="security-card">
-        <div class="security-icon">📜</div>
+        <svg class="security-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
         <h4 data-i18n="sec_open">Open Source</h4>
         <p data-i18n="sec_open_desc">Every line of the smart contract is publicly verifiable. Full source code, tests, and project config available on GitHub.</p>
         <a class="security-link" href="https://github.com/thatsjustthechemistry-cell/tobestable-protocol" target="_blank">View on GitHub →</a>
         <a class="security-link" href="https://explorer.solana.com/address/CfdXZeKuFRGMxiedAHBemm35rANWPvcriwPEyh9KVnBQ" target="_blank">View on Solana Explorer →</a>
       </div>
       <div class="security-card">
-        <div class="security-icon">🧪</div>
+        <svg class="security-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 3v2h6V3"/><path d="M8 12l2 2 4-4"/></svg>
         <h4 data-i18n="sec_tests">29/29 Tests Passing</h4>
         <p data-i18n="sec_tests_desc">Full test suite covering mint mechanics, vault operations, LP lock/unlock, pause/unpause, authority transfer, and edge cases. Every function tested before deployment.</p>
       </div>
       <div class="security-card">
-        <div class="security-icon">⏸️</div>
+        <svg class="security-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
         <h4 data-i18n="sec_pause">Emergency Pause</h4>
         <p data-i18n="sec_pause_desc">The authority can pause minting in case of a discovered vulnerability — but cannot drain funds, change supply, or alter the curve. A safety net, not a backdoor.</p>
       </div>
       <div class="security-card">
-        <div class="security-icon">🔄</div>
+        <svg class="security-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
         <h4 data-i18n="sec_auth">2-Step Authority Transfer</h4>
         <p data-i18n="sec_auth_desc">Authority changes require proposal + acceptance from the new address. No single transaction can hijack control. Prevents accidental or malicious transfers.</p>
       </div>
       <div class="security-card">
-        <div class="security-icon">🔒</div>
+        <svg class="security-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/><circle cx="12" cy="16" r="1.4" fill="currentColor" stroke="none"/></svg>
         <h4 data-i18n="sec_lp">LP Lock (2 Years)</h4>
         <p data-i18n="sec_lp_desc">Liquidity provider tokens are locked on-chain for 2 years after DEX listing. No rug pulls — the liquidity stays where it belongs.</p>
       </div>
@@ -1800,7 +1802,7 @@
 
   <div class="footer-inner">
     <div class="footer-brand">
-      <a class="logo" href="#"><div class="logo-icon"><img src="logo-icon.svg" alt="TOBE"></div> TOBE</a>
+      <a class="logo" href="#"><div class="logo-icon"><img src="logo-icon.svg" alt="TOBE"></div> TOBE<span class="logo-cursor"></span></a>
       <p data-i18n="footer_desc">The anti-inflationary token built to reach and hold $1. Fully transparent — every action on-chain, every stat on this page.</p>
     </div>
     <div class="footer-columns">

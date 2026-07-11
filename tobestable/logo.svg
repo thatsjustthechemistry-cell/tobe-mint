@@ -1,18 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <defs>
-    <linearGradient id="neon" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00ffdd"/>
-      <stop offset="40%" stop-color="#00e8c6"/>
-      <stop offset="70%" stop-color="#7c6aef"/>
-      <stop offset="100%" stop-color="#ff6bb5"/>
-    </linearGradient>
-  </defs>
-
-  <!-- Dark background -->
-  <rect width="512" height="512" rx="112" fill="#060810"/>
-
-  <!-- Horizontal bar: 280 wide -->
-  <rect x="116" y="116" width="280" height="56" rx="4" fill="url(#neon)"/>
-  <!-- Vertical bar: 280 tall (same as horizontal width) -->
-  <rect x="228" y="116" width="56" height="280" rx="4" fill="url(#neon)"/>
+  <!-- Favicon / loader: Peg Split — half mint (ceiling), half dark (floor), split at the $1 line -->
+  <defs><clipPath id="rr"><rect width="512" height="512" rx="112"/></clipPath></defs>
+  <g clip-path="url(#rr)">
+    <rect width="512" height="256" fill="#00e8c6"/>
+    <rect y="256" width="512" height="256" fill="#0d1117"/>
+    <rect x="122" y="128" width="268" height="60" rx="8" fill="#071018"/>
+    <rect x="226" y="128" width="60" height="130" fill="#071018"/>
+    <rect x="226" y="256" width="60" height="130" rx="8" fill="#00e8c6"/>
+  </g>
 </svg>

@@ -806,6 +806,38 @@
   @media (prefers-reduced-motion: reduce) {
     .pd-sheen, .pd-float, .pd-shimmer, .pd-heart, .pd-ticker .pd-dot, .roadmap-phase.active .roadmap-dot { animation:none !important; }
   }
+
+  /* ticker ribbon (marquee) */
+  .pd-ticker-viewport { flex:1; min-width:0; overflow:hidden; }
+  .pd-ticker-track { display:inline-flex; white-space:nowrap; animation: pdTickerScroll 26s linear infinite; }
+  .pd-ticker-track:hover { animation-play-state:paused; }
+  .pd-ticker-item { padding:0 16px; border-right:1px solid var(--border); }
+  .pd-ticker-item:last-child { border-right:none; }
+  @keyframes pdTickerScroll { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+
+  /* flash-tick price color */
+  @keyframes pdFlashUp { 0% { color:var(--success); text-shadow:0 0 10px rgba(0,232,198,0.6); } 100% { color:inherit; text-shadow:none; } }
+  @keyframes pdFlashDown { 0% { color:var(--danger); text-shadow:0 0 10px rgba(255,71,87,0.6); } 100% { color:inherit; text-shadow:none; } }
+  .pd-flash-up { animation:pdFlashUp 1s ease-out 1; }
+  .pd-flash-down { animation:pdFlashDown 1s ease-out 1; }
+
+  /* rolling odometer digits */
+  .pd-odo-col { position:relative; display:inline-block; width:0.62em; height:1em; overflow:hidden; vertical-align:top; }
+  .pd-odo-strip { position:absolute; left:0; top:0; display:flex; flex-direction:column; transition:transform 1.1s cubic-bezier(0.2,0.9,0.25,1); }
+  .pd-odo-strip span { height:1em; line-height:1; }
+  .pd-odo-sep { display:inline-block; }
+
+  /* spring-bounce CTA + contained confetti */
+  @keyframes pdSpring { 0% { transform:scale(1); } 35% { transform:scale(1.06); } 60% { transform:scale(0.97); } 100% { transform:scale(1); } }
+  .pd-spring { animation:pdSpring 0.5s cubic-bezier(0.34,1.56,0.64,1) 1; }
+  .btn-primary:hover, .sticky-mint-btn:hover { transform:translateY(-1px) scale(1.015); }
+  .pd-confetti-bit { position:fixed; width:6px; height:6px; border-radius:2px; pointer-events:none; z-index:9999; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pd-ticker-track { animation:none !important; }
+    .pd-flash-up, .pd-flash-down, .pd-spring { animation:none !important; }
+    .pd-odo-strip { transition:none !important; }
+  }
 </style>
 <script src="lang.js?v=phase-d"></script>
 </head>
@@ -894,7 +926,7 @@
 
       <div class="pd-ticker" id="pdTicker" style="display:none;">
         <span class="pd-dot"></span>
-        <span class="pd-tick-text" id="pdTickerText"></span>
+        <div class="pd-ticker-viewport"><div class="pd-ticker-track" id="pdTickerTrack"></div></div>
         <span class="pd-badge" id="pdBadge" style="display:none;">DEVNET</span>
       </div>
 
@@ -1783,7 +1815,7 @@
       </div>
     </div>
   </div>
-  <div class="pd-heartbeat"><span class="pd-heart"></span><span id="pdHeartText"></span></div>
+  <div class="pd-heartbeat"><span class="pd-heart"></span><span id="pdHeartLeft"></span><span>&nbsp;&middot;&nbsp;SOL $</span><span id="pdHeartPrice">&mdash;</span></div>
   <div class="footer-bottom">
     <span>TOBE &copy; 2026 — Built on Solana</span>
     <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">v3.0.0</span>
@@ -1968,6 +2000,74 @@
     el.classList.remove('pd-shimmer'); void el.offsetWidth; el.classList.add('pd-shimmer');
     el.addEventListener('animationend', () => el.classList.remove('pd-shimmer'), { once: true });
   }
+  function pdFlashPrice(el, newVal, decimals, prefix) {
+    if (!el) return;
+    const text = (prefix || '') + newVal.toFixed(decimals == null ? 4 : decimals);
+    const prev = el.dataset.pdPrev;
+    el.textContent = text;
+    if (prev !== undefined && prev !== text && !PD.reduced) {
+      const up = parseFloat(text) >= parseFloat(prev);
+      el.classList.remove('pd-flash-up', 'pd-flash-down'); void el.offsetWidth;
+      el.classList.add(up ? 'pd-flash-up' : 'pd-flash-down');
+    }
+    el.dataset.pdPrev = text;
+  }
+  function pdOdometer(el, text) {
+    if (!el) return;
+    if (el.dataset.pdOdoText === text) return;
+    el.dataset.pdOdoText = text;
+    if (PD.reduced) { el.textContent = text; return; }
+    el.textContent = '';
+    let digitIdx = 0;
+    String(text).split('').forEach(ch => {
+      if (!/[0-9]/.test(ch)) {
+        const sep = document.createElement('span');
+        sep.className = 'pd-odo-sep'; sep.textContent = ch;
+        el.appendChild(sep);
+        return;
+      }
+      const col = document.createElement('span'); col.className = 'pd-odo-col';
+      const strip = document.createElement('span'); strip.className = 'pd-odo-strip';
+      for (let d = 0; d < 10; d++) { const s = document.createElement('span'); s.textContent = String(d); strip.appendChild(s); }
+      col.appendChild(strip); el.appendChild(col);
+      const digit = parseInt(ch, 10), delay = digitIdx++ * 45;
+      requestAnimationFrame(() => { setTimeout(() => { strip.style.transform = 'translateY(-' + digit + 'em)'; }, delay); });
+    });
+  }
+  function pdConfettiBurst(x, y, count) {
+    if (PD.reduced) return;
+    const colors = ['#00e8c6', '#7c6aef', '#ff6bb5', '#00d68f', '#ffc048'];
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('span');
+      p.className = 'pd-confetti-bit';
+      p.style.background = colors[i % colors.length];
+      p.style.left = x + 'px'; p.style.top = y + 'px';
+      document.body.appendChild(p);
+      const angle = Math.PI * 2 * (i / count) + (Math.random() * 0.5 - 0.25);
+      const dist = 40 + Math.random() * 50;
+      const tx = Math.cos(angle) * dist, ty = Math.sin(angle) * dist - 15;
+      const rot = Math.random() * 360 - 180;
+      const anim = p.animate([
+        { transform: 'translate(-50%,-50%) translate(0,0) rotate(0deg)', opacity: 1 },
+        { transform: 'translate(-50%,-50%) translate(' + tx + 'px,' + ty + 'px) rotate(' + rot + 'deg)', opacity: 0 }
+      ], { duration: 600 + Math.random() * 250, easing: 'cubic-bezier(0.2,0.7,0.3,1)' });
+      anim.onfinish = () => p.remove();
+    }
+  }
+  function initSpringCTA() {
+    if (PD.reduced) return;
+    const targets = new Set();
+    const mint = document.getElementById('mintBtn'); if (mint) targets.add(mint);
+    document.querySelectorAll('.hero-ctas .btn-primary, .sticky-mint-btn').forEach(el => targets.add(el));
+    targets.forEach(btn => {
+      if (btn._pdSpring) return; btn._pdSpring = true;
+      btn.addEventListener('click', () => {
+        btn.classList.remove('pd-spring'); void btn.offsetWidth; btn.classList.add('pd-spring');
+        const r = btn.getBoundingClientRect();
+        pdConfettiBurst(r.left + r.width / 2, r.top + r.height / 2, 14);
+      });
+    });
+  }
 
   function pdInit() {
     // section wake/sleep
@@ -1999,33 +2099,36 @@
       });
     }
 
-    // hero activity ticker (real feed events only)
-    const tick = document.getElementById('pdTicker'), tickText = document.getElementById('pdTickerText'), badge = document.getElementById('pdBadge');
+    // hero activity ticker (real feed events only) — scrolling marquee ribbon
+    const tick = document.getElementById('pdTicker'), tickTrack = document.getElementById('pdTickerTrack'), badge = document.getElementById('pdBadge');
     if (badge && NETWORK === 'devnet') badge.style.display = '';
-    let tickIdx = 0;
+    function pdTickerItem(text) { const s = document.createElement('span'); s.className = 'pd-ticker-item'; s.textContent = text; return s; }
     function renderTick() {
-      if (!tick) return;
+      if (!tick || !tickTrack) return;
       tick.classList.remove('pd-error');
-      if (PD.feedState === 'error') { tick.style.display = ''; tick.classList.add('pd-error'); tickText.textContent = t('alive_feed_error'); return; }
-      if (PD.feedState === 'empty') { tick.style.display = ''; tickText.textContent = t('alive_awaiting_mint'); return; }
+      tickTrack.textContent = '';
+      if (PD.feedState === 'error') { tick.style.display = ''; tick.classList.add('pd-error'); tickTrack.appendChild(pdTickerItem(t('alive_feed_error'))); return; }
+      if (PD.feedState === 'empty') { tick.style.display = ''; tickTrack.appendChild(pdTickerItem(t('alive_awaiting_mint'))); return; }
       if (!PD.feed.length) { tick.style.display = 'none'; return; }
       tick.style.display = '';
-      const it = PD.feed[tickIdx % PD.feed.length];
-      const ago = it.time ? ' · ' + formatAgo(it.time.getTime()) : '';
-      tickText.textContent = it.referrer
-        ? pdShort(it.referrer) + ' ' + t('alive_referral_event') + ago
-        : pdShort(it.minter) + ' ' + t('alive_minted') + (it.round ? ' — ' + t('alive_round') + ' ' + it.round : '') + ago;
+      const items = PD.feed.slice(0, 10).map(it => {
+        const ago = it.time ? ' · ' + formatAgo(it.time.getTime()) : '';
+        return it.referrer
+          ? pdShort(it.referrer) + ' ' + t('alive_referral_event') + ago
+          : pdShort(it.minter) + ' ' + t('alive_minted') + (it.round ? ' — ' + t('alive_round') + ' ' + it.round : '') + ago;
+      });
+      // duplicate the row for a seamless scroll loop (translateX -50% wraps back to an identical copy)
+      items.concat(items).forEach(text => tickTrack.appendChild(pdTickerItem(text)));
     }
-    PD.on('feed', () => { tickIdx = 0; renderTick(); });
-    setInterval(() => { if (PD.reduced || !PD.awake.has('hero') || PD.feed.length < 2) return; tickIdx++; renderTick(); }, 4000);
+    PD.on('feed', renderTick);
 
-    // footer chain heartbeat
-    const heart = document.getElementById('pdHeartText');
+    // footer chain heartbeat, with flash-tick on the SOL price
+    const heartLeft = document.getElementById('pdHeartLeft'), heartPrice = document.getElementById('pdHeartPrice');
     function renderHeart() {
-      if (!heart) return;
+      if (!heartLeft) return;
       const latest = PD.feed.length ? PD.feed[0] : null;
-      const left = latest && latest.time ? t('alive_last_event') + ' ' + formatAgo(latest.time.getTime()) : t('alive_awaiting_mint');
-      heart.textContent = left + '  ·  SOL $' + SOL_USD.toFixed(2);
+      heartLeft.textContent = latest && latest.time ? t('alive_last_event') + ' ' + formatAgo(latest.time.getTime()) : t('alive_awaiting_mint');
+      pdFlashPrice(heartPrice, SOL_USD, 2);
     }
     PD.on('feed', renderHeart); PD.on('sol', renderHeart);
     setInterval(renderHeart, 30000); renderHeart();
@@ -2376,6 +2479,7 @@
     pdInit();
     initHeroParticles(); initTypingEffect(); initScrollProgress();
     initActiveNav();
+    initSpringCTA();
     PD.initFxIfReady(); // idempotent — also self-heals if viewport metrics settle late (see PD's resize/load listeners)
     if (!PD.reduced) initParallaxOrbs();
     initBackToTop(); initPageLoader(); initCounters(); loadLeaderboard(); loadTxFeed(); initChainListener(); fetchRpcHealth();
@@ -3382,6 +3486,12 @@
     const prev = prevValues[id] || 0;
     if (prev !== newVal) { animateValue(el, prev, newVal, 600, formatter); prevValues[id] = newVal; }
   }
+  function odometerStat(id, newVal, formatter) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const prev = prevValues[id] || 0;
+    if (prev !== newVal) { pdOdometer(el, formatter(newVal)); prevValues[id] = newVal; }
+  }
 
   // ── Display Update ──
   function updateDisplay(round) {
@@ -3395,7 +3505,8 @@
     const treasuryRev = round > 0 ? round * MINT_COST_SOL : 0;
 
     document.getElementById('currentRoundDisplay').textContent = round > 0 ? round : '—';
-    document.getElementById('priceDisplay').textContent = round > 0 ? '$' + price.toFixed(4) : '—';
+    if (round > 0) pdFlashPrice(document.getElementById('priceDisplay'), price, 4, '$');
+    else document.getElementById('priceDisplay').textContent = '—';
     document.getElementById('vaultDisplay').textContent = round > 0 ? formatCompact(vaultBalance) : '—';
     document.getElementById('roundBig').textContent = round;
 
@@ -3407,8 +3518,8 @@
     const roiTokenValue = minterTokens * 1;
     el('roiValue').textContent = round > 0 ? '$' + roiTokenValue.toLocaleString() : '—';
     el('roiPct').textContent = round > 0 ? '+' + ((roiTokenValue / (MINT_COST_SOL * SOL_USD) - 1) * 100).toFixed(0) + '%' : '—';
-    animateStat('totalMintedDisplay', totalMinted, v => formatDisplay(Math.round(v)));
-    animateStat('dashVault', vaultBalance, v => formatDisplay(Math.round(v)));
+    odometerStat('totalMintedDisplay', totalMinted, v => formatDisplay(Math.round(v)));
+    odometerStat('dashVault', vaultBalance, v => formatDisplay(Math.round(v)));
     animateStat('dashTreasury', treasuryRev, v => Math.round(v).toLocaleString() + ' SOL');
     updateHeroTicker(totalMinted);
     // Use on-chain price oracle if available, otherwise compute locally
@@ -3591,7 +3702,7 @@
   function updateExplorer(round) {
     const totalMinted=round>0?TOKENS_PER_UNIT*(round*(MAX_ROUNDS+1)-(round*(round+1))/2):0;
     const circ=Math.floor(totalMinted/2);const vaultBal=totalMinted-circ;
-    document.getElementById('expSupply').textContent=formatCompact(totalMinted);
+    pdOdometer(document.getElementById('expSupply'), formatCompact(totalMinted));
     document.getElementById('expCirculating').textContent=formatCompact(circ);
     document.getElementById('expVaultBalance').textContent=formatCompact(vaultBal);
     document.getElementById('expRaised').textContent=(round*10).toLocaleString()+' SOL';

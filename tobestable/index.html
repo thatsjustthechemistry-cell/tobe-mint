@@ -1915,9 +1915,22 @@
   // One ticker (single persistent rAF), one section observer (wake/sleep), one data bus.
   const PD = (() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const touch = window.matchMedia('(pointer: coarse)').matches;
-    const lite = touch || window.innerWidth < 768;
-    const noFx = reduced || lite; // cursor-driven effects off
+    const touchMQ = window.matchMedia('(pointer: coarse)');
+    // touch/lite are re-derived live (not frozen at parse time): some environments finish
+    // resizing the viewport asynchronously after this script runs, and a real user can also
+    // resize a desktop window or rotate a tablet across the 768px breakpoint mid-session.
+    let touch = touchMQ.matches;
+    let lite = touch || window.innerWidth < 768;
+    function recomputeViewport() { touch = touchMQ.matches; lite = touch || window.innerWidth < 768; maybeInitFx(); }
+    let resizeT;
+    window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(recomputeViewport, 150); }, { passive: true });
+    window.addEventListener('load', () => setTimeout(recomputeViewport, 50)); // catch late-settling layout
+    let fxInitialized = false;
+    function maybeInitFx() {
+      if (!(reduced || lite) && !fxInitialized && typeof initTiltCards === 'function') {
+        fxInitialized = true; initTiltCards(); initMagneticButton();
+      }
+    }
     const listeners = {};
     const on = (ev, fn) => { (listeners[ev] = listeners[ev] || []).push(fn); };
     const emit = (ev, data) => { (listeners[ev] || []).forEach(fn => { try { fn(data); } catch (e) {} }); };
@@ -1936,8 +1949,10 @@
     let feed = [], feedState = 'loading'; // loading | ok | empty | error
     const setFeed = items => { feed = items.slice(0, 50); feedState = feed.length ? 'ok' : 'empty'; emit('feed', feed); };
     const feedError = () => { feedState = 'error'; emit('feed', feed); };
-    return { reduced, touch, lite, noFx, on, emit, ticker, awake,
-             get feed() { return feed; }, get feedState() { return feedState; }, setFeed, feedError };
+    return { reduced, on, emit, ticker, awake,
+             get touch() { return touch; }, get lite() { return lite; }, get noFx() { return reduced || lite; },
+             get feed() { return feed; }, get feedState() { return feedState; }, setFeed, feedError,
+             initFxIfReady: maybeInitFx };
   })();
 
   function formatAgo(ts) {
@@ -2361,7 +2376,7 @@
     pdInit();
     initHeroParticles(); initTypingEffect(); initScrollProgress();
     initActiveNav();
-    if (!PD.noFx) { initTiltCards(); initMagneticButton(); }
+    PD.initFxIfReady(); // idempotent — also self-heals if viewport metrics settle late (see PD's resize/load listeners)
     if (!PD.reduced) initParallaxOrbs();
     initBackToTop(); initPageLoader(); initCounters(); loadLeaderboard(); loadTxFeed(); initChainListener(); fetchRpcHealth();
     document.querySelectorAll('.step, .dash-stat, .sim-card, .admin-card, .explorer-card').forEach(el => {

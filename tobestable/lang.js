@@ -749,6 +749,20 @@ const TRANSLATIONS = {
   alive_recent_minters: { en: 'Recent Minters', tr: 'Son Mint Edenler', es: 'Minters Recientes', pt: 'Minters Recentes', fr: 'Minteurs Récents', de: 'Aktuelle Minter', ru: 'Недавние минтеры', zh: '最近铸造者', ja: '最近のミンター', ko: '최근 민터' },
   alive_team_mint:      { en: 'team test-minted', tr: 'ekip test mint etti', es: 'minteó de prueba (equipo)', pt: 'mintou de teste (equipe)', fr: 'a testé un mint (équipe)', de: 'Team-Testmint', ru: 'тестовый минт команды', zh: '团队测试铸造', ja: 'チームのテストミント', ko: '팀 테스트 민트' },
   alive_team_tag:       { en: '(team)', tr: '(ekip)', es: '(equipo)', pt: '(equipe)', fr: '(équipe)', de: '(Team)', ru: '(команда)', zh: '（团队）', ja: '（チーム）', ko: '(팀)' },
+
+  // ─── HEADER STAT RIBBON — deliberately untranslated (Bloomberg/terminal-style
+  // all-caps technical labels, same convention as alive_devnet_badge above) ───
+  ribbon_round:          { en: 'ROUND', tr: 'ROUND', es: 'ROUND', pt: 'ROUND', fr: 'ROUND', de: 'ROUND', ru: 'ROUND', zh: 'ROUND', ja: 'ROUND', ko: 'ROUND' },
+  ribbon_price:          { en: 'PRICE', tr: 'PRICE', es: 'PRICE', pt: 'PRICE', fr: 'PRICE', de: 'PRICE', ru: 'PRICE', zh: 'PRICE', ja: 'PRICE', ko: 'PRICE' },
+  ribbon_vault_ceiling:  { en: 'VAULT CEILING', tr: 'VAULT CEILING', es: 'VAULT CEILING', pt: 'VAULT CEILING', fr: 'VAULT CEILING', de: 'VAULT CEILING', ru: 'VAULT CEILING', zh: 'VAULT CEILING', ja: 'VAULT CEILING', ko: 'VAULT CEILING' },
+  ribbon_hard_cap:       { en: 'HARD CAP', tr: 'HARD CAP', es: 'HARD CAP', pt: 'HARD CAP', fr: 'HARD CAP', de: 'HARD CAP', ru: 'HARD CAP', zh: 'HARD CAP', ja: 'HARD CAP', ko: 'HARD CAP' },
+  ribbon_governance:     { en: 'GOVERNANCE', tr: 'GOVERNANCE', es: 'GOVERNANCE', pt: 'GOVERNANCE', fr: 'GOVERNANCE', de: 'GOVERNANCE', ru: 'GOVERNANCE', zh: 'GOVERNANCE', ja: 'GOVERNANCE', ko: 'GOVERNANCE' },
+  ribbon_governance_val: { en: '2-OF-3 DAO MULTISIG', tr: '2-OF-3 DAO MULTISIG', es: '2-OF-3 DAO MULTISIG', pt: '2-OF-3 DAO MULTISIG', fr: '2-OF-3 DAO MULTISIG', de: '2-OF-3 DAO MULTISIG', ru: '2-OF-3 DAO MULTISIG', zh: '2-OF-3 DAO MULTISIG', ja: '2-OF-3 DAO MULTISIG', ko: '2-OF-3 DAO MULTISIG' },
+  ribbon_mint_split:     { en: 'MINT SPLIT', tr: 'MINT SPLIT', es: 'MINT SPLIT', pt: 'MINT SPLIT', fr: 'MINT SPLIT', de: 'MINT SPLIT', ru: 'MINT SPLIT', zh: 'MINT SPLIT', ja: 'MINT SPLIT', ko: 'MINT SPLIT' },
+  ribbon_mint_split_val: { en: '50% WALLET / 50% LIQUIDITY VAULT', tr: '50% WALLET / 50% LIQUIDITY VAULT', es: '50% WALLET / 50% LIQUIDITY VAULT', pt: '50% WALLET / 50% LIQUIDITY VAULT', fr: '50% WALLET / 50% LIQUIDITY VAULT', de: '50% WALLET / 50% LIQUIDITY VAULT', ru: '50% WALLET / 50% LIQUIDITY VAULT', zh: '50% WALLET / 50% LIQUIDITY VAULT', ja: '50% WALLET / 50% LIQUIDITY VAULT', ko: '50% WALLET / 50% LIQUIDITY VAULT' },
+  ribbon_network:        { en: 'NETWORK', tr: 'NETWORK', es: 'NETWORK', pt: 'NETWORK', fr: 'NETWORK', de: 'NETWORK', ru: 'NETWORK', zh: 'NETWORK', ja: 'NETWORK', ko: 'NETWORK' },
+  ribbon_admin_key:      { en: 'ADMIN MINT KEY', tr: 'ADMIN MINT KEY', es: 'ADMIN MINT KEY', pt: 'ADMIN MINT KEY', fr: 'ADMIN MINT KEY', de: 'ADMIN MINT KEY', ru: 'ADMIN MINT KEY', zh: 'ADMIN MINT KEY', ja: 'ADMIN MINT KEY', ko: 'ADMIN MINT KEY' },
+  ribbon_admin_key_val:  { en: 'NONE', tr: 'NONE', es: 'NONE', pt: 'NONE', fr: 'NONE', de: 'NONE', ru: 'NONE', zh: 'NONE', ja: 'NONE', ko: 'NONE' },
 };
 
 // ─── i18n Engine ───

@@ -800,6 +800,7 @@
   .pd-heartbeat { max-width:1100px; margin:28px auto 0; padding:0 24px; display:flex; align-items:center; gap:9px; font-family:var(--mono); font-size:11px; color:var(--text-dim); }
   @keyframes pdBeat { 0%,100% { transform:scale(1); opacity:1; } 12% { transform:scale(1.45); opacity:0.7; } 24% { transform:scale(1); } }
   .pd-heart { width:7px; height:7px; border-radius:50%; background:var(--accent); animation:pdBeat 2.4s ease-in-out infinite; flex-shrink:0; }
+  .pd-team-tag { color:var(--text-dim); font-size:0.85em; font-style:italic; }
   .faq-item { transition:background 0.25s, box-shadow 0.25s; }
   .faq-item:hover { background:rgba(0,232,198,0.03); box-shadow:inset 3px 0 0 rgba(0,232,198,0.4); }
   .roadmap-phase.active .roadmap-dot { animation:pulse 2s infinite; }
@@ -839,7 +840,7 @@
     .pd-odo-strip { transition:none !important; }
   }
 </style>
-<script src="lang.js?v=phase-d"></script>
+<script src="lang.js?v=phase-d2"></script>
 </head>
 <body>
 <!-- LOADING SCREEN -->
@@ -1995,6 +1996,15 @@
     return Math.floor(s / 86400) + t('alive_ago_d');
   }
   function pdShort(a) { return a.slice(0, 4) + '…' + a.slice(-4); }
+  // Shared honesty rule for every PD.feed consumer (ticker, Explorer table/list):
+  // team/treasury mints are real on-chain events, so we show them — but never
+  // unlabeled next to genuine public activity.
+  function pdEventLabel(it) {
+    const ago = it.time ? ' · ' + formatAgo(it.time.getTime()) : '';
+    if (it.referrer) return pdShort(it.referrer) + ' ' + t('alive_referral_event') + ago;
+    const verb = it.isTeam ? t('alive_team_mint') : t('alive_minted');
+    return pdShort(it.minter) + ' ' + verb + (it.round ? ' — ' + t('alive_round') + ' ' + it.round : '') + ago;
+  }
   function pdShimmer(el) {
     if (!el || PD.reduced) return;
     el.classList.remove('pd-shimmer'); void el.offsetWidth; el.classList.add('pd-shimmer');
@@ -2111,12 +2121,7 @@
       if (PD.feedState === 'empty') { tick.style.display = ''; tickTrack.appendChild(pdTickerItem(t('alive_awaiting_mint'))); return; }
       if (!PD.feed.length) { tick.style.display = 'none'; return; }
       tick.style.display = '';
-      const items = PD.feed.slice(0, 10).map(it => {
-        const ago = it.time ? ' · ' + formatAgo(it.time.getTime()) : '';
-        return it.referrer
-          ? pdShort(it.referrer) + ' ' + t('alive_referral_event') + ago
-          : pdShort(it.minter) + ' ' + t('alive_minted') + (it.round ? ' — ' + t('alive_round') + ' ' + it.round : '') + ago;
-      });
+      const items = PD.feed.slice(0, 10).map(pdEventLabel);
       // duplicate the row for a seamless scroll loop (translateX -50% wraps back to an identical copy)
       items.concat(items).forEach(text => tickTrack.appendChild(pdTickerItem(text)));
     }
@@ -2698,7 +2703,7 @@
           const accounts = tx.transaction.message.accountKeys;
           if (accounts.length < 2) continue;
           const minter = accounts[0].pubkey ? accounts[0].pubkey.toBase58() : accounts[0].toBase58();
-          if (minter === TREASURY_WALLET || minter === AUTHORITY_WALLET) continue;
+          const isTeam = minter === TREASURY_WALLET || minter === AUTHORITY_WALLET;
           const postBalances = tx.meta.postTokenBalances || [];
           const preBalances = tx.meta.preTokenBalances || [];
           let tokensReceived = 0;
@@ -2717,7 +2722,7 @@
             const total = Math.round(tokensReceived) * 2;
             const rr = MAX_ROUNDS + 1 - total / TOKENS_PER_UNIT;
             txItems.push({ minter, tokens: Math.round(tokensReceived), time, sig: sig.signature,
-                           referrer: rm ? rm[1] : null,
+                           referrer: rm ? rm[1] : null, isTeam,
                            round: Number.isInteger(rr) && rr >= 1 && rr <= MAX_ROUNDS ? rr : null });
           }
         } catch(e) { continue; }
@@ -3709,10 +3714,10 @@
     document.getElementById('expHolders').textContent=PD.feed.length?String(new Set(PD.feed.map(i=>i.minter)).size):(round>0?String(round):'0');
     const tbody=document.getElementById('mintTableBody');const noMints=document.getElementById('noMints');
     tbody.textContent='';
-    if(PD.feed.length){noMints.style.display='none';PD.feed.slice(0,6).forEach(it=>{const tr=document.createElement('tr');const td1=document.createElement('td');td1.className='round-cell';td1.textContent=it.round?('#'+it.round):'—';const td2=document.createElement('td');td2.className='addr';const a=document.createElement('a');a.href='https://explorer.solana.com/address/'+it.minter+CLUSTER_PARAM;a.target='_blank';a.style.color='inherit';a.textContent=pdShort(it.minter);td2.appendChild(a);const td3=document.createElement('td');td3.className='amount';td3.textContent=it.tokens.toLocaleString();tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td3);tbody.appendChild(tr);});}else{noMints.style.display='block';}
+    if(PD.feed.length){noMints.style.display='none';PD.feed.slice(0,6).forEach(it=>{const tr=document.createElement('tr');const td1=document.createElement('td');td1.className='round-cell';td1.textContent=it.round?('#'+it.round):'—';const td2=document.createElement('td');td2.className='addr';const a=document.createElement('a');a.href='https://explorer.solana.com/address/'+it.minter+CLUSTER_PARAM;a.target='_blank';a.style.color='inherit';a.textContent=pdShort(it.minter);td2.appendChild(a);if(it.isTeam){const tag=document.createElement('span');tag.className='pd-team-tag';tag.textContent=' '+t('alive_team_tag');td2.appendChild(tag);}const td3=document.createElement('td');td3.className='amount';td3.textContent=it.tokens.toLocaleString();tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td3);tbody.appendChild(tr);});}else{noMints.style.display='block';}
     const holderList=document.getElementById('holderList');const noHolders=document.getElementById('noHolders');
     holderList.textContent='';
-    if(PD.feed.length){noHolders.style.display='none';const agg={};let totalAll=0;PD.feed.forEach(it=>{agg[it.minter]=(agg[it.minter]||0)+it.tokens;totalAll+=it.tokens;});Object.entries(agg).map(([addr,tk])=>({addr,tokens:tk})).sort((a,b)=>b.tokens-a.tokens).slice(0,5).forEach((h,i)=>{const li=document.createElement('li');li.className='holder-item';const rank=document.createElement('span');rank.className='holder-rank';rank.textContent=i+1;const addr=document.createElement('span');addr.className='holder-addr';addr.textContent=pdShort(h.addr);const amt=document.createElement('span');amt.className='holder-amount';amt.textContent=formatCompact(h.tokens);const pct=document.createElement('span');pct.className='holder-pct';pct.textContent=totalAll?(h.tokens/totalAll*100).toFixed(1)+'%':'';li.appendChild(rank);li.appendChild(addr);li.appendChild(amt);li.appendChild(pct);holderList.appendChild(li);});}else{noHolders.style.display='block';}
+    if(PD.feed.length){noHolders.style.display='none';const agg={};let totalAll=0;PD.feed.forEach(it=>{if(!agg[it.minter])agg[it.minter]={tokens:0,isTeam:it.isTeam};agg[it.minter].tokens+=it.tokens;totalAll+=it.tokens;});Object.entries(agg).map(([addr,d])=>({addr,tokens:d.tokens,isTeam:d.isTeam})).sort((a,b)=>b.tokens-a.tokens).slice(0,5).forEach((h,i)=>{const li=document.createElement('li');li.className='holder-item';const rank=document.createElement('span');rank.className='holder-rank';rank.textContent=i+1;const addr=document.createElement('span');addr.className='holder-addr';addr.textContent=pdShort(h.addr)+(h.isTeam?' '+t('alive_team_tag'):'');const amt=document.createElement('span');amt.className='holder-amount';amt.textContent=formatCompact(h.tokens);const pct=document.createElement('span');pct.className='holder-pct';pct.textContent=totalAll?(h.tokens/totalAll*100).toFixed(1)+'%':'';li.appendChild(rank);li.appendChild(addr);li.appendChild(amt);li.appendChild(pct);holderList.appendChild(li);});}else{noHolders.style.display='block';}
     drawPriceChart(round);
     // Update on-chain oracle fields in explorer
     const oracleEl = document.getElementById('expOraclePrice');

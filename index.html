@@ -174,7 +174,10 @@
   .pd-stat-item b { color:var(--text); font-weight:600; }
   .pd-stat-item .pd-stat-accent { color:var(--warning); }
   .pd-stat-item .pd-stat-mint { color:var(--accent); }
-  @media (prefers-reduced-motion: reduce) { .pd-stat-ribbon { animation:none !important; } }
+  /* NOTE: the two marquees (stat ribbon + activity ticker) intentionally keep
+     scrolling under prefers-reduced-motion — they're pause-on-hover and the info
+     is duplicated elsewhere on the page. Reduced-motion still suppresses the
+     flashier effects (flash-tick, odometer, confetti, spring, particles). */
   .header-inner { max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; height:64px; }
   .logo { font-family:var(--display); font-weight:800; font-size:18px; letter-spacing:0.5px; display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); }
   .logo-icon { width:30px; height:30px; border-radius:8px; overflow:hidden; flex-shrink:0; }
@@ -799,7 +802,7 @@
   .pd-float { animation:pdFloat 5s ease-in-out infinite; animation-delay:var(--pd-delay, 0s); }
   @keyframes pdShim { 0% { text-shadow:0 0 0 rgba(0,232,198,0); } 35% { text-shadow:0 0 16px rgba(0,232,198,0.85); } 100% { text-shadow:0 0 0 rgba(0,232,198,0); } }
   .pd-shimmer { animation:pdShim 0.9s ease-out 1; }
-  .pd-ticker { display:inline-flex; align-items:center; gap:8px; margin:14px 0 2px; padding:7px 14px; border-radius:100px; background:rgba(0,232,198,0.05); border:1px solid rgba(0,232,198,0.18); font-family:var(--mono); font-size:11px; color:var(--text-dim); max-width:100%; overflow:hidden; white-space:nowrap; }
+  .pd-ticker { display:inline-flex; align-items:center; gap:8px; margin:14px 0 2px; padding:7px 14px; border-radius:100px; background:rgba(0,232,198,0.05); border:1px solid rgba(0,232,198,0.18); font-family:var(--mono); font-size:11px; color:var(--text-dim); width:min(360px, 100%); max-width:100%; overflow:hidden; white-space:nowrap; }
   .pd-ticker .pd-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 2s infinite; flex-shrink:0; }
   .pd-ticker.pd-error .pd-dot { background:var(--danger); animation:none; }
   .pd-badge { font-size:8.5px; letter-spacing:1px; padding:2px 6px; border-radius:4px; background:var(--accent); color:var(--bg); font-weight:700; flex-shrink:0; }
@@ -844,7 +847,6 @@
   .pd-confetti-bit { position:fixed; width:6px; height:6px; border-radius:2px; pointer-events:none; z-index:9999; }
 
   @media (prefers-reduced-motion: reduce) {
-    .pd-ticker-track { animation:none !important; }
     .pd-flash-up, .pd-flash-down, .pd-spring { animation:none !important; }
     .pd-odo-strip { transition:none !important; }
   }

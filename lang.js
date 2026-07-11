@@ -747,6 +747,8 @@ const TRANSLATIONS = {
   alive_referral_event: { en: 'referred a minter', tr: 'bir minter yönlendirdi', es: 'refirió a un minter', pt: 'indicou um minter', fr: 'a parrainé un minteur', de: 'hat einen Minter geworben', ru: 'привёл минтера', zh: '推荐了一位铸造者', ja: 'ミンターを紹介', ko: '민터를 추천함' },
   alive_devnet_badge:   { en: 'DEVNET', tr: 'DEVNET', es: 'DEVNET', pt: 'DEVNET', fr: 'DEVNET', de: 'DEVNET', ru: 'DEVNET', zh: 'DEVNET', ja: 'DEVNET', ko: 'DEVNET' },
   alive_recent_minters: { en: 'Recent Minters', tr: 'Son Mint Edenler', es: 'Minters Recientes', pt: 'Minters Recentes', fr: 'Minteurs Récents', de: 'Aktuelle Minter', ru: 'Недавние минтеры', zh: '最近铸造者', ja: '最近のミンター', ko: '최근 민터' },
+  alive_team_mint:      { en: 'team test-minted', tr: 'ekip test mint etti', es: 'minteó de prueba (equipo)', pt: 'mintou de teste (equipe)', fr: 'a testé un mint (équipe)', de: 'Team-Testmint', ru: 'тестовый минт команды', zh: '团队测试铸造', ja: 'チームのテストミント', ko: '팀 테스트 민트' },
+  alive_team_tag:       { en: '(team)', tr: '(ekip)', es: '(equipo)', pt: '(equipe)', fr: '(équipe)', de: '(Team)', ru: '(команда)', zh: '（团队）', ja: '（チーム）', ko: '(팀)' },
 };
 
 // ─── i18n Engine ───

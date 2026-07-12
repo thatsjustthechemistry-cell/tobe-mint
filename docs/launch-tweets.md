@@ -49,13 +49,24 @@ Account: **@tobe_stable**
 
 ---
 
-## Post 3 — Peg mechanics (the honest version)
+## Post 3 — Peg mechanics (the honest version) ✅ POSTED
 > $TOBE's peg isn't magic — it's an on-chain vault, and we're upfront that it's asymmetric:
 >
 > ▲ Above $1: vault sells TOBE for SOL. Unlimited. A hard ceiling.
 > ▼ Below $1: vault buys with a finite SOL reserve. A real floor — but bounded, not infinite.
 >
 > No UST-style infinite mint. 🧵
+
+---
+
+## Post 3.5 — Launch timing (out-of-sequence, added 2026-07-12)
+> $TOBE is launching on Solana mainnet by the end of July. 🟢
+>
+> Fair launch, no presale, multisig-governed. All 1,024 public mint rounds open to everyone, same rules as the founder.
+>
+> Final ops checks in progress. Mint goes live the moment they're green.
+
+⚠️ This is a public date commitment. Before posting, confirm the operational gates in `docs/MAINNET_LAUNCH.md` (deploy wallet funded, council wallets funded, upgrade-authority handoff executed on mainnet) are realistically closeable within the month — see also the launch-gates memory note.
 
 ---
 

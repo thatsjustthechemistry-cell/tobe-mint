@@ -63,6 +63,7 @@
     --font: 'DM Sans', -apple-system, sans-serif;
     --mono: 'JetBrains Mono', monospace;
     --display: 'JetBrains Mono', monospace;
+    --heading: var(--display); /* was referenced in 7 places but never defined — silently fell back to body font */
   }
 
   /* Light mode */
@@ -449,7 +450,6 @@
   /* ═══ FOOTER ═══ */
   footer { border-top:1px solid var(--border); padding:48px 0 32px; overflow:hidden; }
   .footer-manifesto { max-width:680px; margin:0 auto 56px; padding:40px 32px; text-align:left; border:1px solid var(--border); border-radius:16px; background:rgba(255,255,255,0.01); }
-  .manifesto-line { width:40px; height:2px; background:var(--accent); margin:0 0 24px; border-radius:1px; }
   .manifesto-title { font-family:var(--heading); font-size:22px; color:var(--text); margin-bottom:24px; letter-spacing:-0.3px; }
   .manifesto-text { color:var(--text-dim); font-size:15px; line-height:1.85; margin-bottom:16px; }
   .manifesto-text:last-child { margin-bottom:0; }
@@ -1784,7 +1784,6 @@
 <footer class="reveal">
   <!-- Manifesto -->
   <div class="footer-manifesto">
-    <div class="manifesto-line"></div>
     <h3 class="manifesto-title" data-i18n="manifesto_title">Why TOBE Exists</h3>
 
     <p class="manifesto-text" data-i18n="manifesto_p1">Crypto promised to give everyone a fair shot. Instead, it created a new class of insiders — teams that pre-mint millions of tokens, VCs that get discounted allocations, and influencers that pump and dump on their own followers. The average person enters late, buys high, and holds the bag. That's not innovation. That's the same old game with a new coat of paint.</p>

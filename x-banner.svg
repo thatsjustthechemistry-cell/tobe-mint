@@ -1,57 +1,29 @@
 <svg viewBox="0 0 1500 500" xmlns="http://www.w3.org/2000/svg" role="img">
 <title>TOBESTABLE X banner</title>
-<desc>Dark banner with TOBESTABLE wordmark, hard-ceiling/reserve-backed-floor tagline, and a peg-line chart motif.</desc>
-<defs>
-  <linearGradient id="bg" x1="0" y1="0" x2="1500" y2="500" gradientUnits="userSpaceOnUse">
-    <stop offset="0%" stop-color="#0a0b0f"/>
-    <stop offset="100%" stop-color="#0d0f16"/>
-  </linearGradient>
-  <linearGradient id="wordmark" x1="0" y1="0" x2="1" y2="0">
-    <stop offset="0%" stop-color="#00e8c6"/>
-    <stop offset="100%" stop-color="#7c6aef"/>
-  </linearGradient>
-  <linearGradient id="lineglow" x1="0" y1="0" x2="1500" y2="0" gradientUnits="userSpaceOnUse">
-    <stop offset="0%" stop-color="#00e8c6" stop-opacity="0"/>
-    <stop offset="50%" stop-color="#00e8c6" stop-opacity="0.9"/>
-    <stop offset="100%" stop-color="#7c6aef" stop-opacity="0.9"/>
-  </linearGradient>
-  <radialGradient id="orb1" cx="50%" cy="50%" r="50%">
-    <stop offset="0%" stop-color="#00e8c6" stop-opacity="0.16"/>
-    <stop offset="100%" stop-color="#00e8c6" stop-opacity="0"/>
-  </radialGradient>
-  <radialGradient id="orb2" cx="50%" cy="50%" r="50%">
-    <stop offset="0%" stop-color="#7c6aef" stop-opacity="0.14"/>
-    <stop offset="100%" stop-color="#7c6aef" stop-opacity="0"/>
-  </radialGradient>
-</defs>
+<desc>Terminal-window boot log: security audits passed, tests passing, hard-coded supply, no admin mint key, 2-of-3 DAO governance — TOBE wordmark and tagline.</desc>
 
-<rect width="1500" height="500" fill="url(#bg)"/>
-<circle cx="130" cy="90" r="260" fill="url(#orb1)"/>
-<circle cx="1400" cy="440" r="300" fill="url(#orb2)"/>
+<rect width="1500" height="500" fill="#0a0b0f"/>
 
-<!-- subtle grid -->
-<g stroke="#1a1d2e" stroke-width="1" opacity="0.5">
-  <line x1="0" y1="125" x2="1500" y2="125"/>
-  <line x1="0" y1="250" x2="1500" y2="250"/>
-  <line x1="0" y1="375" x2="1500" y2="375"/>
+<rect x="60" y="60" width="1380" height="380" rx="10" fill="#0f1420" stroke="#1e2a3a" stroke-width="1.5"/>
+<rect x="60" y="60" width="1380" height="42" rx="10" fill="#141a26"/>
+<rect x="60" y="90" width="1380" height="12" fill="#141a26"/>
+<circle cx="96" cy="81" r="7" fill="#ff5f57"/>
+<circle cx="120" cy="81" r="7" fill="#febc2e"/>
+<circle cx="144" cy="81" r="7" fill="#28c840"/>
+<text x="750" y="86" font-family="JetBrains Mono, Consolas, monospace" font-size="13" fill="#6b7a90" text-anchor="middle">tobestable — boot.log</text>
+
+<g font-family="JetBrains Mono, Consolas, monospace" font-size="16" fill="#8b97ab">
+  <text x="96" y="145"><tspan fill="#00d68f">&#10003;</tspan> 4 security audits <tspan fill="#00d68f">passed</tspan></text>
+  <text x="96" y="175"><tspan fill="#00d68f">&#10003;</tspan> 29/29 tests <tspan fill="#00d68f">passing</tspan></text>
+  <text x="96" y="205"><tspan fill="#00d68f">&#10003;</tspan> supply curve <tspan fill="#00d68f">hard-coded, immutable</tspan></text>
+  <text x="96" y="235"><tspan fill="#00d68f">&#10003;</tspan> admin mint key <tspan fill="#00d68f">none</tspan></text>
+  <text x="96" y="265"><tspan fill="#00d68f">&#10003;</tspan> governance <tspan fill="#00d68f">2-of-3 DAO multisig</tspan></text>
+  <text x="96" y="295">$ <tspan fill="#e8ecf1">status: ready</tspan><tspan fill="#00e8c6">_</tspan></text>
 </g>
 
-<!-- ceiling / floor reference lines -->
-<line x1="0" y1="160" x2="1500" y2="160" stroke="#00e8c6" stroke-width="1.5" stroke-dasharray="6 8" opacity="0.55"/>
-<line x1="0" y1="340" x2="1500" y2="340" stroke="#7c6aef" stroke-width="1.5" stroke-dasharray="6 8" opacity="0.55"/>
-
-<!-- peg line weaving between ceiling and floor -->
-<path d="M 0 260 C 140 200, 260 170, 380 200 S 620 320, 740 300 S 980 190, 1100 220 S 1340 300, 1500 260"
-      fill="none" stroke="url(#lineglow)" stroke-width="4" stroke-linecap="round"/>
-<path d="M 0 260 C 140 200, 260 170, 380 200 S 620 320, 740 300 S 980 190, 1100 220 S 1340 300, 1500 260"
-      fill="none" stroke="#00e8c6" stroke-width="1" opacity="0.3"/>
-
-<!-- Wordmark + tagline, left-anchored to clear the avatar circle (bottom-left) -->
-<text x="90" y="230" font-family="JetBrains Mono, monospace" font-weight="700" font-size="72" fill="url(#wordmark)" letter-spacing="1">TOBESTABLE</text>
-<text x="92" y="270" font-family="JetBrains Mono, monospace" font-weight="500" font-size="22" fill="#e8ecf1" opacity="0.9" letter-spacing="0.5">A HARD $1 CEILING. A RESERVE-BACKED FLOOR.</text>
-<text x="92" y="302" font-family="JetBrains Mono, monospace" font-weight="400" font-size="16" fill="#6b7a90" letter-spacing="0.5">FAIR-LAUNCH · NO PRESALE · MULTISIG-GOVERNED · SOLANA</text>
-
-<!-- ceiling/floor labels, right side -->
-<text x="1410" y="150" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="14" fill="#00e8c6" opacity="0.8">CEILING $1.00</text>
-<text x="1410" y="358" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="14" fill="#7c6aef" opacity="0.8">FLOOR $1.00</text>
+<g font-family="JetBrains Mono, Consolas, monospace" font-weight="700">
+  <text x="900" y="230" font-size="54" fill="#e8ecf1">TOBE<tspan fill="#00e8c6">.</tspan></text>
+</g>
+<text x="900" y="266" font-family="JetBrains Mono, Consolas, monospace" font-size="16" fill="#8b97ab" letter-spacing="1">BUILT TO BE STABLE</text>
+<text x="900" y="400" font-family="JetBrains Mono, Consolas, monospace" font-size="14" fill="#00e8c6">tobestable.com</text>
 </svg>

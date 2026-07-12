@@ -22,8 +22,8 @@
 </g>
 
 <g font-family="JetBrains Mono, Consolas, monospace" font-weight="700">
-  <text x="900" y="230" font-size="54" fill="#e8ecf1">TOBE<tspan fill="#00e8c6">.</tspan></text>
+  <text x="900" y="255" font-size="100" fill="#e8ecf1">TOBE<tspan fill="#00e8c6">.</tspan></text>
 </g>
-<text x="900" y="266" font-family="JetBrains Mono, Consolas, monospace" font-size="16" fill="#8b97ab" letter-spacing="1">BUILT TO BE STABLE</text>
-<text x="900" y="400" font-family="JetBrains Mono, Consolas, monospace" font-size="14" fill="#00e8c6">tobestable.com</text>
+<text x="905" y="298" font-family="JetBrains Mono, Consolas, monospace" font-size="24" fill="#8b97ab" letter-spacing="1.5">BUILT TO BE STABLE</text>
+<text x="905" y="400" font-family="JetBrains Mono, Consolas, monospace" font-weight="700" font-size="32" fill="#00e8c6">tobestable.com</text>
 </svg>

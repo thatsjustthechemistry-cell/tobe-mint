@@ -117,6 +117,8 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; background: var(--bg); overscroll-behavior-y: none; }
+  /* Boot scroll-lock — released by initPageLoader(), or by the standalone watchdog
+     script in <head> if the main script dies (CDN failure / parse error) */
   html.loading, html.loading body { overflow:hidden !important; height:100vh !important; }
   /* Hide scrollbar completely */
   ::-webkit-scrollbar { display:none; }
@@ -621,10 +623,11 @@
   .referral-note { font-size:12px; color:var(--text-muted); margin-top:8px; max-width:560px; }
 
   /* ═══ LOADING SCREEN ═══ */
-  .page-loader { position:fixed; inset:0; background:var(--bg); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:opacity 0.5s, visibility 0.5s; }
+  /* pdLoaderKill: CSS-only failsafe — if JS dies before hiding the loader, the fixed overlay
+     (which also blocks touch scrolling) dismisses itself at 3.2s regardless */
+  .page-loader { position:fixed; inset:0; background:var(--bg); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:opacity 0.5s, visibility 0.5s; animation:pdLoaderKill 0.4s 3.2s forwards; }
   .page-loader.hidden { opacity:0; visibility:hidden; }
-  html:has(.page-loader:not(.hidden)) { overflow:hidden !important; }
-  html:has(.page-loader:not(.hidden)) body { overflow:hidden !important; }
+  @keyframes pdLoaderKill { to { opacity:0; visibility:hidden; } }
   .loader-logo { width:56px; height:56px; border-radius:14px; background:linear-gradient(135deg, var(--accent), var(--accent-2)); display:flex; align-items:center; justify-content:center; font-family:var(--display); font-size:24px; font-weight:800; color:var(--bg); margin-bottom:24px; animation:loaderPulse 1.2s ease-in-out infinite; }
   @keyframes loaderPulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.08);opacity:0.8;} }
   .loader-bar { width:120px; height:2px; background:var(--border); border-radius:2px; overflow:hidden; }
@@ -853,6 +856,23 @@
     .pd-odo-strip { transition:none !important; }
   }
 </style>
+<script>
+/* Scroll-lock watchdog: standalone on purpose — if any other script dies (CDN failure,
+   parse error), this still releases the boot scroll-lock so the page can never stay
+   permanently unscrollable. No-ops when the normal loader flow already ran. */
+(function () {
+  function unlock() {
+    document.documentElement.classList.remove('loading');
+    var l = document.getElementById('pageLoader');
+    if (l) {
+      l.classList.add('hidden');
+      setTimeout(function () { if (l.parentNode) l.parentNode.removeChild(l); }, 600);
+    }
+  }
+  setTimeout(unlock, 3000);
+  setTimeout(unlock, 6500);
+})();
+</script>
 <script src="lang.js?v=phase-d3"></script>
 </head>
 <body>

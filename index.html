@@ -2915,7 +2915,13 @@
     const ctx = canvas.getContext('2d');
     let w, h, t = 0;
     function resize() { const hero = canvas.parentElement; w = canvas.width = hero.offsetWidth; h = canvas.height = hero.offsetHeight; }
-    resize(); window.addEventListener('resize', resize);
+    resize();
+    let heroResizeT;
+    window.addEventListener('resize', () => {
+      // URL-bar height changes during mobile scroll must not realloc this canvas mid-gesture
+      if (canvas.parentElement.offsetWidth === w) return;
+      clearTimeout(heroResizeT); heroResizeT = setTimeout(resize, 150);
+    }, { passive: true });
     const blobs = [
       { x: 0.2, y: 0.3, r: 0.35, color: [0, 232, 198], speed: 0.4, phase: 0 },
       { x: 0.7, y: 0.5, r: 0.4, color: [124, 106, 239], speed: 0.3, phase: 2 },
@@ -3732,9 +3738,11 @@
 
   function drawSimChart(selectedRound, marketPrice, vaultReleasePct) {
     const canvas = document.getElementById('simChart'); if (!canvas) return;
-    const ctx = canvas.getContext('2d'); const dpr = window.devicePixelRatio||1;
-    canvas.width = canvas.offsetWidth*dpr; canvas.height = canvas.offsetHeight*dpr; ctx.scale(dpr,dpr);
+    const ctx = canvas.getContext('2d'); const dpr = Math.min(window.devicePixelRatio||1, 2);
     const w = canvas.offsetWidth, h = canvas.offsetHeight;
+    const bw = Math.round(w*dpr), bh = Math.round(h*dpr);
+    if (canvas.width !== bw || canvas.height !== bh) { canvas.width = bw; canvas.height = bh; }
+    ctx.setTransform(dpr,0,0,dpr,0,0);
     const pad = {top:20,bottom:30,left:50,right:20};
     const plotW = w-pad.left-pad.right, plotH = h-pad.top-pad.bottom;
     ctx.clearRect(0,0,w,h);
@@ -3758,9 +3766,13 @@
 
   function drawCurve(markedRound = 0) {
     const canvas = document.getElementById('curveChart'); const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio||1;
-    canvas.width = canvas.offsetWidth*dpr; canvas.height = canvas.offsetHeight*dpr; ctx.scale(dpr,dpr);
+    const dpr = Math.min(window.devicePixelRatio||1, 2);
     const w = canvas.offsetWidth, h = canvas.offsetHeight;
+    // Realloc the buffer only when the size actually changed — unconditional realloc on
+    // every 15s refresh caused periodic GPU hiccups on phones.
+    const bw = Math.round(w*dpr), bh = Math.round(h*dpr);
+    if (canvas.width !== bw || canvas.height !== bh) { canvas.width = bw; canvas.height = bh; }
+    ctx.setTransform(dpr,0,0,dpr,0,0);
     const mobile = w < 400;
     const pad = {top:mobile?24:16, bottom:28, left:mobile?42:55, right:mobile?8:16};
     const plotW = w-pad.left-pad.right, plotH = h-pad.top-pad.bottom;
@@ -3836,7 +3848,15 @@
   function formatCompact(n){if(n>=1_000_000)return(n/1_000_000).toFixed(1)+'M';if(n>=1_000)return(n/1_000).toFixed(0)+'K';return n.toLocaleString();}
   function showToast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';setTimeout(()=>t.classList.remove('show'),3000);}
   function copyProgramId(){navigator.clipboard.writeText(PROGRAM_ID).then(()=>showToast('Program ID copied','success'));}
-  window.addEventListener('resize',()=>{drawCurve(currentRound);drawPriceChart(currentRound);});
+  // Redraw charts only when layout WIDTH actually changes, debounced. On phones the URL-bar
+  // collapse/expand fires resize continuously DURING scroll; synchronous canvas redraws on
+  // every event stalled the scroll ("page gets stuck").
+  let chartResizeT, chartLastW = window.innerWidth;
+  window.addEventListener('resize', () => {
+    if (window.innerWidth === chartLastW) return;
+    clearTimeout(chartResizeT);
+    chartResizeT = setTimeout(() => { chartLastW = window.innerWidth; drawCurve(currentRound); drawPriceChart(currentRound); }, 150);
+  }, { passive: true });
 
   function setSimScenario(round,price,el){document.getElementById('simRound').value=round;document.getElementById('simPrice').value=price;updateSim();document.querySelectorAll('.scenario-preset-grid .sim-card').forEach(s=>s.style.borderColor='var(--border)');if(el)el.style.borderColor='var(--accent)';}
 

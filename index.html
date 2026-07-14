@@ -1283,7 +1283,7 @@
           <div class="card-glow"></div>
           <div class="mint-card-title" data-i18n="mint_tobe">Mint $TOBE</div>
           <div class="mint-info">
-            <div class="mint-row"><span class="mint-row-label" data-i18n="you_pay">You Pay</span><span class="mint-row-value highlight">10 SOL</span></div>
+            <div class="mint-row"><span class="mint-row-label" data-i18n="you_pay">You Pay</span><span class="mint-row-value highlight" id="youPayValue">10 SOL</span></div>
             <div class="mint-row"><span class="mint-row-label" data-i18n="you_receive_50">You Receive (50%)</span><span class="mint-row-value" id="receiveAmount">— TOBE</span></div>
             <div class="mint-row"><span class="mint-row-label" data-i18n="vault_receives_50">Vault Receives (50%)</span><span class="mint-row-value" id="vaultReceive" style="color:var(--accent-2);">— TOBE</span></div>
             <div class="mint-row"><span class="mint-row-label" data-i18n="effective_price">Effective Price</span><span class="mint-row-value" id="effectivePrice">—</span></div>
@@ -1960,6 +1960,14 @@
   const TOBE_MINT  = '4fFD96LWnsgCiWMtLJym12k7xLofH6FdSDtr5MgyYmHV';
   const MINT_COST_LAMPORTS = 10_000_000_000; // 10 SOL
   const MINT_COST_SOL = 10;
+  // Disclosed team allocation (see FAQ): the team wallet's first 16 mints are
+  // free — no setter on-chain, hard-capped, tagged on-chain and in the feed.
+  const TEAM_FREE_MINT_CAP = 16;
+  function isTeamFreeMintEligible(state, addr) {
+    return !!(state && state.teamWallet && addr
+      && state.teamWallet.toBase58() === addr
+      && state.teamFreeMintsUsed < TEAM_FREE_MINT_CAP);
+  }
   let SOL_USD = 120; // fallback SOL price in USD, updated live below
   // Fetch live SOL/USD price from CoinGecko (free, no API key)
   async function fetchSolPrice() {
@@ -2317,6 +2325,15 @@
         base.raydiumToken1Vault = read32();
         base.tobeIsToken0 = readBool();
         base.vaultTobeAtConfig = readU64();
+      }
+      // Phase 3 fields: floor_active, founder (disclosed revenue split), then the
+      // disclosed team allocation (team_wallet + team_free_mints_used). Same
+      // defensive length check pattern — absent on pre-Phase-3 deployments.
+      if (data.length >= offset + 1 + 32 + 32 + 8) {
+        base.floorActive = readBool();
+        base.founder = read32();
+        base.teamWallet = read32();
+        base.teamFreeMintsUsed = readU64();
       }
       return base;
     } catch (err) { console.warn('Failed to fetch mint state:', err); return null; }
@@ -3111,7 +3128,14 @@
       const minterTobeAta = findATA(minterPk, tobeMintPk);
       showToast('Checking SOL balance...', 'success');
       const solBalance = await connection.getBalance(minterPk);
-      if (solBalance < MINT_COST_LAMPORTS + 10_000_000) throw new Error(`Insufficient SOL: ${(solBalance/1e9).toFixed(3)} (need 10 SOL + fees)`);
+      // Disclosed team allocation: this wallet's mint is free on-chain (waived
+      // payment, same 50/50 split) while under the cap — only needs tx fees.
+      const freeMint = isTeamFreeMintEligible(state, walletAddress);
+      const requiredLamports = freeMint ? 10_000_000 : (MINT_COST_LAMPORTS + 10_000_000);
+      if (solBalance < requiredLamports) {
+        const needSol = (requiredLamports / 1e9).toFixed(3);
+        throw new Error(`Insufficient SOL: ${(solBalance/1e9).toFixed(3)} (need ${needSol} SOL${freeMint ? ' — free team mint, fees only' : ' + fees'})`);
+      }
       showToast('Building transaction...', 'success');
       const tx = new solanaWeb3.Transaction();
       tx.add(createATAInstruction(minterPk, minterPk, tobeMintPk));
@@ -3633,6 +3657,13 @@
     document.getElementById('roundBig').textContent = round;
 
     const el = (id) => { const e = document.getElementById(id); return e; };
+    if (isTeamFreeMintEligible(onChainState, walletAddress)) {
+      el('youPayValue').textContent = 'FREE (' + (onChainState.teamFreeMintsUsed + 1) + '/' + TEAM_FREE_MINT_CAP + ')';
+      el('youPayValue').title = 'Disclosed team allocation — see FAQ';
+    } else {
+      el('youPayValue').textContent = MINT_COST_SOL + ' SOL';
+      el('youPayValue').title = '';
+    }
     el('receiveAmount').textContent = minterTokens.toLocaleString() + ' TOBE';
     el('vaultReceive').textContent = vaultTokens.toLocaleString() + ' TOBE';
     el('effectivePrice').textContent = round > 0 ? '$' + price.toFixed(4) : '$' + (MINT_COST_SOL * SOL_USD / (TOKENS_PER_UNIT * MAX_ROUNDS / 2)).toFixed(4);

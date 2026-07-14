@@ -4221,27 +4221,36 @@
   window._typedPhrases = getTypedPhrases();
 </script>
 <script>
-/* TEMP diagnostic probe — remove once the mobile stall hunt is over.
-   Standalone script: shows a red badge (top-left) whenever the main thread
-   stalls >400ms, with stall length, page time, scrollY, and seconds since the
-   last 15s chain refresh — field screenshots pinpoint what coincides with it. */
+/* TEMP diagnostic HUD — remove once the mobile stall hunt is over. Standalone.
+   Phones (coarse pointer) get a tiny always-on readout: uptime / fps / touch
+   counters / scrollY / seconds since last chain refresh. Screenshots taken WHILE
+   stuck are decisive: numbers frozen = renderer hang; touch count rising while
+   scrollY stays put = Chrome gets the touches but refuses to scroll; fps ticking
+   with touch frozen = gestures being swallowed before the page sees them.
+   All devices additionally get a red STALL line for main-thread freezes >400ms. */
 (function () {
-  var badge = null, stalls = 0, last = performance.now();
+  var coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  var el = document.createElement('div');
+  el.style.cssText = 'position:fixed;top:4px;left:4px;z-index:2147483647;background:rgba(15,17,23,0.85);color:#7fe7d4;font:10px/1.5 monospace;padding:4px 7px;border-radius:6px;pointer-events:none;white-space:pre;max-width:85vw;display:' + (coarse ? 'block' : 'none') + ';';
+  document.body.appendChild(el);
+  var frames = 0, fps = 0, tm = 0, ts = 0, stalls = 0, stallTxt = '', last = performance.now();
+  document.addEventListener('touchstart', function () { ts++; }, { passive: true, capture: true });
+  document.addEventListener('touchmove', function () { tm++; }, { passive: true, capture: true });
   document.addEventListener('visibilitychange', function () { last = performance.now(); });
-  function show(txt) {
-    if (!badge) {
-      badge = document.createElement('div');
-      badge.style.cssText = 'position:fixed;top:4px;left:4px;z-index:2147483647;background:rgba(190,25,45,0.93);color:#fff;font:10px/1.5 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre;max-width:85vw;';
-      document.body.appendChild(badge);
-    }
-    badge.textContent = txt;
+  setInterval(function () { fps = frames * 2; frames = 0; }, 500);
+  function draw() {
+    var sr = window.__lastRefreshT ? Math.round((performance.now() - window.__lastRefreshT) / 1000) + 's' : '?';
+    el.textContent = 'up ' + Math.round(performance.now() / 1000) + 's  fps ' + fps + '  touch ' + ts + '/' + tm + '\ny ' + Math.round(window.scrollY) + '  refresh ' + sr + ' ago' + stallTxt;
   }
+  setInterval(draw, 400);
   (function tick() {
+    frames++;
     var now = performance.now(), gap = now - last;
     if (gap > 400 && document.visibilityState === 'visible') {
       stalls++;
-      var sr = window.__lastRefreshT ? (Math.round((now - window.__lastRefreshT) / 100) / 10) + 's' : '?';
-      show('STALL #' + stalls + ': ' + Math.round(gap) + 'ms\npage t+' + Math.round(now / 1000) + 's  scrollY ' + Math.round(window.scrollY) + '\nsince last refresh: ' + sr);
+      stallTxt = '\nSTALL #' + stalls + ': ' + Math.round(gap) + 'ms @y' + Math.round(window.scrollY);
+      el.style.display = 'block'; el.style.background = 'rgba(190,25,45,0.93)'; el.style.color = '#fff';
+      draw();
     }
     last = now;
     requestAnimationFrame(tick);

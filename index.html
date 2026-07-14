@@ -3915,10 +3915,23 @@
     }
 
     const hideCurveFx = () => { tooltip.classList.remove('visible'); const d = document.getElementById('pdCurveDot'); if (d) d.classList.remove('visible'); };
-    canvas.addEventListener('mousemove', showCurveTooltip);
-    canvas.addEventListener('touchmove', e => { showCurveTooltip(e); }, { passive: true });
-    canvas.addEventListener('mouseleave', hideCurveFx);
-    canvas.addEventListener('touchend', hideCurveFx);
+    if (window.matchMedia('(pointer: coarse)').matches) {
+      // Touch devices: tap shows a one-shot tooltip. NO touchmove tracking — the per-event
+      // layout reads/writes ran at input frequency during swipes and stalled page scrolling
+      // right where thumbs land (the chart spans the middle of the tokenomics section).
+      let hideT;
+      canvas.addEventListener('touchstart', e => { showCurveTooltip(e); clearTimeout(hideT); }, { passive: true });
+      canvas.addEventListener('touchend', () => { clearTimeout(hideT); hideT = setTimeout(hideCurveFx, 1400); }, { passive: true });
+    } else {
+      // Desktop: rAF-throttle so at most one tooltip update renders per frame
+      let mmEvent = null, mmPending = false;
+      canvas.addEventListener('mousemove', e => {
+        mmEvent = e;
+        if (mmPending) return; mmPending = true;
+        requestAnimationFrame(() => { mmPending = false; if (mmEvent) showCurveTooltip(mmEvent); });
+      });
+      canvas.addEventListener('mouseleave', () => { mmEvent = null; hideCurveFx(); });
+    }
   })();
 
   // ── Hero Supply Ticker ──

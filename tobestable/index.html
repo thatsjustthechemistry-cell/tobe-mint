@@ -3699,21 +3699,28 @@
     document.getElementById('barReleasedVal').textContent = '0';
     document.getElementById('barUnminted').style.width = (unminted/total*100) + '%';
     document.getElementById('barUnmintedVal').textContent = formatCompact(unminted);
-    const list = document.getElementById('vaultActivity'); list.textContent = '';
-    if (round > 0) {
-      for (let r = round; r > Math.max(0, round - 5); r--) {
-        const tokens = Math.floor((TOKENS_PER_UNIT * (MAX_ROUNDS + 1 - r)) / 2);
+    const list = document.getElementById('vaultActivity');
+    // Rebuild only when content actually changes: destroying the node under an active
+    // finger makes Chrome cancel the scroll gesture (mobile "page gets stuck").
+    const vaKey = round + '|' + (typeof getCurrentLang === 'function' ? getCurrentLang() : '');
+    if (list.dataset.vaKey !== vaKey) {
+      list.dataset.vaKey = vaKey;
+      list.textContent = '';
+      if (round > 0) {
+        for (let r = round; r > Math.max(0, round - 5); r--) {
+          const tokens = Math.floor((TOKENS_PER_UNIT * (MAX_ROUNDS + 1 - r)) / 2);
+          const li = document.createElement('li');
+          const dot = document.createElement('div'); dot.className = 'vault-dot mint';
+          const lbl = document.createElement('span'); lbl.style.color = 'var(--accent-2)'; lbl.textContent = 'Round ' + r;
+          const val = document.createElement('span'); val.style.cssText = 'color:var(--text-dim);flex:1;text-align:right;'; val.textContent = formatCompact(tokens) + ' ' + t('tobe_deposited');
+          li.appendChild(dot); li.appendChild(lbl); li.appendChild(val); list.appendChild(li);
+        }
+      } else {
         const li = document.createElement('li');
-        const dot = document.createElement('div'); dot.className = 'vault-dot mint';
-        const lbl = document.createElement('span'); lbl.style.color = 'var(--accent-2)'; lbl.textContent = 'Round ' + r;
-        const val = document.createElement('span'); val.style.cssText = 'color:var(--text-dim);flex:1;text-align:right;'; val.textContent = formatCompact(tokens) + ' ' + t('tobe_deposited');
-        li.appendChild(dot); li.appendChild(lbl); li.appendChild(val); list.appendChild(li);
+        const dot = document.createElement('div'); dot.className = 'vault-dot hold';
+        const txt = document.createElement('span'); txt.style.color = 'var(--text-dim)'; txt.textContent = t('no_activity');
+        li.appendChild(dot); li.appendChild(txt); list.appendChild(li);
       }
-    } else {
-      const li = document.createElement('li');
-      const dot = document.createElement('div'); dot.className = 'vault-dot hold';
-      const txt = document.createElement('span'); txt.style.color = 'var(--text-dim)'; txt.textContent = t('no_activity');
-      li.appendChild(dot); li.appendChild(txt); list.appendChild(li);
     }
   }
 
@@ -3836,11 +3843,18 @@
     document.getElementById('expRaised').textContent=(round*10).toLocaleString()+' SOL';
     document.getElementById('expHolders').textContent=PD.feed.length?String(new Set(PD.feed.map(i=>i.minter)).size):(round>0?String(round):'0');
     const tbody=document.getElementById('mintTableBody');const noMints=document.getElementById('noMints');
+    const holderList=document.getElementById('holderList');const noHolders=document.getElementById('noHolders');
+    // Rebuild the mint table + holder list only when the feed actually changed:
+    // nuking these nodes every 15s refresh cancels an in-progress touch scroll
+    // gesture in Chrome when the finger is over them (mobile "page gets stuck").
+    const feedKey=PD.feed.length+'|'+(PD.feed[0]?String(PD.feed[0].minter)+PD.feed[0].tokens+String(PD.feed[0].round||''):'')+'|'+(typeof getCurrentLang==='function'?getCurrentLang():'');
+    if(tbody.dataset.feedKey!==feedKey){
+    tbody.dataset.feedKey=feedKey;
     tbody.textContent='';
     if(PD.feed.length){noMints.style.display='none';PD.feed.slice(0,6).forEach(it=>{const tr=document.createElement('tr');const td1=document.createElement('td');td1.className='round-cell';td1.textContent=it.round?('#'+it.round):'—';const td2=document.createElement('td');td2.className='addr';const a=document.createElement('a');a.href='https://explorer.solana.com/address/'+it.minter+CLUSTER_PARAM;a.target='_blank';a.style.color='inherit';a.textContent=pdShort(it.minter);td2.appendChild(a);if(it.isTeam){const tag=document.createElement('span');tag.className='pd-team-tag';tag.textContent=' '+t('alive_team_tag');td2.appendChild(tag);}const td3=document.createElement('td');td3.className='amount';td3.textContent=it.tokens.toLocaleString();tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td3);tbody.appendChild(tr);});}else{noMints.style.display='block';}
-    const holderList=document.getElementById('holderList');const noHolders=document.getElementById('noHolders');
     holderList.textContent='';
     if(PD.feed.length){noHolders.style.display='none';const agg={};let totalAll=0;PD.feed.forEach(it=>{if(!agg[it.minter])agg[it.minter]={tokens:0,isTeam:it.isTeam};agg[it.minter].tokens+=it.tokens;totalAll+=it.tokens;});Object.entries(agg).map(([addr,d])=>({addr,tokens:d.tokens,isTeam:d.isTeam})).sort((a,b)=>b.tokens-a.tokens).slice(0,5).forEach((h,i)=>{const li=document.createElement('li');li.className='holder-item';const rank=document.createElement('span');rank.className='holder-rank';rank.textContent=i+1;const addr=document.createElement('span');addr.className='holder-addr';addr.textContent=pdShort(h.addr)+(h.isTeam?' '+t('alive_team_tag'):'');const amt=document.createElement('span');amt.className='holder-amount';amt.textContent=formatCompact(h.tokens);const pct=document.createElement('span');pct.className='holder-pct';pct.textContent=totalAll?(h.tokens/totalAll*100).toFixed(1)+'%':'';li.appendChild(rank);li.appendChild(addr);li.appendChild(amt);li.appendChild(pct);holderList.appendChild(li);});}else{noHolders.style.display='block';}
+    }
     drawPriceChart(round);
     // Update on-chain oracle fields in explorer
     const oracleEl = document.getElementById('expOraclePrice');
@@ -3940,6 +3954,24 @@
       });
       canvas.addEventListener('mouseleave', () => { mmEvent = null; hideCurveFx(); });
     }
+  })();
+
+  // ── Touch-safe refresh: Chrome cancels an in-progress scroll gesture when the DOM
+  //    node under the finger is removed. Defer refresh-driven re-renders until the
+  //    active touch ends so a 15s tick can never kill the user's scroll. ──
+  (function () {
+    let touchActive = false, pendUD = null, pendUE = null;
+    const origUD = updateDisplay, origUE = updateExplorer;
+    const flush = () => {
+      touchActive = false;
+      if (pendUD !== null) { const r = pendUD; pendUD = null; origUD(r); }
+      if (pendUE !== null) { const r = pendUE; pendUE = null; origUE(r); }
+    };
+    document.addEventListener('touchstart', () => { touchActive = true; }, { passive: true, capture: true });
+    document.addEventListener('touchend', flush, { passive: true, capture: true });
+    document.addEventListener('touchcancel', flush, { passive: true, capture: true });
+    updateDisplay = function (r) { if (touchActive) { pendUD = r; return; } return origUD(r); };
+    updateExplorer = function (r) { if (touchActive) { pendUE = r; return; } return origUE(r); };
   })();
 
   // ── Hero Supply Ticker ──
@@ -4233,14 +4265,24 @@
   var el = document.createElement('div');
   el.style.cssText = 'position:fixed;top:4px;left:4px;z-index:2147483647;background:rgba(15,17,23,0.85);color:#7fe7d4;font:10px/1.5 monospace;padding:4px 7px;border-radius:6px;pointer-events:none;white-space:pre;max-width:85vw;display:' + (coarse ? 'block' : 'none') + ';';
   document.body.appendChild(el);
-  var frames = 0, fps = 0, tm = 0, ts = 0, stalls = 0, stallTxt = '', last = performance.now();
-  document.addEventListener('touchstart', function () { ts++; }, { passive: true, capture: true });
+  var frames = 0, fps = 0, tm = 0, ts = 0, pd = 0, det = 0, tgt = '-', gestureEl = null, stalls = 0, stallTxt = '', last = performance.now();
+  document.addEventListener('touchstart', function (e) {
+    ts++;
+    gestureEl = e.target && e.target.nodeType === 1 ? e.target : (e.target ? e.target.parentElement : null);
+    try {
+      tgt = gestureEl ? (gestureEl.tagName + (gestureEl.id ? '#' + gestureEl.id : '') + (typeof gestureEl.className === 'string' && gestureEl.className ? '.' + gestureEl.className.split(' ')[0] : '') + ' ta:' + getComputedStyle(gestureEl).touchAction) : '?';
+    } catch (err) { tgt = '?'; }
+  }, { passive: true, capture: true });
   document.addEventListener('touchmove', function () { tm++; }, { passive: true, capture: true });
+  window.addEventListener('touchmove', function (e) { if (e.defaultPrevented) pd++; }, { passive: true });
+  function gestureEnd() { if (gestureEl && !gestureEl.isConnected) det++; gestureEl = null; }
+  document.addEventListener('touchend', gestureEnd, { passive: true, capture: true });
+  document.addEventListener('touchcancel', gestureEnd, { passive: true, capture: true });
   document.addEventListener('visibilitychange', function () { last = performance.now(); });
   setInterval(function () { fps = frames * 2; frames = 0; }, 500);
   function draw() {
     var sr = window.__lastRefreshT ? Math.round((performance.now() - window.__lastRefreshT) / 1000) + 's' : '?';
-    el.textContent = 'up ' + Math.round(performance.now() / 1000) + 's  fps ' + fps + '  touch ' + ts + '/' + tm + '\ny ' + Math.round(window.scrollY) + '  refresh ' + sr + ' ago' + stallTxt;
+    el.textContent = 'up ' + Math.round(performance.now() / 1000) + 's  fps ' + fps + '  touch ' + ts + '/' + tm + '\ny ' + Math.round(window.scrollY) + '  refresh ' + sr + ' ago\n' + tgt + '  pd:' + pd + ' det:' + det + stallTxt;
   }
   setInterval(draw, 400);
   (function tick() {

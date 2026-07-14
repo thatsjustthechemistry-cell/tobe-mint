@@ -1956,8 +1956,9 @@
   let connected = false, walletAddress = null, currentRound = 0, isMinting = false;
   let walletProvider = null;
   const MAX_ROUNDS = 1024, TOKENS_PER_UNIT = 1024, MAX_SUPPLY = 537395200;
-  const PROGRAM_ID = 'CfdXZeKuFRGMxiedAHBemm35rANWPvcriwPEyh9KVnBQ';
-  const TOBE_MINT  = '4fFD96LWnsgCiWMtLJym12k7xLofH6FdSDtr5MgyYmHV';
+  const PROGRAM_ID = '4qhad17GrSJHqgUEoNEJU3iGaYpT9ZUZr9DErnjvwyvS'; // TEMP: team-free-mint test deployment, revert after
+  const PROGRAM_ID_PROD_BACKUP = 'CfdXZeKuFRGMxiedAHBemm35rANWPvcriwPEyh9KVnBQ'; // revert PROGRAM_ID to this
+  const TOBE_MINT  = '9dBcgqW3e1PLvtDiWwD3LL6kScf1UTM1h4njHYy3nQGs'; // TEMP, revert after — was 4fFD96LWnsgCiWMtLJym12k7xLofH6FdSDtr5MgyYmHV
   const MINT_COST_LAMPORTS = 10_000_000_000; // 10 SOL
   const MINT_COST_SOL = 10;
   // Disclosed team allocation (see FAQ): the team wallet's first 16 mints are

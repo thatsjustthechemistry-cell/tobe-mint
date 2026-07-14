@@ -815,7 +815,13 @@
   .pd-float { animation:pdFloat 5s ease-in-out infinite; animation-delay:var(--pd-delay, 0s); }
   @keyframes pdShim { 0% { text-shadow:0 0 0 rgba(0,232,198,0); } 35% { text-shadow:0 0 16px rgba(0,232,198,0.85); } 100% { text-shadow:0 0 0 rgba(0,232,198,0); } }
   .pd-shimmer { animation:pdShim 0.9s ease-out 1; }
-  .pd-ticker { display:inline-flex; align-items:center; gap:8px; margin:14px 0 2px; padding:7px 14px; border-radius:100px; background:rgba(0,232,198,0.05); border:1px solid rgba(0,232,198,0.18); font-family:var(--mono); font-size:11px; color:var(--text-dim); width:min(360px, 100%); max-width:100%; overflow:hidden; white-space:nowrap; }
+  /* Always laid out (never display:none) — height:0 + invisible when "off" instead. Toggling
+     display on/off here shifts everything below it in the document, which triggers Chrome's
+     scroll-anchoring correction on every refresh tick a phone's flaky RPC flips this state,
+     reading as the page slightly bouncing and fighting the user's own scroll. */
+  .pd-ticker { display:inline-flex; align-items:center; gap:8px; margin:14px 0 2px; padding:7px 14px; border-radius:100px; background:rgba(0,232,198,0.05); border:1px solid rgba(0,232,198,0.18); font-family:var(--mono); font-size:11px; color:var(--text-dim); width:min(360px, 100%); max-width:100%; overflow:hidden; white-space:nowrap; box-sizing:border-box; height:34px; transition:opacity 0.2s; }
+  /* Same box size as "on" — only visibility/opacity change, so the hero never reflows when this toggles */
+  .pd-ticker.pd-off { opacity:0; visibility:hidden; }
   .pd-ticker .pd-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 2s infinite; flex-shrink:0; }
   .pd-ticker.pd-error .pd-dot { background:var(--danger); animation:none; }
   .pd-badge { font-size:8.5px; letter-spacing:1px; padding:2px 6px; border-radius:4px; background:var(--accent); color:var(--bg); font-weight:700; flex-shrink:0; }
@@ -979,7 +985,7 @@
       <h1><span data-i18n="hero_title_1">Built To Be</span><br><span class="gradient" data-i18n="hero_title_2">Stable</span></h1>
       <div class="hero-typed"><span id="typedText"></span><span class="cursor"></span></div>
 
-      <div class="pd-ticker" id="pdTicker" style="display:none;">
+      <div class="pd-ticker pd-off" id="pdTicker">
         <span class="pd-dot"></span>
         <div class="pd-ticker-viewport"><div class="pd-ticker-track" id="pdTickerTrack"></div></div>
         <span class="pd-badge" id="pdBadge" style="display:none;">DEVNET</span>
@@ -2204,10 +2210,10 @@
       if (!tick || !tickTrack) return;
       tick.classList.remove('pd-error');
       tickTrack.textContent = '';
-      if (PD.feedState === 'error') { tick.style.display = ''; tick.classList.add('pd-error'); tickTrack.appendChild(pdTickerItem(t('alive_feed_error'))); return; }
-      if (PD.feedState === 'empty') { tick.style.display = ''; tickTrack.appendChild(pdTickerItem(t('alive_awaiting_mint'))); return; }
-      if (!PD.feed.length) { tick.style.display = 'none'; return; }
-      tick.style.display = '';
+      if (PD.feedState === 'error') { tick.classList.remove('pd-off'); tick.classList.add('pd-error'); tickTrack.appendChild(pdTickerItem(t('alive_feed_error'))); return; }
+      if (PD.feedState === 'empty') { tick.classList.remove('pd-off'); tickTrack.appendChild(pdTickerItem(t('alive_awaiting_mint'))); return; }
+      if (!PD.feed.length) { tick.classList.add('pd-off'); return; }
+      tick.classList.remove('pd-off');
       const items = PD.feed.slice(0, 10).map(pdEventLabel);
       // duplicate the row for a seamless scroll loop (translateX -50% wraps back to an identical copy)
       items.concat(items).forEach(text => tickTrack.appendChild(pdTickerItem(text)));
@@ -4251,60 +4257,6 @@
 
   // ─── i18n: Override typed phrases ───
   window._typedPhrases = getTypedPhrases();
-</script>
-<script>
-/* TEMP diagnostic HUD — remove once the mobile stall hunt is over. Standalone.
-   Phones (coarse pointer) get a tiny always-on readout: uptime / fps / touch
-   counters / scrollY / seconds since last chain refresh. Screenshots taken WHILE
-   stuck are decisive: numbers frozen = renderer hang; touch count rising while
-   scrollY stays put = Chrome gets the touches but refuses to scroll; fps ticking
-   with touch frozen = gestures being swallowed before the page sees them.
-   All devices additionally get a red STALL line for main-thread freezes >400ms. */
-(function () {
-  var coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-  var el = document.createElement('div');
-  el.style.cssText = 'position:fixed;top:4px;left:4px;z-index:2147483647;background:rgba(15,17,23,0.85);color:#7fe7d4;font:10px/1.5 monospace;padding:4px 7px;border-radius:6px;pointer-events:none;white-space:pre;max-width:85vw;display:' + (coarse ? 'block' : 'none') + ';';
-  document.body.appendChild(el);
-  var frames = 0, fps = 0, tm = 0, ts = 0, pd = 0, det = 0, tgt = '-', gestureEl = null, stalls = 0, stallTxt = '', last = performance.now();
-  document.addEventListener('touchstart', function (e) {
-    ts++;
-    gestureEl = e.target && e.target.nodeType === 1 ? e.target : (e.target ? e.target.parentElement : null);
-    try {
-      tgt = gestureEl ? (gestureEl.tagName + (gestureEl.id ? '#' + gestureEl.id : '') + (typeof gestureEl.className === 'string' && gestureEl.className ? '.' + gestureEl.className.split(' ')[0] : '') + ' ta:' + getComputedStyle(gestureEl).touchAction) : '?';
-    } catch (err) { tgt = '?'; }
-  }, { passive: true, capture: true });
-  document.addEventListener('touchmove', function () { tm++; }, { passive: true, capture: true });
-  window.addEventListener('touchmove', function (e) { if (e.defaultPrevented) pd++; }, { passive: true });
-  function gestureEnd() { if (gestureEl && !gestureEl.isConnected) det++; gestureEl = null; }
-  document.addEventListener('touchend', gestureEnd, { passive: true, capture: true });
-  document.addEventListener('touchcancel', gestureEnd, { passive: true, capture: true });
-  document.addEventListener('visibilitychange', function () { last = performance.now(); });
-  setInterval(function () { fps = frames * 2; frames = 0; }, 500);
-  function draw() {
-    var sr = window.__lastRefreshT ? Math.round((performance.now() - window.__lastRefreshT) / 1000) + 's' : '?';
-    el.textContent = 'up ' + Math.round(performance.now() / 1000) + 's  fps ' + fps + '  touch ' + ts + '/' + tm + '\ny ' + Math.round(window.scrollY) + '  refresh ' + sr + ' ago\n' + tgt + '  pd:' + pd + ' det:' + det + stallTxt;
-  }
-  setInterval(draw, 400);
-  (function tick() {
-    frames++;
-    var now = performance.now(), gap = now - last;
-    if (gap > 400 && document.visibilityState === 'visible') {
-      stalls++;
-      stallTxt = '\nSTALL #' + stalls + ': ' + Math.round(gap) + 'ms @y' + Math.round(window.scrollY);
-      el.style.display = 'block'; el.style.background = 'rgba(190,25,45,0.93)'; el.style.color = '#fff';
-      draw();
-    }
-    last = now;
-    requestAnimationFrame(tick);
-  })();
-  var hookT = setInterval(function () {
-    if (typeof window.refreshFromChain === 'function') {
-      clearInterval(hookT);
-      var orig = window.refreshFromChain;
-      window.refreshFromChain = function () { window.__lastRefreshT = performance.now(); return orig.apply(this, arguments); };
-    }
-  }, 500);
-})();
 </script>
 </body>
 </html>

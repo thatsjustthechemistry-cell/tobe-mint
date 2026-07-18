@@ -57,8 +57,10 @@ Telegram: **t.me/+cqCtGkXO7gA0Yjc0**
 
 ---
 
-## 8/ Governance
-> Program authority *and* program upgrade authority both sit with a 2-of-3 Realms multisig — no single key can mint extra, drain reserves, change the curve, or swap the bytecode.
+## 8/ Governance — with the honest caveat
+> Program authority *and* program upgrade authority both sit with a 2-of-3 Realms multisig, so no single key can mint extra, drain reserves, change the curve, or swap the bytecode.
+>
+> Caveat we won't bury: all 3 council keys are currently mine, on separate devices. That's a bootstrap multisig — it stops a compromised device, not me. Moving to independent holders by on-chain vote.
 >
 > Code: github.com/thatsjustthechemistry-cell/tobestable-protocol
 

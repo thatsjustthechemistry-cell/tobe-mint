@@ -1030,7 +1030,7 @@
       <div class="step reveal">
         <div class="step-num">01</div>
         <div class="step-title" data-i18n="step1_title">Pay 10 SOL</div>
-        <div class="step-desc" data-i18n="step1_desc">Every mint round costs exactly 10 SOL (one disclosed exception: the team wallet's first 16 rounds are free, add no SOL, and are tagged in the feed). The protocol splits it 5/5: half accumulates for Raydium liquidity, half backs the vault SOL reserve. Zero goes to the team. Same price, every round, forever.</div>
+        <div class="step-desc" data-i18n="step1_desc">Every mint round costs exactly 10 SOL — one disclosed exception: the team wallet's first 8 rounds are free, add no SOL, and are tagged in the feed. The protocol splits payment 5/5: half accumulates for Raydium liquidity, half backs the vault SOL reserve. Beyond the free rounds, zero goes to the team. Same price, every round, forever.</div>
       </div>
       <div class="step reveal reveal-delay-1">
         <div class="step-num">02</div>
@@ -1577,7 +1577,7 @@
           <span data-i18n="faq_q7">Is there a team allocation or pre-mine?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a7">One disclosed, hard-capped team allocation exists: the team wallet gets its first 16 mint rounds free — the 10 SOL payment is waived, the 50/50 split stays identical, and those rounds add no SOL to the LP pool or floor reserve (16 of 1,024 rounds ≈ 1.6%). The cap is enforced in the contract with no setter; every free mint is tagged on-chain and in the live feed. Beyond the cap the team pays 10 SOL like everyone else. No presale, no VC rounds, no other special mint path. Purpose of the allocation: funding marketing and forming the protocol's initial Raydium liquidity (separately locked for 2 years) — not personal enrichment.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a7">One disclosed, hard-capped team allocation exists: the team wallet gets its first 8 mint rounds free — the 10 SOL payment is waived, the 50/50 split stays identical, and those rounds add no SOL to the LP pool or floor reserve (8 of 1,024 rounds ≈ 0.8%). The cap is enforced in the contract with no setter; every free mint is tagged on-chain and in the live feed. Beyond the cap the team pays 10 SOL like everyone else. No presale, no VC rounds, no other special mint path. Purpose of the allocation: funding marketing and forming the protocol's initial Raydium liquidity (separately locked for 2 years) — not personal enrichment.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
@@ -1612,7 +1612,7 @@
           <span data-i18n="faq_q12">Why should I trust this over other tokens?</span>
           <span class="faq-arrow">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a12">Don't trust — verify. The smart contract is open source. Every mint, vault deposit, and token transfer is on-chain and displayed on this page in real time. The only special mint path is the disclosed, hard-capped 16-round team allocation — no backdoor, no other admin mint function. The rules are set by code, not by people. Math, not marketing.</div></div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a12">Don't trust — verify. The smart contract is open source. Every mint, vault deposit, and token transfer is on-chain and displayed on this page in real time. The only special mint path is the disclosed, hard-capped 8-round team allocation — no backdoor, no other admin mint function. The rules are set by code, not by people. Math, not marketing.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
@@ -1811,7 +1811,7 @@
     <div class="founder-info">
       <h4>Team Necdet</h4>
       <div class="founder-role" data-i18n="founder_role">Founder & Developer</div>
-      <p data-i18n="founder_desc">Designed and built the TOBE protocol from scratch — smart contract, frontend, and economic model. One disclosed 16-round team allocation, no investors, no shortcuts.</p>
+      <p data-i18n="founder_desc">Designed and built the TOBE protocol from scratch — smart contract, frontend, and economic model. One disclosed 8-round team allocation, no investors, no shortcuts.</p>
       <div class="founder-links">
         <a href="https://github.com/thatsjustthechemistry-cell/tobestable-protocol" target="_blank">GitHub →</a>
       </div>
@@ -1832,7 +1832,7 @@
 
     <p class="manifesto-text" data-i18n="manifesto_p1">Crypto promised to give everyone a fair shot. Instead, it created a new class of insiders — teams that pre-mint millions of tokens, VCs that get discounted allocations, and influencers that pump and dump on their own followers. The average person enters late, buys high, and holds the bag. That's not innovation. That's the same old game with a new coat of paint.</p>
 
-    <p class="manifesto-text" data-i18n="manifesto_p2">TOBE was built on a different principle: value should be earned, not extracted. The only team allocation is a disclosed, hard-capped 16 free mint rounds. No private rounds. No seed investors with 10x advantages. Every single token enters circulation the same way — through 1,024 public mint rounds that anyone can participate in, at a price set by math, not marketing.</p>
+    <p class="manifesto-text" data-i18n="manifesto_p2">TOBE was built on a different principle: value should be earned, not extracted. The only team allocation is a disclosed, hard-capped 8 free mint rounds. No private rounds. No seed investors with 10x advantages. Every single token enters circulation the same way — through 1,024 public mint rounds that anyone can participate in, at a price set by math, not marketing.</p>
 
     <p class="manifesto-text" data-i18n="manifesto_p3">The mechanism is simple. Each round, you pay 10 SOL. Half the tokens go to you. The other half goes to a vault: part backs a hard ceiling at $1, part backs a floor that pays out when the market dips below $1. The floor draws down when it defends; the ceiling side rebuilds as the market trades back and forth. Every round mints fewer tokens than the last, so early participants get more, but late participants pay the same. The supply curve is decreasing, not inflating — and that part, nothing can ever change.</p>
 
@@ -1961,9 +1961,10 @@
   const TOBE_MINT  = '9dBcgqW3e1PLvtDiWwD3LL6kScf1UTM1h4njHYy3nQGs'; // TEMP, revert after — was 4fFD96LWnsgCiWMtLJym12k7xLofH6FdSDtr5MgyYmHV
   const MINT_COST_LAMPORTS = 10_000_000_000; // 10 SOL
   const MINT_COST_SOL = 10;
-  // Disclosed team allocation (see FAQ): the team wallet's first 16 mints are
+  // Disclosed team allocation (see FAQ): the team wallet's first 8 mints are
   // free — no setter on-chain, hard-capped, tagged on-chain and in the feed.
-  const TEAM_FREE_MINT_CAP = 16;
+  // MUST match TEAM_FREE_MINT_CAP in programs/neco_token/src/lib.rs exactly.
+  const TEAM_FREE_MINT_CAP = 8;
   function isTeamFreeMintEligible(state, addr) {
     return !!(state && state.teamWallet && addr
       && state.teamWallet.toBase58() === addr

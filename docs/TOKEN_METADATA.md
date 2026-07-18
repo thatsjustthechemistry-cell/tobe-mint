@@ -30,9 +30,9 @@ To change the URI itself (e.g., switch to IPFS), call the `update_metadata` inst
 | `properties.files[]` | ✅ (logo) |
 | `properties.creators[]` | ✅ (single creator at 100% share) |
 | `extensions.website` / `extensions.github` | ✅ |
-| `extensions.twitter` | ⏳ Add when Twitter handle exists |
+| `extensions.twitter` | ✅ https://x.com/tobe_stable |
 | `extensions.discord` | ⏳ Optional, add if/when Discord launches |
-| `extensions.telegram` | ⏳ Optional |
+| `extensions.telegram` | ✅ https://t.me/+cqCtGkXO7gA0Yjc0 |
 | `extensions.coingeckoId` | ⏳ Add after CoinGecko approval |
 | `extensions.coinmarketcapId` | ⏳ Add after CoinMarketCap approval |
 
@@ -42,10 +42,12 @@ To change the URI itself (e.g., switch to IPFS), call the `update_metadata` inst
 - [ ] Confirm `image` URL returns a 200x200 PNG (`curl -I https://tobestable.com/logo.png`)
 - [ ] Confirm `external_url` (https://tobestable.com) is live and informative
 
-### When Twitter handle is set up
-- [ ] Add to `extensions.twitter`: `"https://twitter.com/YOUR_HANDLE"`
-- [ ] Push to website
-- [ ] No on-chain action needed
+### Socials — ✅ DONE (2026-07-18)
+- [x] `extensions.twitter` → `https://x.com/tobe_stable`
+- [x] `extensions.telegram` → `https://t.me/+cqCtGkXO7gA0Yjc0`
+- [x] Pushed to the website (redeploy required for wallets to see it)
+- [x] No on-chain action needed — the on-chain URI already points here, so wallets
+      pick this up on their next refetch without a transaction
 
 ### When CoinGecko listing approved
 - [ ] Add to `extensions.coingeckoId`: `"tobestable"` (or whatever ID they assigned)

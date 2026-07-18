@@ -2815,7 +2815,11 @@
           const accounts = tx.transaction.message.accountKeys;
           if (accounts.length < 2) continue;
           const minter = accounts[0].pubkey ? accounts[0].pubkey.toBase58() : accounts[0].toBase58();
-          const isTeam = minter === TREASURY_WALLET || minter === AUTHORITY_WALLET;
+          // Tag off the actual on-chain team wallet (the one with the disclosed free
+          // mints), not treasury/authority — those coincide on devnet but diverge on
+          // mainnet (authority → multisig), which would otherwise mislabel the feed.
+          const teamW = (onChainState && onChainState.teamWallet) ? onChainState.teamWallet.toBase58() : null;
+          const isTeam = teamW ? (minter === teamW) : (minter === TREASURY_WALLET || minter === AUTHORITY_WALLET);
           const postBalances = tx.meta.postTokenBalances || [];
           const preBalances = tx.meta.preTokenBalances || [];
           let tokensReceived = 0;
@@ -3648,7 +3652,10 @@
     const price = round > 0 ? (MINT_COST_SOL * SOL_USD / minterTokens) : 0;
     const totalMinted = round > 0 ? TOKENS_PER_UNIT * (round * (MAX_ROUNDS + 1) - (round * (round + 1)) / 2) : 0;
     const vaultBalance = onChainState ? Math.floor(onChainState.vaultBalance / 1e9) : Math.floor(totalMinted / 2);
-    const treasuryRev = round > 0 ? round * MINT_COST_SOL : 0;
+    // SOL raised excludes the disclosed free team mints (they add no SOL). Use the
+    // on-chain teamFreeMintsUsed so paid rounds = round − freeUsed.
+    const freeUsed = (onChainState && onChainState.teamFreeMintsUsed) || 0;
+    const treasuryRev = round > 0 ? Math.max(0, round - freeUsed) * MINT_COST_SOL : 0;
 
     document.getElementById('currentRoundDisplay').textContent = round > 0 ? round : '—';
     if (round > 0) pdFlashPrice(document.getElementById('priceDisplay'), price, 4, '$');
@@ -3878,7 +3885,8 @@
     pdOdometer(document.getElementById('expSupply'), formatCompact(totalMinted));
     document.getElementById('expCirculating').textContent=formatCompact(circ);
     document.getElementById('expVaultBalance').textContent=formatCompact(vaultBal);
-    document.getElementById('expRaised').textContent=(round*10).toLocaleString()+' SOL';
+    const expFreeUsed=(onChainState&&onChainState.teamFreeMintsUsed)||0;
+    document.getElementById('expRaised').textContent=(Math.max(0,round-expFreeUsed)*10).toLocaleString()+' SOL';
     document.getElementById('expHolders').textContent=PD.feed.length?String(new Set(PD.feed.map(i=>i.minter)).size):(round>0?String(round):'0');
     const tbody=document.getElementById('mintTableBody');const noMints=document.getElementById('noMints');
     const holderList=document.getElementById('holderList');const noHolders=document.getElementById('noHolders');

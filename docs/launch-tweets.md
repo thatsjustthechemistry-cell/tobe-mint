@@ -1,4 +1,4 @@
-# TOBESTABLE — Launch Tweet Blast
+# TOBESTABLE — Launch Tweet Blast (11 tweets)
 
 Ten-tweet launch blast, posted individually or as a thread. Each tweet is
 self-contained and stays inside what the audited contract actually enforces —
@@ -21,13 +21,15 @@ Telegram: **t.me/+cqCtGkXO7gA0Yjc0**
 ## 1/ Hook
 > $TOBE — TOBESTABLE is live on Solana. 🟢
 >
-> A hard $1 ceiling. A reserve-backed floor. 1,024 public mint rounds, same rules for everyone.
+> A hard $1 ceiling. A reserve-bounded floor. 1,024 public mint rounds, same rules for everyone.
 >
 > tobestable.com
 
 ---
 
 ## 2/ What it is
+> The name is "TO BE stable" — not "stable already." It's a direction, not a claim.
+>
 > Not a fiat-backed stablecoin. Not "guaranteed $1." An anti-inflationary token with an on-chain mechanism that pushes price toward $1 — strongly from above, partially from below. Here's exactly how. 👇
 
 ---
@@ -66,12 +68,19 @@ Telegram: **t.me/+cqCtGkXO7gA0Yjc0**
 
 ---
 
-## 9/ Community
+## 9/ Audited & tested — stated honestly
+> Self-audited across 8 vulnerability classes, AI-assisted — **not** a paid professional audit, and I won't pretend otherwise. The report is in the repo, including a scope boundary listing what landed *after* the last full round.
+>
+> Every instruction in the program has integration test coverage running in CI. The audit's own history is in there too — including a finding one round dismissed and a later round proved real.
+
+---
+
+## 10/ Community
 > Questions, feedback, or just want to watch the mint rounds happen in real time — join the Telegram: t.me/+cqCtGkXO7gA0Yjc0
 
 ---
 
-## 10/ CTA
+## 11/ CTA
 > 1,024 rounds. Round 1 is open now.
 >
 > Mint: tobestable.com

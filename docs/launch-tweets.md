@@ -94,7 +94,7 @@ Telegram: **t.me/+cqCtGkXO7gA0Yjc0**
 ## 8/ Governance
 > No single key can mint extra tokens, drain the vault, change the supply curve, or swap the program bytecode. Program authority **and** upgrade authority both sit with a 2-of-3 Realms multisig.
 >
-> The 3 council keys are held by 3 different people on separate machines. I hold one. I cannot reach the 2-of-3 threshold on my own — someone else has to agree.
+> The 3 council keys are held by 3 different people on separate machines, each with their recovery phrase backed up offline. I hold one — I cannot reach the 2-of-3 threshold on my own. Someone else has to agree.
 
 ---
 

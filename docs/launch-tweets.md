@@ -11,35 +11,46 @@ here — team allocation, founder revenue, multisig custody, audit status — bu
 framed as things worth checking, not things being confessed.
 
 **⚠️ Accuracy rule (added 2026-07-19, after a copy audit against the contract).**
-Write marketing copy from the *contract*, not from the previous draft. A 2026-07-19
-review caught four drifts that all crept in during tone passes:
+Write marketing copy from the *contract* **and from the launch runbook** — not from
+the previous draft. A 2026-07-19 review caught five drifts, all introduced during
+tone passes:
 
 | Was | Reality |
 |---|---|
-| "Burned liquidity" | LP is **locked 2 years** (`LP_LOCK_DURATION`), then `unlock_lp` returns it. Not burned. |
+| "Burned liquidity" | LP is not burned. `lock_lp` locks it 2 years (`LP_LOCK_DURATION`), then `unlock_lp` returns it. |
+| "Liquidity locked 2 years" | **Also wrong — claim dropped entirely.** `lock_lp` is never called anywhere in `MAINNET_LAUNCH.md` Steps 1–11, and post-Step-5 it would need a 2-of-3 council proposal that does not exist. Nothing in the plan makes this true. |
 | "Below $1 the vault buys back" | `sell_to_vault` needs `floor_active`, set only by `arm_floor` — **authority-only, and only once TOBE reaches $1**. No floor before that. |
 | "upgrade authority sits with 2-of-3" | Only true **after Step 5.5**. Before it, upgrade authority is the single deploy wallet. |
 | "findings, fixes and scope" | Compressed away the actual scope-gap disclosure. ~200 lines landed after the last full audit round. |
 
+🔑 **The lesson from #2:** a claim needs a matching *step in the runbook*, not just a
+matching *function in the program*. `lock_lp` exists in `lib.rs`, which is why the
+first correction (burned → locked) looked sufficient. It is not scheduled to run.
+Check both.
+
 Supersedes the earlier build-in-public runway (teaser → Posts 1–6) — all prior
 tweets deleted, this is the full replacement.
 
-**Posting plan (decided 2026-07-19):**
+**Posting plan (decided 2026-07-19): send all 11 at once, as one thread.**
 
-1. **At launch, post tweets 1–7 and 9–11.** Send after Steps 1–2 are done and the
-   mint actually exists — tweets **1** and **11** say "live" / "Round 1 is open".
-2. **Hold tweet 8 back.** Send it on its own once **Step 5.5** (upgrade-authority
-   handoff to the DAO) has completed and is confirmed on-chain.
+⏰ **Post after Step 5.5 completes.** That is the only timing constraint, and the
+launch sequence satisfies it naturally:
 
-🔴 **Why 8 is held:** it claims program **and** upgrade authority both sit with the
-2-of-3 multisig. Until Step 5.5 lands, upgrade authority is still the single deploy
-wallet `BzvTL4PY…` — so posting it at launch would be a false claim about the exact
-thing it is reassuring people about. Necdet chose to hold it rather than soften it to
-future tense: the governance point is the strongest in the thread and lands harder as
-a true statement than a promised one.
+```
+Step 5.5  Transfer PROGRAM UPGRADE authority to the DAO   ← tweet 8 becomes true here
+Step 6    🟢 Fully fair-launched                          ← post the thread from here on
+Step 7    Community mints
+```
 
-Posting 8 late is also a good moment in its own right — "upgrade authority is now
-with the DAO, here is the transaction" is a stronger post than a launch-day promise.
+Tweet **8** claims program **and** upgrade authority both sit with the 2-of-3
+multisig — false until Step 5.5, true from then on. Since Step 5.5 lands *before*
+Step 6 ("Fully fair-launched"), there is no hold-back needed: announce at Step 6 or
+later and every one of the 11 is accurate. Tweets **1** and **11** ("live", "Round 1
+is open") are also satisfied by then.
+
+🔴 **Do not post the thread between Step 2 and Step 5.5** — that window is the one
+place where tweet 8 would be a false claim about the exact thing it is reassuring
+people about.
 
 Account: **@tobe_stable**
 Website: **tobestable.com**
@@ -52,14 +63,22 @@ Telegram: **t.me/+cqCtGkXO7gA0Yjc0**
 >
 > A hard $1 ceiling, enforced on-chain. 1,024 mint rounds at one fixed price. No presale, no VC round, no private sale.
 >
-> Fixed supply. Liquidity locked 2 years. All of it verifiable.
+> Fixed supply, hard-capped in code. All of it verifiable.
 >
 > tobestable.com
 
-*(Changed: "no private allocation" → "no private sale" — there was no private
+*(Two changes. "no private allocation" → "no private sale": there was no private
 sale, and this no longer collides with the disclosed 8-round team allocation in
-tweet 6. "Burned liquidity" → "Liquidity locked 2 years" — the contract locks,
-it does not burn.)*
+tweet 6.*
+
+*And the liquidity claim is **gone**. It was "Burned liquidity", first corrected to
+"Liquidity locked 2 years" — but that is also unsupportable: `lock_lp` is never
+called in `MAINNET_LAUNCH.md` Steps 1–11, and after Step 5 the authority is the DAO,
+so locking would need a council proposal nobody has written. The pool itself is
+created by the community at Step 8. Rather than promise a lock that is not scheduled,
+the claim is dropped and replaced with "hard-capped in code", which is enforced
+(`MAX_ROUNDS = 1024`, no setter). If LP locking is ever actually added to the runbook,
+the claim can come back — see option A in the 2026-07-19 discussion.)*
 
 ---
 
@@ -140,16 +159,17 @@ this tweet says.)*
 
 ---
 
-## 8/ Governance — ⏸️ HELD BACK, post after Step 5.5
+## 8/ Governance
 > No single key can mint extra tokens, drain the vault, change the supply curve, or swap the program bytecode. Program authority **and** upgrade authority both sit with a 2-of-3 Realms multisig.
 >
 > The 3 council keys are held by 3 different people on separate machines, each with their recovery phrase backed up offline. I hold one — I cannot reach the 2-of-3 threshold on my own. Someone else has to agree.
 
-*(Text unchanged — it is accurate once the handoff is done, and false before it.
-**Decision: hold this tweet back and post it alone after Step 5.5.** Before that,
-upgrade authority is the single deploy wallet `BzvTL4PY…`. This is the one tweet
-whose truth depends on when you send it — so it is sequenced rather than reworded,
-keeping the strong present-tense claim intact.)*
+*(Text unchanged — accurate once the handoff is done, false before it. **No hold-back
+needed:** Step 5.5 lands before Step 6 ("Fully fair-launched"), so posting the thread
+at Step 6 or later makes this true along with everything else. This is the one tweet
+that sets the earliest safe posting time for the whole thread — see the posting plan
+above. Before Step 5.5, upgrade authority is still the single deploy wallet
+`BzvTL4PY…`.)*
 
 ---
 

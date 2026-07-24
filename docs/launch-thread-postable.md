@@ -133,10 +133,17 @@ Don't trust. Verify.
 
 ## Likely replies, and the honest answers
 
-**"Is the liquidity locked?"** — Protocol-added liquidity is *burned*, which is stronger
-than locked: `flush_lp_to_raydium` deposits SOL+TOBE into Raydium and burns the LP
-receipt, so it can never be withdrawn by anyone. The initial pool creator (a community
-member, not the team) holds their own LP position.
+**"Is the liquidity locked?"** — Burned, which is stronger than locked. Two separate
+sources, both permanent: `flush_lp_to_raydium` burns the LP receipt for every deposit
+the protocol makes, and the **initial seed LP was burned by hand right after the pool
+was created**. No LP tokens for this pool exist in anyone's wallet, including mine.
+
+> ⚠️ **This answer depends on you actually burning the seed LP.** The team creates the
+> pool (funded via Eis6's free mint), so the initial LP lands in *your* wallet —
+> `flush_lp_to_raydium` only burns the protocol's own deposits, never yours. Burn it
+> with `spl-token burn <LP_ACCOUNT> <AMOUNT>` immediately after Step 8 and keep the
+> tx signature. **If you skip the burn, delete the second sentence above** — you would
+> be holding a withdrawable liquidity position while claiming none exists.
 
 **"Why isn't the floor live?"** — Arming it early was a real High-severity finding (H1)
 found in audit round 4: anyone could flash-skew the pool across $1, latch the floor, and

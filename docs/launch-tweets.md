@@ -17,16 +17,31 @@ tone passes:
 
 | Was | Reality |
 |---|---|
-| "Burned liquidity" | LP is not burned. `lock_lp` locks it 2 years (`LP_LOCK_DURATION`), then `unlock_lp` returns it. |
-| "Liquidity locked 2 years" | **Also wrong — claim dropped entirely.** `lock_lp` is never called anywhere in `MAINNET_LAUNCH.md` Steps 1–11, and post-Step-5 it would need a 2-of-3 council proposal that does not exist. Nothing in the plan makes this true. |
 | "Below $1 the vault buys back" | `sell_to_vault` needs `floor_active`, set only by `arm_floor` — **authority-only, and only once TOBE reaches $1**. No floor before that. |
 | "upgrade authority sits with 2-of-3" | Only true **after Step 5.5**. Before it, upgrade authority is the single deploy wallet. |
 | "findings, fixes and scope" | Compressed away the actual scope-gap disclosure. ~200 lines landed after the last full audit round. |
+| "no private allocation" | Collided with the disclosed 8-round team allocation in tweet 6. Now "no private sale" — true and non-contradictory. |
+| ~~"Burned liquidity"~~ | **FALSE ALARM — the original was correct.** See below. |
 
-🔑 **The lesson from #2:** a claim needs a matching *step in the runbook*, not just a
-matching *function in the program*. `lock_lp` exists in `lib.rs`, which is why the
-first correction (burned → locked) looked sufficient. It is not scheduled to run.
-Check both.
+🔑 **The "burned liquidity" episode — the most useful lesson in this file.** Two
+consecutive review passes "corrected" a claim that was **true**, and the second one
+deleted it outright. The program has **two unrelated LP mechanisms**, and both passes
+found only the wrong one:
+
+| Mechanism | In the runbook? | What it does |
+|---|---|---|
+| `lock_lp` / `unlock_lp` | ❌ **never called** | 2-year timelock, then returns the LP |
+| `flush_lp_to_raydium` | ✅ **Step 10** | deposits SOL+TOBE into Raydium, then **burns the LP receipt** (`token::burn`, lib.rs:908) |
+
+Pass 1 found `lock_lp`, concluded "it locks, doesn't burn", and weakened the claim.
+Pass 2 found `lock_lp` isn't in the runbook and deleted the claim. Neither pass
+grepped for `burn`. **Searching for the mechanism you already have in mind will
+confirm it and miss the real one — grep for the claim's own keyword before rewriting
+it.**
+
+Standing rule, still valid: a claim needs a matching **step in the runbook**, not just
+a matching **function in the program**. `lock_lp` proves it — it exists in `lib.rs`
+and never runs.
 
 Supersedes the earlier build-in-public runway (teaser → Posts 1–6) — all prior
 tweets deleted, this is the full replacement.
@@ -63,22 +78,34 @@ Telegram: **t.me/+cqCtGkXO7gA0Yjc0**
 >
 > A hard $1 ceiling, enforced on-chain. 1,024 mint rounds at one fixed price. No presale, no VC round, no private sale.
 >
-> Fixed supply, hard-capped in code. All of it verifiable.
+> Fixed supply, hard-capped in code. Protocol liquidity is permanent — its LP tokens are burned on deposit.
+>
+> All of it verifiable.
 >
 > tobestable.com
 
-*(Two changes. "no private allocation" → "no private sale": there was no private
-sale, and this no longer collides with the disclosed 8-round team allocation in
-tweet 6.*
+*("no private allocation" → "no private sale": there was no private sale, and this
+no longer collides with the disclosed 8-round team allocation in tweet 6.*
 
-*And the liquidity claim is **gone**. It was "Burned liquidity", first corrected to
-"Liquidity locked 2 years" — but that is also unsupportable: `lock_lp` is never
-called in `MAINNET_LAUNCH.md` Steps 1–11, and after Step 5 the authority is the DAO,
-so locking would need a council proposal nobody has written. The pool itself is
-created by the community at Step 8. Rather than promise a lock that is not scheduled,
-the claim is dropped and replaced with "hard-capped in code", which is enforced
-(`MAX_ROUNDS = 1024`, no setter). If LP locking is ever actually added to the runbook,
-the claim can come back — see option A in the 2026-07-19 discussion.)*
+*⚠️ **The liquidity claim was removed and then restored — read this before editing it
+again.** The original "Burned liquidity" was **correct**. A 2026-07-19 pass found
+`lock_lp`/`unlock_lp` (a 2-year timelock) and "corrected" it to "Liquidity locked 2
+years"; a second pass found `lock_lp` is never called in `MAINNET_LAUNCH.md` and
+dropped the claim entirely. **Both passes were wrong.** There are TWO separate LP
+mechanisms in this program:*
+
+*• `lock_lp` / `unlock_lp` — a 2-year timelock. **Never called in the runbook.** This
+is the one both bad passes found.*
+*• `flush_lp_to_raydium` (Step 10, permissionless) — deposits `pool_sol_reserve` SOL +
+matching vault TOBE into Raydium, then **burns the LP receipt** (`token::burn`,
+lib.rs:908, "locks liquidity forever"). This is the real mechanism, and it IS in the
+runbook.*
+
+*Precision note: this burns the LP for liquidity **the protocol adds** (5 SOL/round
+accumulates in `pool_sol_reserve`). The Step 8 community pool creator keeps their own
+initial LP — so say "protocol liquidity", not a blanket "all liquidity". Also note
+that at announce time (Step 6) no flush has run yet, so this is a mechanism claim like
+tweets 3–5, not a statement about current pool state.)*
 
 ---
 
